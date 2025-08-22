@@ -7,10 +7,10 @@ import 'screens/program_detail_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // TODO: Configurar com suas credenciais Supabase
+  // Configuração Supabase - MyFirstBA project
   await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+    url: 'https://mqcfdwyhbtvaclslured.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xY2Zkd3loYnR2YWNsc2x1cmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzMjcsImV4cCI6MjA3MDkyMTMyN30.lpiqxTq-V18FhRSDd0V4xV4GvsTMVlU-GrHdvtzjQ4U',
   );
   
   runApp(const BuiltWithScienceApp());
