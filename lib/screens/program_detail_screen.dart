@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/workout_models.dart';
 import '../data/mock_data.dart';
 
 class ProgramDetailScreen extends StatelessWidget {
@@ -7,26 +6,16 @@ class ProgramDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final programId = ModalRoute.of(context)!.settings.arguments as int;
-    final program = MockData.getProgramById(programId);
-    final programDays = MockData.getProgramDays(programId);
-
-    if (program == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Program Not Found')),
-        body: const Center(
-          child: Text('Program not found'),
-        ),
-      );
-    }
+    // Para este exemplo, mostra o programa 3 dias
+    const programId = 1;
+    final program = MockData.programs.firstWhere((p) => p.id == programId);
+    final programDays = MockData.programDays.where((d) => d.programId == programId).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(program.name),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SafeArea(
         child: Padding(
@@ -34,8 +23,17 @@ class ProgramDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Título e descrição
               Text(
-                '${programDays.length} workout days designed for optimal muscle development and strength gains.',
+                program.name,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Science-based workout program designed for optimal muscle growth and strength development. Each session is carefully structured with proper exercise selection, rep ranges, and progression protocols.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey.shade600,
@@ -62,12 +60,13 @@ class ProgramDetailScreen extends StatelessWidget {
                       ),
                       child: InkWell(
                         onTap: () {
-                          // TODO: Navegar para detalhes do dia
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Iniciando ${day.dayName}'),
-                              duration: const Duration(seconds: 2),
-                            ),
+                          Navigator.pushNamed(
+                            context,
+                            '/workout',
+                            arguments: {
+                              'programId': day.programId,
+                              'dayId': day.id,
+                            },
                           );
                         },
                         borderRadius: BorderRadius.circular(16),
@@ -92,71 +91,78 @@ class ProgramDetailScreen extends StatelessWidget {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.shade100,
-                                      borderRadius: BorderRadius.circular(12),
+                                      color: Colors.blue.shade100,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Text(
-                                      'Ready',
+                                    child: const Text(
+                                      'START',
                                       style: TextStyle(
-                                        color: Colors.green.shade800,
                                         fontSize: 10,
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              
                               const SizedBox(height: 8),
-                              
-                              Text(
-                                day.dayName,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              
-                              const SizedBox(height: 8),
-                              
                               Expanded(
-                                child: Text(
-                                  _getDayDescription(day.dayName),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      day.dayName,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Complete workout routine with exercise variations and intelligent progression tracking.',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                 ),
                               ),
-                              
-                              const SizedBox(height: 12),
-                              
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: Implementar início do treino
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Iniciando ${day.dayName}'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.timer,
+                                    size: 14,
+                                    color: Colors.grey.shade500,
                                   ),
-                                  child: const Text(
-                                    'Start Workout',
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '45-60 min',
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11,
+                                      color: Colors.grey.shade500,
                                     ),
                                   ),
-                                ),
+                                  const Spacer(),
+                                  Icon(
+                                    Icons.fitness_center,
+                                    size: 14,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '6-8 exercises',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -167,46 +173,48 @@ class ProgramDetailScreen extends StatelessWidget {
                 ),
               ),
               
-              // Program Overview
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Program Overview',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              // Botão de ação na parte inferior
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(top: 16),
+                child: Column(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        if (programDays.isNotEmpty) {
+                          Navigator.pushNamed(
+                            context,
+                            '/workout',
+                            arguments: {
+                              'programId': programDays.first.programId,
+                              'dayId': programDays.first.id,
+                            },
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Start First Workout'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _StatWidget(
-                            value: '${programDays.length}',
-                            label: 'Workout Days',
-                            color: Colors.blue,
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Program overview coming soon!'),
                           ),
-                          _StatWidget(
-                            value: '36',
-                            label: 'Total Exercises',
-                            color: Colors.green,
-                          ),
-                          _StatWidget(
-                            value: '78',
-                            label: 'Exercise Variations',
-                            color: Colors.purple,
-                          ),
-                        ],
+                        );
+                      },
+                      icon: const Icon(Icons.info_outline),
+                      label: const Text('View Program Overview'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -215,57 +223,4 @@ class ProgramDetailScreen extends StatelessWidget {
       ),
     );
   }
-
-  String _getDayDescription(String dayName) {
-    if (dayName.contains('Full Body')) {
-      return "Complete full body workout targeting all major muscle groups";
-    } else if (dayName.contains('Upper')) {
-      return "Upper body focus: chest, back, shoulders, and arms";
-    } else if (dayName.contains('Lower')) {
-      return "Lower body focus with emphasis on specified muscle groups";
-    } else if (dayName.contains('Push')) {
-      return "Push movements: chest, shoulders, triceps";
-    } else if (dayName.contains('Pull')) {
-      return "Pull movements: back, biceps, rear delts";
-    }
-    return "Science-based workout session";
-  }
 }
-
-class _StatWidget extends StatelessWidget {
-  final String value;
-  final String label;
-  final Color color;
-
-  const _StatWidget({
-    required this.value,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-

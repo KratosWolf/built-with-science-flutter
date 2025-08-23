@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'screens/auth_wrapper.dart';
 import 'screens/home_screen.dart';
 import 'screens/programs_screen.dart';
 import 'screens/program_detail_screen.dart';
+import 'screens/workout_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Configuração Supabase - MyFirstBA project
+  // Configuração Supabase - Built With Science App
   await Supabase.initialize(
-    url: 'https://mqcfdwyhbtvaclslured.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xY2Zkd3loYnR2YWNsc2x1cmVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzNDUzMjcsImV4cCI6MjA3MDkyMTMyN30.lpiqxTq-V18FhRSDd0V4xV4GvsTMVlU-GrHdvtzjQ4U',
+    url: 'https://gktvfldykmzhynqthbdn.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Nzg4NzAsImV4cCI6MjA3MTU1NDg3MH0.Nd2KdEGj8hQApxmTk8nkBM81R4ROJPhwRMtgPXadGVw',
   );
   
   runApp(const BuiltWithScienceApp());
@@ -46,10 +49,30 @@ class BuiltWithScienceApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const HomeScreen(),
-      routes: {
-        '/programs': (context) => const ProgramsScreen(),
-        '/program-detail': (context) => const ProgramDetailScreen(),
+      home: const AuthWrapper(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(builder: (context) => const AuthWrapper());
+          case '/home':
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
+          case '/programs':
+            return MaterialPageRoute(builder: (context) => const ProgramsScreen());
+          case '/program-detail':
+            return MaterialPageRoute(builder: (context) => const ProgramDetailScreen());
+          case '/workout':
+            final args = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => WorkoutScreen(
+                programId: args['programId'] as int,
+                dayId: args['dayId'] as int,
+              ),
+            );
+          case '/profile':
+            return MaterialPageRoute(builder: (context) => const ProfileScreen());
+          default:
+            return MaterialPageRoute(builder: (context) => const AuthWrapper());
+        }
       },
     );
   }

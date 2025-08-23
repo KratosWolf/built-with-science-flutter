@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/supabase_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,6 +11,15 @@ class HomeScreen extends StatelessWidget {
         title: const Text('🏋️ Built With Science'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              Navigator.pushNamed(context, '/profile');
+            },
+            tooltip: 'Profile',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(

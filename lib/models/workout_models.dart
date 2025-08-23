@@ -154,6 +154,7 @@ class ExerciseVariation {
   final int variationIndex;
   final String variationName;
   final String youtubeUrl;
+  final bool isPrimary;
 
   ExerciseVariation({
     required this.id,
@@ -161,6 +162,7 @@ class ExerciseVariation {
     required this.variationIndex,
     required this.variationName,
     required this.youtubeUrl,
+    this.isPrimary = false,
   });
 
   factory ExerciseVariation.fromJson(Map<String, dynamic> json) {
@@ -170,6 +172,7 @@ class ExerciseVariation {
       variationIndex: json['variation_index'] as int,
       variationName: json['variation_name'] as String,
       youtubeUrl: json['youtube_url'] as String,
+      isPrimary: json['is_primary'] as bool? ?? false,
     );
   }
 
@@ -180,6 +183,7 @@ class ExerciseVariation {
       'variation_index': variationIndex,
       'variation_name': variationName,
       'youtube_url': youtubeUrl,
+      'is_primary': isPrimary,
     };
   }
 }
@@ -278,7 +282,7 @@ class WorkoutSet {
   final int? reps;
   final int? restSec;
   final double? rpe;
-  final String? difficulty; // 'easy' | 'ok' | 'hard'
+  final String? difficulty; // 'easy' | 'medium' | 'hard' | 'max_effort' | 'failed'
   final DateTime createdAt;
 
   WorkoutSet({
@@ -335,7 +339,9 @@ class LastSetCache {
   final double? weightKg;
   final int? reps;
   final int? restSec;
+  final String? difficulty;
   final DateTime updatedAt;
+  final List<CachedSet> sets;
 
   LastSetCache({
     required this.userId,
@@ -344,7 +350,9 @@ class LastSetCache {
     this.weightKg,
     this.reps,
     this.restSec,
+    this.difficulty,
     DateTime? updatedAt,
+    this.sets = const [],
   }) : updatedAt = updatedAt ?? DateTime.now();
 
   factory LastSetCache.fromJson(Map<String, dynamic> json) {
@@ -355,7 +363,11 @@ class LastSetCache {
       weightKg: json['weight_kg'] != null ? (json['weight_kg'] as num).toDouble() : null,
       reps: json['reps'] as int?,
       restSec: json['rest_sec'] as int?,
+      difficulty: json['difficulty'] as String?,
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      sets: (json['sets'] as List<dynamic>?)
+          ?.map((e) => CachedSet.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
     );
   }
 
@@ -367,28 +379,100 @@ class LastSetCache {
       'weight_kg': weightKg,
       'reps': reps,
       'rest_sec': restSec,
+      'difficulty': difficulty,
       'updated_at': updatedAt.toIso8601String(),
+      'sets': sets.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
+class CachedSet {
+  final int setNumber;
+  final double weight;
+  final int reps;
+  final String difficulty;
+
+  CachedSet({
+    required this.setNumber,
+    required this.weight,
+    required this.reps,
+    required this.difficulty,
+  });
+
+  factory CachedSet.fromJson(Map<String, dynamic> json) {
+    return CachedSet(
+      setNumber: json['setNumber'] as int,
+      weight: (json['weight'] as num).toDouble(),
+      reps: json['reps'] as int,
+      difficulty: json['difficulty'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'setNumber': setNumber,
+      'weight': weight,
+      'reps': reps,
+      'difficulty': difficulty,
     };
   }
 }
 
 // Classe para sugestão de progressão
 class ProgressionSuggestion {
-  final double suggestedWeight;
-  final String rationale;
-  final double percentageChange;
-  final double? previousWeight;
-  final int? previousReps;
-  final String targetReps;
+  final String type; // 'weight' | 'reps' | 'both'
+  final ProgressionData current;
+  final ProgressionData suggested;
+  final String reason;
 
   ProgressionSuggestion({
-    required this.suggestedWeight,
-    required this.rationale,
-    required this.percentageChange,
-    this.previousWeight,
-    this.previousReps,
-    required this.targetReps,
+    required this.type,
+    required this.current,
+    required this.suggested,
+    required this.reason,
   });
+
+  factory ProgressionSuggestion.fromJson(Map<String, dynamic> json) {
+    return ProgressionSuggestion(
+      type: json['type'] as String,
+      current: ProgressionData.fromJson(json['current'] as Map<String, dynamic>),
+      suggested: ProgressionData.fromJson(json['suggested'] as Map<String, dynamic>),
+      reason: json['reason'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'current': current.toJson(),
+      'suggested': suggested.toJson(),
+      'reason': reason,
+    };
+  }
+}
+
+class ProgressionData {
+  final double? weight;
+  final int? reps;
+
+  ProgressionData({
+    this.weight,
+    this.reps,
+  });
+
+  factory ProgressionData.fromJson(Map<String, dynamic> json) {
+    return ProgressionData(
+      weight: json['weight'] != null ? (json['weight'] as num).toDouble() : null,
+      reps: json['reps'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'weight': weight,
+      'reps': reps,
+    };
+  }
 }
 
 // Enums para melhor type safety
@@ -396,5 +480,46 @@ enum Unit { kg, lb }
 enum SuggestionAggressiveness { conservative, standard, aggressive }
 enum VideoPref { youtube, guide, smart }
 enum WorkoutStatus { inProgress, done }
-enum Difficulty { easy, ok, hard }
+enum Difficulty { easy, medium, hard, maxEffort, failed }
+
+// Classe para exercício de treino (compatível com Next.js)
+class DayExerciseData {
+  final int exerciseId;
+  final int sets;
+  final String repsTarget;
+  final bool isSuperset;
+  final String? supersetLabel;
+  final String? supersetExerciseLabel;
+
+  DayExerciseData({
+    required this.exerciseId,
+    required this.sets,
+    required this.repsTarget,
+    this.isSuperset = false,
+    this.supersetLabel,
+    this.supersetExerciseLabel,
+  });
+
+  factory DayExerciseData.fromJson(Map<String, dynamic> json) {
+    return DayExerciseData(
+      exerciseId: json['exercise_id'] as int,
+      sets: json['sets'] as int,
+      repsTarget: json['reps_target'] as String,
+      isSuperset: json['is_superset'] as bool? ?? false,
+      supersetLabel: json['superset_label'] as String?,
+      supersetExerciseLabel: json['superset_exercise_label'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'exercise_id': exerciseId,
+      'sets': sets,
+      'reps_target': repsTarget,
+      'is_superset': isSuperset,
+      'superset_label': supersetLabel,
+      'superset_exercise_label': supersetExerciseLabel,
+    };
+  }
+}
 
