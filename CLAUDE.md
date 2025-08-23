@@ -112,14 +112,36 @@ Science-based Flutter workout tracking app with intelligent progression, offline
 - `supabase_schema.sql`: Database schema with security policies
 - `supabase_seed_data.sql`: Exercise data and program structure
 
+## 🛡️ Git Branch Strategy
+
+### **Current Branches**:
+- `main` → **Stable, working code** (authentication system complete)
+- `feature/supabase-integration` → **Active development branch** (database setup, Google OAuth)
+
+### **Workflow**:
+1. **Development** happens on feature branches
+2. **Testing** and validation before merge
+3. **Merge to main** only when feature is stable and tested
+4. **New feature branch** for each major development phase
+
+### **For Next Session**:
+```bash
+git checkout feature/supabase-integration
+# Continue development on this protected branch
+```
+
 ## 📊 Current Status
 
 **✅ Completed**: Authentication system, database design, service layer, UI foundation
-**🔄 In Progress**: Database setup and Google OAuth integration
+**🔄 In Progress**: Database setup and Google OAuth integration (on feature branch)
 **⏳ Next**: Complete Supabase integration and mobile testing
+
+**Active Branch**: `feature/supabase-integration`
+**Protected**: `main` branch contains stable authentication system
 
 ---
 
 *Last updated: August 23, 2025*
 *Total development sessions: 3*
 *Current focus: Supabase integration and Google OAuth*
+*Git protection: Feature branch strategy implemented*
