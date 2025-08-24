@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:developer' as developer;
+
 import '../models/workout_models.dart';
+import '../services/supabase_service.dart';
+import '../utils/progression_utils.dart';
+import '../widgets/progression_suggestion_card.dart';
 import '../data/user_exercises.dart';
-import '../screens/workout_screen.dart';
 
 class ExerciseSelector extends StatefulWidget {
   final int exerciseId;
@@ -12,6 +18,7 @@ class ExerciseSelector extends StatefulWidget {
   final String repsTarget;
   final bool isSuperset;
   final String? supersetLabel;
+  final int? sessionId;
   final Function(ExerciseSetData)? onDataChange;
 
   const ExerciseSelector({
@@ -21,6 +28,7 @@ class ExerciseSelector extends StatefulWidget {
     required this.repsTarget,
     this.isSuperset = false,
     this.supersetLabel,
+    this.sessionId,
     this.onDataChange,
   });
 
@@ -28,14 +36,32 @@ class ExerciseSelector extends StatefulWidget {
   State<ExerciseSelector> createState() => _ExerciseSelectorState();
 }
 
-class _ExerciseSelectorState extends State<ExerciseSelector> {
+class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  // Exercise data
   Exercise? exercise;
   List<ExerciseVariation> variations = [];
   int selectedVariationIndex = 1;
+  
+  // Set tracking
   List<WorkoutSetData> exerciseSets = [];
-  LastSetCache? lastCache;
-  ProgressionSuggestion? suggestion;
   Map<int, SetTimer> setTimers = {};
+  
+  // Text controllers for input fields
+  Map<int, TextEditingController> weightControllers = {};
+  Map<int, TextEditingController> repsControllers = {};
+  Map<int, TextEditingController> notesControllers = {};
+  
+  // Progression data
+  LastSetCache? lastSetCache;
+  ProgressionSuggestion? progressionSuggestion;
+  WorkoutUser? currentUser;
+  
+  // Loading states
+  bool isLoadingProgression = true;
+  bool isLoadingExercise = true;
 
   @override
   void initState() {
@@ -43,86 +69,270 @@ class _ExerciseSelectorState extends State<ExerciseSelector> {
     _initializeData();
   }
 
-  void _initializeData() {
-    exercise = UserExerciseData.getUserExerciseById(widget.exerciseId);
-    variations = UserExerciseData.getUserExerciseVariations(widget.exerciseId);
-    
-    _loadLastWorkoutCache();
+  @override
+  void dispose() {
+    // Dispose all text controllers
+    for (var controller in weightControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in repsControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in notesControllers.values) {
+      controller.dispose();
+    }
+    weightControllers.clear();
+    repsControllers.clear();
+    notesControllers.clear();
+    super.dispose();
+  }
+
+  TextEditingController _getOrCreateWeightController(int setNumber, double? initialValue) {
+    final key = setNumber;
+    if (!weightControllers.containsKey(key)) {
+      weightControllers[key] = TextEditingController(text: initialValue?.toString() ?? '');
+    }
+    return weightControllers[key]!;
+  }
+
+  TextEditingController _getOrCreateRepsController(int setNumber, int? initialValue) {
+    final key = setNumber;
+    if (!repsControllers.containsKey(key)) {
+      repsControllers[key] = TextEditingController(text: initialValue?.toString() ?? '');
+    }
+    return repsControllers[key]!;
+  }
+
+  TextEditingController _getOrCreateNotesController(int setNumber, String? initialValue) {
+    final key = setNumber;
+    if (!notesControllers.containsKey(key)) {
+      notesControllers[key] = TextEditingController(text: initialValue ?? '');
+    }
+    return notesControllers[key]!;
+  }
+
+  Future<void> _initializeData() async {
+    try {
+      await Future.wait([
+        _loadExerciseData(),
+        _loadUserData(),
+        _loadProgressionData(),
+        _loadLastWorkoutCache(),
+      ]);
+    } catch (e) {
+      developer.log('Error initializing exercise data: $e', name: 'ExerciseSelector');
+    }
+  }
+
+  Future<void> _loadExerciseData() async {
+    try {
+      setState(() => isLoadingExercise = true);
+      
+      // Load from Supabase or fallback to local data
+      try {
+        exercise = await SupabaseService.getExerciseById(widget.exerciseId);
+        variations = await SupabaseService.getExerciseVariations(widget.exerciseId);
+      } catch (e) {
+        // Fallback to local data
+        exercise = UserExerciseData.getUserExerciseById(widget.exerciseId);
+        variations = UserExerciseData.getUserExerciseVariations(widget.exerciseId);
+      }
+      
+      // Find primary variation or use first available
+      final primaryVariation = variations.where((v) => v.isPrimary).firstOrNull;
+      selectedVariationIndex = primaryVariation?.variationIndex ?? 
+                               (variations.isNotEmpty ? variations.first.variationIndex : 1);
+      
+      setState(() => isLoadingExercise = false);
+    } catch (e) {
+      setState(() => isLoadingExercise = false);
+      developer.log('Error loading exercise data: $e', name: 'ExerciseSelector');
+    }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      currentUser = await SupabaseService.getUserProfile();
+    } catch (e) {
+      developer.log('Error loading user data: $e', name: 'ExerciseSelector');
+    }
+  }
+
+  Future<void> _loadProgressionData() async {
+    try {
+      setState(() => isLoadingProgression = true);
+      
+      // Try to load from Supabase first
+      lastSetCache = await SupabaseService.getLastSetCache(widget.exerciseId);
+      
+      // Fallback to local cache if Supabase fails
+      if (lastSetCache == null) {
+        lastSetCache = await _getLocalLastSetCache();
+      }
+      
+      // Generate progression suggestion if we have cache data
+      if (lastSetCache != null && 
+          lastSetCache!.weightKg != null && 
+          lastSetCache!.reps != null && 
+          lastSetCache!.difficulty != null) {
+        
+        progressionSuggestion = ProgressionUtils.calculateAdvancedProgression(
+          lastWeight: lastSetCache!.weightKg!,
+          lastReps: lastSetCache!.reps!,
+          targetReps: widget.repsTarget,
+          difficulty: lastSetCache!.difficulty!,
+          aggressiveness: currentUser?.suggestionAggressiveness ?? 'standard',
+        );
+        
+        // Pre-fill sets with suggested values
+        _initializeSetsWithSuggestion();
+      } else {
+        // Initialize empty sets
+        _initializeEmptySets();
+      }
+      
+      setState(() => isLoadingProgression = false);
+    } catch (e) {
+      setState(() => isLoadingProgression = false);
+      developer.log('Error loading progression data: $e', name: 'ExerciseSelector');
+      _initializeEmptySets();
+    }
   }
 
   Future<void> _loadLastWorkoutCache() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKey = 'exercise_cache_${widget.exerciseId}';
-    final cachedData = prefs.getString(cacheKey);
-    
-    if (cachedData != null) {
-      try {
-        final parsedCache = LastSetCache.fromJson(jsonDecode(cachedData));
-        setState(() {
-          lastCache = parsedCache;
-          selectedVariationIndex = parsedCache.variationIndex ?? 1;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'last_workout_${widget.exerciseId}';
+      final cachedData = prefs.getString(cacheKey);
+      
+      if (cachedData != null) {
+        final jsonData = jsonDecode(cachedData);
+        final cachedSets = (jsonData['sets'] as List<dynamic>?)
+            ?.map((e) => CachedSet.fromJson(e as Map<String, dynamic>))
+            .toList() ?? [];
+        
+        // Initialize sets with cached data
+        exerciseSets = List.generate(widget.sets, (index) {
+          final cachedSet = cachedSets.isNotEmpty && index < cachedSets.length 
+              ? cachedSets[index]
+              : null;
           
-          // Gerar sugestão baseada no último treino
-          if (parsedCache.weightKg != null && parsedCache.reps != null && parsedCache.difficulty != null) {
-            suggestion = UserExerciseData.getProgressionSuggestion(
-              parsedCache.weightKg!,
-              parsedCache.reps!,
-              parsedCache.difficulty!,
-              widget.repsTarget,
-            );
-            
-            // Pré-preencher com dados sugeridos
-            exerciseSets = List.generate(widget.sets, (index) => 
-              WorkoutSetData(
-                setNumber: index + 1,
-                weightKg: suggestion?.suggested.weight ?? parsedCache.weightKg,
-                reps: suggestion?.suggested.reps ?? parsedCache.reps,
-              )
-            );
-          }
+          return WorkoutSetData(
+            setNumber: index + 1,
+            weightKg: cachedSet?.weight,
+            reps: cachedSet?.reps,
+            difficulty: cachedSet?.difficulty,
+            notes: null, // Notes are session-specific, don't cache
+          );
         });
-      } catch (e) {
-        debugPrint('Error parsing exercise cache: $e');
+        
+        developer.log('Loaded cached workout data for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+      } else {
+        _initializeEmptySets();
       }
-    }
-    
-    // Inicializar sets vazios se não há cache
-    if (exerciseSets.isEmpty) {
-      setState(() {
-        exerciseSets = List.generate(widget.sets, (index) => 
-          WorkoutSetData(setNumber: index + 1)
-        );
-      });
+    } catch (e) {
+      developer.log('Error loading workout cache: $e', name: 'ExerciseSelector');
+      _initializeEmptySets();
     }
   }
 
-  Future<void> _saveToCache(WorkoutSetData setData) async {
-    if (setData.weightKg != null && setData.reps != null && setData.difficulty != null) {
-      // Obter sets completos com dados válidos
-      final completedSets = exerciseSets
-          .where((set) => set.weightKg != null && set.reps != null && set.difficulty != null)
-          .map((set) => CachedSet(
-                setNumber: set.setNumber,
-                weight: set.weightKg!,
-                reps: set.reps!,
-                difficulty: set.difficulty!,
-              ))
-          .toList();
+  Future<LastSetCache?> _getLocalLastSetCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'exercise_cache_${widget.exerciseId}';
+      final cachedData = prefs.getString(cacheKey);
+      
+      if (cachedData != null) {
+        final jsonData = jsonDecode(cachedData);
+        return LastSetCache.fromJson(jsonData);
+      }
+    } catch (e) {
+      developer.log('Error loading local cache: $e', name: 'ExerciseSelector');
+    }
+    return null;
+  }
 
-      final cacheData = LastSetCache(
-        userId: 'user_1', // TODO: Obter do contexto de autenticação
+  void _initializeSetsWithSuggestion() {
+    final suggestedWeight = progressionSuggestion?.suggested.weight ?? lastSetCache?.weightKg;
+    final suggestedReps = progressionSuggestion?.suggested.reps ?? lastSetCache?.reps;
+    
+    exerciseSets = List.generate(widget.sets, (index) => 
+      WorkoutSetData(
+        setNumber: index + 1,
+        weightKg: suggestedWeight,
+        reps: suggestedReps,
+      )
+    );
+  }
+
+  void _initializeEmptySets() {
+    exerciseSets = List.generate(widget.sets, (index) => 
+      WorkoutSetData(setNumber: index + 1)
+    );
+  }
+
+  void _onAcceptSuggestion(double weight, int reps) {
+    setState(() {
+      // Apply suggestion to all incomplete sets
+      for (int i = 0; i < exerciseSets.length; i++) {
+        if (exerciseSets[i].difficulty == null) {
+          exerciseSets[i] = WorkoutSetData(
+            setNumber: exerciseSets[i].setNumber,
+            weightKg: weight,
+            reps: reps,
+            difficulty: exerciseSets[i].difficulty,
+          );
+        }
+      }
+    });
+    
+    // Notify parent of changes
+    _notifyDataChange();
+  }
+
+  Future<void> _saveWorkoutSet(WorkoutSetData setData) async {
+    if (widget.sessionId == null || 
+        setData.weightKg == null || 
+        setData.reps == null || 
+        setData.difficulty == null) {
+      return;
+    }
+
+    try {
+      await SupabaseService.saveWorkoutSet(
+        sessionId: widget.sessionId!,
         exerciseId: widget.exerciseId,
         variationIndex: selectedVariationIndex,
+        setNumber: setData.setNumber,
         weightKg: setData.weightKg,
         reps: setData.reps,
         difficulty: setData.difficulty,
-        sets: completedSets,
+        durationSec: _getSetDuration(setData.setNumber),
       );
       
-      final prefs = await SharedPreferences.getInstance();
-      final cacheKey = 'exercise_cache_${widget.exerciseId}';
-      await prefs.setString(cacheKey, jsonEncode(cacheData.toJson()));
+      // Check and update PR
+      await SupabaseService.checkAndUpdatePR(
+        exerciseId: widget.exerciseId,
+        weightKg: setData.weightKg!,
+        reps: setData.reps!,
+        variationIndex: selectedVariationIndex,
+        sessionId: widget.sessionId,
+      );
+      
+      developer.log('Saved set: ${setData.weightKg}kg x ${setData.reps} reps', 
+                   name: 'ExerciseSelector');
+    } catch (e) {
+      developer.log('Error saving workout set: $e', name: 'ExerciseSelector');
+      // Data will be cached locally by SupabaseService for offline sync
     }
+  }
+
+  int? _getSetDuration(int setNumber) {
+    final timer = setTimers[setNumber];
+    if (timer != null && !timer.isActive) {
+      return DateTime.now().difference(timer.startTime).inSeconds;
+    }
+    return null;
   }
 
   void _startSetTimer(int setNumber) {
@@ -143,54 +353,101 @@ class _ExerciseSelectorState extends State<ExerciseSelector> {
   }
 
   void _updateSetData(int setIndex, String field, dynamic value) {
-    final newSets = List<WorkoutSetData>.from(exerciseSets);
-    final currentSet = newSets[setIndex];
+    final currentSet = exerciseSets[setIndex];
     
     final updatedSet = WorkoutSetData(
       setNumber: currentSet.setNumber,
       weightKg: field == 'weight' ? value : currentSet.weightKg,
       reps: field == 'reps' ? value : currentSet.reps,
       difficulty: field == 'difficulty' ? value : currentSet.difficulty,
+      notes: field == 'notes' ? value : currentSet.notes,
     );
     
-    newSets[setIndex] = updatedSet;
     setState(() {
-      exerciseSets = newSets;
+      exerciseSets[setIndex] = updatedSet;
     });
     
-    // Iniciar cronômetro quando dificuldade for selecionada
+    // Handle set completion
     if (field == 'difficulty' && value != null) {
-      final setNumber = updatedSet.setNumber;
-      _startSetTimer(setNumber);
+      HapticFeedback.lightImpact();
       
-      // Parar timer anterior se existir
-      final previousSetNumber = setNumber - 1;
-      if (previousSetNumber > 0) {
-        _stopSetTimer(previousSetNumber);
+      // Start/stop timers
+      _startSetTimer(updatedSet.setNumber);
+      if (updatedSet.setNumber > 1) {
+        _stopSetTimer(updatedSet.setNumber - 1);
+      }
+      
+      // Save set if complete
+      if (updatedSet.weightKg != null && updatedSet.reps != null) {
+        _saveWorkoutSet(updatedSet);
+        _saveWorkoutCache(); // Save cache for next session
       }
     }
     
-    // Salvar no cache se o set está completo
-    if (field == 'difficulty' && updatedSet.weightKg != null && updatedSet.reps != null) {
-      _saveToCache(updatedSet);
-    }
-    
-    // Notificar componente pai
+    _notifyDataChange();
+  }
+
+  void _notifyDataChange() {
     if (widget.onDataChange != null) {
       widget.onDataChange!(ExerciseSetData(
         exerciseId: widget.exerciseId,
         selectedVariationIndex: selectedVariationIndex,
-        videoUrl: UserExerciseData.getExerciseVideoUrl(widget.exerciseId, variationIndex: selectedVariationIndex),
+        videoUrl: _getCurrentVideoUrl(),
         sets: exerciseSets,
       ));
     }
   }
 
-  CachedSet? _getPreviousSetDifficulty(int setNumber) {
-    if (lastCache?.sets.isEmpty ?? true) return null;
+  Future<void> _saveWorkoutCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'last_workout_${widget.exerciseId}';
+      
+      // Convert sets to cacheable format (only completed sets with weight/reps)
+      final completedSets = exerciseSets
+          .where((set) => set.weightKg != null && set.reps != null)
+          .map((set) => CachedSet(
+                setNumber: set.setNumber,
+                weight: set.weightKg!,
+                reps: set.reps!,
+                difficulty: set.difficulty ?? 'medium',
+              ))
+          .toList();
+      
+      if (completedSets.isNotEmpty) {
+        final cacheData = {
+          'exerciseId': widget.exerciseId,
+          'lastUpdated': DateTime.now().toIso8601String(),
+          'sets': completedSets.map((set) => set.toJson()).toList(),
+        };
+        
+        await prefs.setString(cacheKey, jsonEncode(cacheData));
+        developer.log('Saved workout cache for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+      }
+    } catch (e) {
+      developer.log('Error saving workout cache: $e', name: 'ExerciseSelector');
+    }
+  }
+
+  String _getCurrentVideoUrl() {
+    try {
+      final variation = variations.firstWhere(
+        (v) => v.variationIndex == selectedVariationIndex
+      );
+      return variation.youtubeUrl;
+    } catch (e) {
+      return UserExerciseData.getExerciseVideoUrl(
+        widget.exerciseId, 
+        variationIndex: selectedVariationIndex
+      );
+    }
+  }
+
+  CachedSet? _getPreviousSetData(int setNumber) {
+    if (lastSetCache?.sets.isEmpty ?? true) return null;
     
     try {
-      return lastCache!.sets.firstWhere((set) => set.setNumber == setNumber);
+      return lastSetCache!.sets.firstWhere((set) => set.setNumber == setNumber);
     } catch (e) {
       return null;
     }
@@ -198,443 +455,502 @@ class _ExerciseSelectorState extends State<ExerciseSelector> {
 
   @override
   Widget build(BuildContext context) {
-    if (exercise == null || variations.isEmpty) {
-      return Card(
+    super.build(context);
+    
+    if (isLoadingExercise) {
+      return const Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Exercício não encontrado (ID: ${widget.exerciseId})',
-            style: const TextStyle(color: Colors.red),
+          padding: EdgeInsets.all(32),
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
         ),
       );
     }
 
-    final currentVideoUrl = UserExerciseData.getExerciseVideoUrl(widget.exerciseId, variationIndex: selectedVariationIndex);
-    final selectedVariation = variations.firstWhere((v) => v.variationIndex == selectedVariationIndex);
+    if (exercise == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.red.shade400,
+                size: 48,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Exercise not found (ID: ${widget.exerciseId})',
+                style: TextStyle(color: Colors.red.shade600),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: widget.isSuperset ? BorderSide(color: Colors.blue.shade500, width: 2) : BorderSide.none,
+        side: widget.isSuperset 
+          ? BorderSide(color: Colors.blue.shade500, width: 2) 
+          : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header do Exercício
-            Row(
-              children: [
-                if (widget.isSuperset && widget.supersetLabel != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      widget.supersetLabel!,
-                      style: TextStyle(
-                        color: Colors.blue.shade800,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                if (widget.isSuperset) const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        exercise!.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${widget.sets} sets • ${widget.repsTarget} reps',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
+            _buildExerciseHeader(),
             const SizedBox(height: 16),
-            
-            // Dropdown de Variações
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Variação do Exercício:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: selectedVariationIndex,
-                      isExpanded: true,
-                      items: variations.map((variation) {
-                        return DropdownMenuItem<int>(
-                          value: variation.variationIndex,
-                          child: Row(
-                            children: [
-                              if (variation.isPrimary)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'PRINCIPAL',
-                                    style: TextStyle(
-                                      color: Colors.green.shade800,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              if (variation.isPrimary) const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  variation.variationName,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (newVariationIndex) {
-                        if (newVariationIndex != null) {
-                          setState(() {
-                            selectedVariationIndex = newVariationIndex;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
+            _buildVariationSelector(),
             const SizedBox(height: 16),
-            
-            // URL do Vídeo
-            if (currentVideoUrl.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.play_arrow, color: Colors.red.shade600, size: 16),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Tutorial:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        selectedVariation.variationName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Abrir URL do vídeo
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Abrir: $currentVideoUrl')),
-                        );
-                      },
-                      icon: const Icon(Icons.open_in_new, size: 12),
-                      label: const Text('Abrir', style: TextStyle(fontSize: 12)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
+            _buildVideoSection(),
             const SizedBox(height: 16),
-            
-            // Sugestão de Progressão
-            if (suggestion != null && lastCache != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  border: Border.all(color: Colors.blue.shade200),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'SUGESTÃO',
-                        style: TextStyle(
-                          color: Colors.blue.shade800,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Baseado no último treino:',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.blue.shade900,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            suggestion!.reason,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.blue.shade700,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Último: ${lastCache!.weightKg}kg × ${lastCache!.reps} reps (${lastCache!.difficulty})',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.blue.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            
+            _buildProgressionSuggestion(),
             const SizedBox(height: 16),
-            
-            // Sets
-            Column(
-              children: exerciseSets.asMap().entries.map((entry) {
-                final index = entry.key;
-                final set = entry.value;
-                final previousSetData = _getPreviousSetDifficulty(set.setNumber);
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      // Header do Set com tag anterior e timer
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Set ${set.setNumber}:',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              _SetTimer(setNumber: set.setNumber, setTimers: setTimers),
-                            ],
-                          ),
-                          if (previousSetData != null)
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                border: Border.all(color: Colors.blue.shade200),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Last workout',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.blue.shade600,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${previousSetData.weight}kg × ${previousSetData.reps} reps',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.blue.shade800,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 120,
-                                    child: Text(
-                                      UserExerciseData.difficultyLabels[previousSetData.difficulty] ?? previousSetData.difficulty,
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        color: Colors.blue.shade700,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                      
-                      const SizedBox(height: 8),
-                      
-                      // Inputs do Set
-                      Row(
-                        children: [
-                          // Peso
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Peso (kg)',
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  controller: TextEditingController(
-                                    text: set.weightKg?.toString() ?? '',
-                                  ),
-                                  onChanged: (value) {
-                                    final weight = double.tryParse(value);
-                                    _updateSetData(index, 'weight', weight);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          
-                          const SizedBox(width: 8),
-                          
-                          // Reps
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                labelText: 'Reps',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              ),
-                              keyboardType: TextInputType.number,
-                              controller: TextEditingController(
-                                text: set.reps?.toString() ?? '',
-                              ),
-                              onChanged: (value) {
-                                final reps = int.tryParse(value);
-                                _updateSetData(index, 'reps', reps);
-                              },
-                            ),
-                          ),
-                          
-                          const SizedBox(width: 8),
-                          
-                          // Dificuldade
-                          Expanded(
-                            flex: 2,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: set.difficulty,
-                                  isExpanded: true,
-                                  hint: const Text(
-                                    'Dificuldade',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                  items: UserExerciseData.difficultyLabels.entries.map((entry) {
-                                    return DropdownMenuItem<String>(
-                                      value: entry.key,
-                                      child: Text(
-                                        entry.value,
-                                        style: const TextStyle(fontSize: 11),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    _updateSetData(index, 'difficulty', value);
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            ),
+            _buildSetsSection(),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildExerciseHeader() {
+    return Row(
+      children: [
+        if (widget.isSuperset && widget.supersetLabel != null) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              widget.supersetLabel!,
+              style: TextStyle(
+                color: Colors.blue.shade800,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                exercise!.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${widget.sets} sets • ${widget.repsTarget} reps',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Connection status indicator
+        if (!SupabaseService.isOnline)
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.cloud_off,
+              color: Colors.orange.shade600,
+              size: 16,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildVariationSelector() {
+    if (variations.isEmpty) return const SizedBox.shrink();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Exercise Variation:',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<int>(
+              value: selectedVariationIndex,
+              isExpanded: true,
+              items: variations.map((variation) {
+                return DropdownMenuItem<int>(
+                  value: variation.variationIndex,
+                  child: Row(
+                    children: [
+                      if (variation.isPrimary) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'PRIMARY',
+                            style: TextStyle(
+                              color: Colors.green.shade800,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Expanded(
+                        child: Text(
+                          variation.variationName,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+              onChanged: (newVariationIndex) {
+                if (newVariationIndex != null) {
+                  setState(() {
+                    selectedVariationIndex = newVariationIndex;
+                  });
+                  _notifyDataChange();
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVideoSection() {
+    final videoUrl = _getCurrentVideoUrl();
+    if (videoUrl.isEmpty) return const SizedBox.shrink();
+
+    final selectedVariation = variations.where(
+      (v) => v.variationIndex == selectedVariationIndex
+    ).firstOrNull;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.play_circle_outline, color: Colors.red.shade600, size: 20),
+          const SizedBox(width: 8),
+          const Text(
+            'Tutorial:',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              selectedVariation?.variationName ?? 'Video Tutorial',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton.icon(
+            onPressed: () async {
+              try {
+                final Uri uri = Uri.parse(videoUrl);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Could not open: $videoUrl'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error opening video: ${e.toString()}'),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.open_in_new, size: 14),
+            label: const Text('Open'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              minimumSize: Size.zero,
+              textStyle: const TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressionSuggestion() {
+    if (isLoadingProgression) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return ProgressionSuggestionCard(
+      exerciseId: widget.exerciseId,
+      exerciseName: exercise!.name,
+      targetReps: widget.repsTarget,
+      variationIndex: selectedVariationIndex,
+      lastSetCache: lastSetCache,
+      onAcceptSuggestion: _onAcceptSuggestion,
+      userAggressiveness: currentUser?.suggestionAggressiveness ?? 'standard',
+    );
+  }
+
+  Widget _buildSetsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Sets:',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey.shade800,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...exerciseSets.asMap().entries.map((entry) {
+          final index = entry.key;
+          final set = entry.value;
+          final previousSetData = _getPreviousSetData(set.setNumber);
+          
+          return _buildSetWidget(index, set, previousSetData);
+        }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildSetWidget(int index, WorkoutSetData set, CachedSet? previousSetData) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        border: Border.all(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Set header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Set ${set.setNumber}',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _SetTimer(setNumber: set.setNumber, setTimers: setTimers),
+                ],
+              ),
+              if (previousSetData != null)
+                _buildPreviousSetInfo(previousSetData),
+            ],
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Set inputs
+          Row(
+            children: [
+              // Weight input
+              Expanded(
+                flex: 3,
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Weight (${currentUser?.unit ?? "kg"})',
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  controller: _getOrCreateWeightController(set.setNumber, set.weightKg),
+                  onChanged: (value) {
+                    final weight = double.tryParse(value);
+                    _updateSetData(index, 'weight', weight);
+                  },
+                ),
+              ),
+              
+              const SizedBox(width: 12),
+              
+              // Reps input
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Reps',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  ),
+                  keyboardType: TextInputType.number,
+                  controller: _getOrCreateRepsController(set.setNumber, set.reps),
+                  onChanged: (value) {
+                    final reps = int.tryParse(value);
+                    _updateSetData(index, 'reps', reps);
+                  },
+                ),
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Difficulty selector
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: set.difficulty,
+                isExpanded: true,
+                hint: const Text('How did it feel?'),
+                items: UserExerciseData.difficultyLabels.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(
+                      entry.value,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  _updateSetData(index, 'difficulty', value);
+                },
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Notes field
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Notes (optional)',
+              hintText: 'Form notes, feeling, observations...',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            maxLines: 2,
+            controller: _getOrCreateNotesController(set.setNumber, set.notes),
+            onChanged: (value) {
+              _updateSetData(index, 'notes', value.isEmpty ? null : value);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreviousSetInfo(CachedSet previousSetData) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        border: Border.all(color: Colors.blue.shade200),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Last time',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue.shade600,
+            ),
+          ),
+          Text(
+            '${previousSetData.weight}kg × ${previousSetData.reps} reps',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(
+            width: 100,
+            child: Text(
+              UserExerciseData.difficultyLabels[previousSetData.difficulty] ?? 
+              previousSetData.difficulty,
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.blue.shade700,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-// Widget para exibir timer em tempo real
+// Set Timer Widget
 class _SetTimer extends StatefulWidget {
   final int setNumber;
   final Map<int, SetTimer> setTimers;
@@ -688,28 +1004,27 @@ class _SetTimerState extends State<_SetTimer> {
     final seconds = currentTime % 60;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        border: Border.all(color: Colors.green.shade200),
-        borderRadius: BorderRadius.circular(4),
+        color: Colors.green.shade100,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.access_time,
-            size: 12,
-            color: Colors.green.shade600,
+            Icons.timer,
+            size: 14,
+            color: Colors.green.shade700,
           ),
-          const SizedBox(width: 2),
+          const SizedBox(width: 4),
           Text(
             '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontFamily: 'monospace',
-              color: Colors.green.shade700,
-              fontWeight: FontWeight.bold,
+              color: Colors.green.shade800,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -718,7 +1033,7 @@ class _SetTimerState extends State<_SetTimer> {
   }
 }
 
-// Classe para controlar timer de set
+// Set Timer data class
 class SetTimer {
   final DateTime startTime;
   final bool isActive;
@@ -735,6 +1050,53 @@ class SetTimer {
     return SetTimer(
       startTime: startTime ?? this.startTime,
       isActive: isActive ?? this.isActive,
+    );
+  }
+}
+
+// Data classes
+class ExerciseSetData {
+  final int exerciseId;
+  final int selectedVariationIndex;
+  final String videoUrl;
+  final List<WorkoutSetData> sets;
+
+  ExerciseSetData({
+    required this.exerciseId,
+    required this.selectedVariationIndex,
+    required this.videoUrl,
+    required this.sets,
+  });
+}
+
+class WorkoutSetData {
+  final int setNumber;
+  final double? weightKg;
+  final int? reps;
+  final String? difficulty;
+  final String? notes;
+
+  WorkoutSetData({
+    required this.setNumber,
+    this.weightKg,
+    this.reps,
+    this.difficulty,
+    this.notes,
+  });
+
+  WorkoutSetData copyWith({
+    int? setNumber,
+    double? weightKg,
+    int? reps,
+    String? difficulty,
+    String? notes,
+  }) {
+    return WorkoutSetData(
+      setNumber: setNumber ?? this.setNumber,
+      weightKg: weightKg ?? this.weightKg,
+      reps: reps ?? this.reps,
+      difficulty: difficulty ?? this.difficulty,
+      notes: notes ?? this.notes,
     );
   }
 }

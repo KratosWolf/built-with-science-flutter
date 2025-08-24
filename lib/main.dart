@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'screens/auth_wrapper.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/program_selection_screen.dart';
+import 'screens/simple_home.dart';
 import 'screens/programs_screen.dart';
 import 'screens/program_detail_screen.dart';
 import 'screens/workout_screen.dart';
@@ -10,10 +12,9 @@ import 'screens/profile_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Configuração Supabase - Built With Science App
   await Supabase.initialize(
     url: 'https://gktvfldykmzhynqthbdn.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Nzg4NzAsImV4cCI6MjA3MTU1NDg3MH0.Nd2KdEGj8hQApxmTk8nkBM81R4ROJPhwRMtgPXadGVw',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQzMzQ1NzQsImV4cCI6MjAzOTkxMDU3NH0.WGkqrCyHe1AYD8D9HHLCD_g_7i2k8RyQNjZN5wPJmUE',
   );
   
   runApp(const BuiltWithScienceApp());
@@ -49,17 +50,23 @@ class BuiltWithScienceApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
-            return MaterialPageRoute(builder: (context) => const AuthWrapper());
+            return MaterialPageRoute(builder: (context) => const SimpleHomeScreen());
           case '/home':
-            return MaterialPageRoute(builder: (context) => const HomeScreen());
+            return MaterialPageRoute(builder: (context) => const SimpleHomeScreen());
           case '/programs':
             return MaterialPageRoute(builder: (context) => const ProgramsScreen());
           case '/program-detail':
-            return MaterialPageRoute(builder: (context) => const ProgramDetailScreen());
+            final args = settings.arguments as Map<String, dynamic>?;
+            if (args != null && args['program'] != null) {
+              return MaterialPageRoute(
+                builder: (context) => ProgramDetailScreen(program: args['program']),
+              );
+            }
+            return MaterialPageRoute(builder: (context) => const SimpleHomeScreen());
           case '/workout':
             final args = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
@@ -71,7 +78,7 @@ class BuiltWithScienceApp extends StatelessWidget {
           case '/profile':
             return MaterialPageRoute(builder: (context) => const ProfileScreen());
           default:
-            return MaterialPageRoute(builder: (context) => const AuthWrapper());
+            return MaterialPageRoute(builder: (context) => const SimpleHomeScreen());
         }
       },
     );

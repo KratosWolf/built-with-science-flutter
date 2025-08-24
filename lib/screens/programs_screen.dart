@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import '../data/mock_data.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -20,23 +20,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   }
 
   Future<void> _loadPrograms() async {
-    try {
-      final programs = await SupabaseService.getPrograms();
-      if (mounted) {
-        setState(() {
-          _programs = programs;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading programs: $e')),
-        );
-      }
+    // Using mock data temporarily while Supabase is disabled
+    await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
+    if (mounted) {
+      setState(() {
+        _programs = MockData.programs;
+        _isLoading = false;
+      });
     }
   }
 
@@ -72,10 +62,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         itemCount: _programs.length,
                         itemBuilder: (context, index) {
                           final program = _programs[index];
-                          return FutureBuilder<List<ProgramDay>>(
-                            future: SupabaseService.getProgramDays(program.id),
-                            builder: (context, snapshot) {
-                              final programDays = snapshot.data ?? [];
+                          final programDays = MockData.programDays
+                              .where((day) => day.programId == program.id)
+                              .toList();
+                          
+                          return Builder(
+                            builder: (context) {
                               
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 16),

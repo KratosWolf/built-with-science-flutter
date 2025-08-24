@@ -1,15 +1,10 @@
--- Built With Science - Comprehensive Supabase Database Schema
--- Based on Flutter models and Next.js analysis
--- Created: 2025-08-23
+-- Built With Science - Clean Database Schema
+-- No syntax errors version
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ==================================================
--- CORE PROGRAM STRUCTURE TABLES
--- ==================================================
-
--- Programs (3-day, 4-day, 5-day, etc.)
+-- Programs (3-day, 4-day, 5-day)
 CREATE TABLE programs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -19,12 +14,12 @@ CREATE TABLE programs (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Program Days (Full Body A, Full Body B, etc.)
+-- Program Days (Full Body A, Full Body B)
 CREATE TABLE program_days (
     id SERIAL PRIMARY KEY,
     program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-    day_index INTEGER NOT NULL, -- 1, 2, 3...
-    day_name VARCHAR(255) NOT NULL, -- "Full Body A", "Push", "Pull", etc.
+    day_index INTEGER NOT NULL,
+    day_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -32,9 +27,9 @@ CREATE TABLE program_days (
 CREATE TABLE exercises (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    muscle_groups TEXT[], -- ['chest', 'triceps'] for compound exercises
-    category VARCHAR(100), -- 'compound' | 'isolation' | 'cardio'
-    equipment VARCHAR(100), -- 'barbell' | 'dumbbells' | 'bodyweight' | etc.
+    muscle_groups TEXT[],
+    category VARCHAR(100),
+    equipment VARCHAR(100),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -42,11 +37,11 @@ CREATE TABLE exercises (
 CREATE TABLE exercise_variations (
     id SERIAL PRIMARY KEY,
     exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
-    variation_index INTEGER NOT NULL, -- 1, 2, 3... (matches Flutter model)
+    variation_index INTEGER NOT NULL,
     variation_name VARCHAR(255) NOT NULL,
     youtube_url VARCHAR(500),
-    is_primary BOOLEAN DEFAULT FALSE, -- main variation
-    difficulty_level VARCHAR(50) DEFAULT 'intermediate', -- 'beginner' | 'intermediate' | 'advanced'
+    is_primary BOOLEAN DEFAULT FALSE,
+    difficulty_level VARCHAR(50) DEFAULT 'intermediate',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -55,11 +50,11 @@ CREATE TABLE day_exercises (
     id SERIAL PRIMARY KEY,
     program_day_id INTEGER NOT NULL REFERENCES program_days(id) ON DELETE CASCADE,
     exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
-    order_pos INTEGER NOT NULL, -- order within the day
+    order_pos INTEGER NOT NULL,
     set_target INTEGER NOT NULL DEFAULT 3,
-    rest_sec INTEGER DEFAULT 120, -- default 2 minutes
+    rest_sec INTEGER DEFAULT 120,
     is_superset BOOLEAN DEFAULT FALSE,
-    superset_label VARCHAR(50), -- 'A1', 'A2', 'B1', 'B2', etc.
+    superset_label VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,15 +63,11 @@ CREATE TABLE day_exercise_sets (
     id SERIAL PRIMARY KEY,
     day_exercise_id INTEGER NOT NULL REFERENCES day_exercises(id) ON DELETE CASCADE,
     set_number INTEGER NOT NULL,
-    reps_target VARCHAR(20) NOT NULL, -- "8-10", "6-12", "15+", etc.
-    intensity_pct DECIMAL(4,1), -- percentage of 1RM, optional
+    reps_target VARCHAR(20) NOT NULL,
+    intensity_pct DECIMAL(4,1),
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- ==================================================
--- USER MANAGEMENT & PREFERENCES
--- ==================================================
 
 -- Users (extends Supabase auth.users)
 CREATE TABLE workout_users (
@@ -92,10 +83,6 @@ CREATE TABLE workout_users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- ==================================================
--- WORKOUT TRACKING TABLES
--- ==================================================
-
 -- Workout Sessions (individual workout instances)
 CREATE TABLE workout_sessions (
     id SERIAL PRIMARY KEY,
@@ -106,7 +93,7 @@ CREATE TABLE workout_sessions (
     finished_at TIMESTAMP WITH TIME ZONE,
     status VARCHAR(20) DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'done', 'abandoned')),
     notes TEXT,
-    total_duration_sec INTEGER, -- calculated duration
+    total_duration_sec INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -116,21 +103,17 @@ CREATE TABLE workout_sets (
     id SERIAL PRIMARY KEY,
     session_id INTEGER NOT NULL REFERENCES workout_sessions(id) ON DELETE CASCADE,
     exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE RESTRICT,
-    variation_index INTEGER DEFAULT 1, -- which variation was used
+    variation_index INTEGER DEFAULT 1,
     set_number INTEGER NOT NULL,
-    weight_kg DECIMAL(6,2), -- allows up to 9999.99 kg
+    weight_kg DECIMAL(6,2),
     reps INTEGER,
-    rest_sec INTEGER, -- actual rest time
-    rpe DECIMAL(3,1) CHECK (rpe >= 1 AND rpe <= 10), -- Rate of Perceived Exertion 1-10
+    rest_sec INTEGER,
+    rpe DECIMAL(3,1) CHECK (rpe >= 1 AND rpe <= 10),
     difficulty VARCHAR(20) CHECK (difficulty IN ('easy', 'medium', 'hard', 'max_effort', 'failed')),
-    duration_sec INTEGER, -- time spent on the set
+    duration_sec INTEGER,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
--- ==================================================
--- PROGRESSION TRACKING & CACHING
--- ==================================================
 
 -- Last Set Cache (for quick progression suggestions)
 CREATE TABLE last_set_cache (
@@ -141,7 +124,7 @@ CREATE TABLE last_set_cache (
     reps INTEGER,
     rest_sec INTEGER,
     difficulty VARCHAR(20),
-    sets JSONB, -- cached sets data for detailed analysis
+    sets JSONB,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, exercise_id, variation_index)
 );
@@ -155,45 +138,29 @@ CREATE TABLE exercise_prs (
     pr_type VARCHAR(20) NOT NULL CHECK (pr_type IN ('1rm', 'max_reps', 'max_volume')), 
     weight_kg DECIMAL(6,2),
     reps INTEGER,
-    estimated_1rm DECIMAL(6,2), -- calculated using Epley or similar formula
+    estimated_1rm DECIMAL(6,2),
     achieved_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     session_id INTEGER REFERENCES workout_sessions(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(user_id, exercise_id, variation_index, pr_type)
 );
 
--- ==================================================
--- INDEXES FOR PERFORMANCE
--- ==================================================
-
--- Program structure indexes
+-- Create indexes
 CREATE INDEX idx_program_days_program_id ON program_days(program_id);
 CREATE INDEX idx_day_exercises_program_day_id ON day_exercises(program_day_id);
 CREATE INDEX idx_day_exercises_exercise_id ON day_exercises(exercise_id);
 CREATE INDEX idx_day_exercise_sets_day_exercise_id ON day_exercise_sets(day_exercise_id);
-
--- Exercise and variation indexes
 CREATE INDEX idx_exercise_variations_exercise_id ON exercise_variations(exercise_id);
 CREATE INDEX idx_exercise_variations_primary ON exercise_variations(exercise_id, is_primary);
-
--- User and session indexes
 CREATE INDEX idx_workout_sessions_user_id ON workout_sessions(user_id);
 CREATE INDEX idx_workout_sessions_status ON workout_sessions(status);
 CREATE INDEX idx_workout_sessions_started_at ON workout_sessions(started_at);
-
--- Workout tracking indexes
 CREATE INDEX idx_workout_sets_session_id ON workout_sets(session_id);
 CREATE INDEX idx_workout_sets_exercise_id ON workout_sets(exercise_id);
 CREATE INDEX idx_workout_sets_created_at ON workout_sets(created_at);
-
--- Progression indexes
 CREATE INDEX idx_last_set_cache_user_exercise ON last_set_cache(user_id, exercise_id);
 CREATE INDEX idx_exercise_prs_user_id ON exercise_prs(user_id);
 CREATE INDEX idx_exercise_prs_exercise_id ON exercise_prs(exercise_id);
-
--- ==================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
--- ==================================================
 
 -- Enable RLS on user-specific tables
 ALTER TABLE workout_users ENABLE ROW LEVEL SECURITY;
@@ -218,7 +185,7 @@ CREATE POLICY "Users can manage their own cache" ON last_set_cache
 CREATE POLICY "Users can manage their own PRs" ON exercise_prs
     FOR ALL USING (auth.uid() = user_id);
 
--- Public read access for program structure (everyone can see programs)
+-- Public read access for program structure
 ALTER TABLE programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE program_days ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
@@ -232,10 +199,6 @@ CREATE POLICY "Exercises are publicly readable" ON exercises FOR SELECT TO publi
 CREATE POLICY "Exercise variations are publicly readable" ON exercise_variations FOR SELECT TO public USING (true);
 CREATE POLICY "Day exercises are publicly readable" ON day_exercises FOR SELECT TO public USING (true);
 CREATE POLICY "Day exercise sets are publicly readable" ON day_exercise_sets FOR SELECT TO public USING (true);
-
--- ==================================================
--- TRIGGERS FOR AUTOMATIC UPDATES
--- ==================================================
 
 -- Auto-update updated_at timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -259,7 +222,6 @@ CREATE TRIGGER update_workout_sessions_updated_at BEFORE UPDATE ON workout_sessi
 CREATE OR REPLACE FUNCTION update_last_set_cache()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Only update cache if set has weight, reps, and difficulty
     IF NEW.weight_kg IS NOT NULL AND NEW.reps IS NOT NULL AND NEW.difficulty IS NOT NULL THEN
         INSERT INTO last_set_cache (
             user_id, 
@@ -298,130 +260,3 @@ $$ language 'plpgsql';
 CREATE TRIGGER trigger_update_last_set_cache 
     AFTER INSERT OR UPDATE ON workout_sets
     FOR EACH ROW EXECUTE FUNCTION update_last_set_cache();
-
--- ==================================================
--- HELPFUL VIEWS FOR COMMON QUERIES
--- ==================================================
-
--- View for complete program structure
-CREATE VIEW program_structure AS
-SELECT 
-    p.id as program_id,
-    p.name as program_name,
-    pd.id as program_day_id,
-    pd.day_name,
-    pd.day_index,
-    de.id as day_exercise_id,
-    de.order_pos,
-    e.id as exercise_id,
-    e.name as exercise_name,
-    de.set_target,
-    string_agg(des.reps_target, ', ' ORDER BY des.set_number) as reps_targets
-FROM programs p
-JOIN program_days pd ON p.id = pd.program_id
-JOIN day_exercises de ON pd.id = de.program_day_id
-JOIN exercises e ON de.exercise_id = e.id
-LEFT JOIN day_exercise_sets des ON de.id = des.day_exercise_id
-GROUP BY p.id, p.name, pd.id, pd.day_name, pd.day_index, de.id, de.order_pos, e.id, e.name, de.set_target
-ORDER BY p.id, pd.day_index, de.order_pos;
-
--- View for user workout history
-CREATE VIEW user_workout_history AS
-SELECT 
-    ws.user_id,
-    ws.id as session_id,
-    p.name as program_name,
-    pd.day_name,
-    ws.started_at,
-    ws.finished_at,
-    ws.status,
-    COUNT(wset.id) as total_sets,
-    AVG(wset.weight_kg) as avg_weight,
-    SUM(wset.reps * wset.weight_kg) as total_volume
-FROM workout_sessions ws
-JOIN programs p ON ws.program_id = p.id
-JOIN program_days pd ON ws.program_day_id = pd.id
-LEFT JOIN workout_sets wset ON ws.id = wset.session_id
-GROUP BY ws.user_id, ws.id, p.name, pd.day_name, ws.started_at, ws.finished_at, ws.status
-ORDER BY ws.started_at DESC;
-
--- ==================================================
--- SAMPLE DATA FUNCTIONS (for development)
--- ==================================================
-
--- Function to create sample programs
-CREATE OR REPLACE FUNCTION create_sample_programs()
-RETURNS void AS $$
-BEGIN
-    -- Insert 3-day program
-    INSERT INTO programs (name, description, days_per_week) 
-    VALUES ('3-Day Full Body', 'Science-based full body workout program', 3);
-    
-    -- Insert 4-day program  
-    INSERT INTO programs (name, description, days_per_week)
-    VALUES ('4-Day Upper/Lower', 'Upper and lower body split program', 4);
-    
-    -- Insert 5-day program
-    INSERT INTO programs (name, description, days_per_week)
-    VALUES ('5-Day Push/Pull/Legs', 'Push, pull, legs split program', 5);
-    
-    RAISE NOTICE 'Sample programs created successfully';
-END;
-$$ language 'plpgsql';
-
--- ==================================================
--- ANALYTICS & REPORTING FUNCTIONS
--- ==================================================
-
--- Function to get user progression for an exercise
-CREATE OR REPLACE FUNCTION get_exercise_progression(
-    p_user_id UUID,
-    p_exercise_id INTEGER,
-    p_limit INTEGER DEFAULT 10
-)
-RETURNS TABLE (
-    workout_date DATE,
-    weight_kg DECIMAL,
-    reps INTEGER,
-    estimated_1rm DECIMAL
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        ws.started_at::DATE as workout_date,
-        wset.weight_kg,
-        wset.reps,
-        CASE 
-            WHEN wset.reps > 1 THEN ROUND((wset.weight_kg * (1 + wset.reps::DECIMAL / 30))::DECIMAL, 2)
-            ELSE wset.weight_kg
-        END as estimated_1rm
-    FROM workout_sets wset
-    JOIN workout_sessions ws ON wset.session_id = ws.id
-    WHERE ws.user_id = p_user_id 
-        AND wset.exercise_id = p_exercise_id
-        AND wset.weight_kg IS NOT NULL 
-        AND wset.reps IS NOT NULL
-        AND ws.status = 'done'
-    ORDER BY ws.started_at DESC
-    LIMIT p_limit;
-END;
-$$ language 'plpgsql';
-
--- ==================================================
--- COMMENTS FOR DOCUMENTATION
--- ==================================================
-
-COMMENT ON TABLE programs IS 'Workout programs (3-day, 4-day, 5-day, etc.)';
-COMMENT ON TABLE program_days IS 'Individual days within a program (Full Body A, Push Day, etc.)';
-COMMENT ON TABLE exercises IS 'Master list of all exercises';
-COMMENT ON TABLE exercise_variations IS 'Different ways to perform the same exercise with YouTube tutorials';
-COMMENT ON TABLE day_exercises IS 'Exercises assigned to specific program days';
-COMMENT ON TABLE day_exercise_sets IS 'Set configurations for each exercise in a day';
-COMMENT ON TABLE workout_users IS 'User profiles with preferences (extends Supabase auth)';
-COMMENT ON TABLE workout_sessions IS 'Individual workout instances/sessions';
-COMMENT ON TABLE workout_sets IS 'Individual sets performed during workouts';
-COMMENT ON TABLE last_set_cache IS 'Cache of last performance for quick progression suggestions';
-COMMENT ON TABLE exercise_prs IS 'Personal records for each exercise';
-
--- Schema version for migrations
-INSERT INTO programs (name, description) VALUES ('__schema_version__', '1.0.0') ON CONFLICT DO NOTHING;

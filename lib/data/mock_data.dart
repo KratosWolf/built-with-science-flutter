@@ -4,9 +4,9 @@ import '../models/workout_models.dart';
 class MockData {
   // Programas (baseado em programs.csv)
   static final List<Program> programs = [
-    Program(id: 1, name: "3-day Program"),
-    Program(id: 2, name: "4-day Program"),
-    Program(id: 3, name: "5-day Program"),
+    Program(id: 1, name: "3-day Program", daysPerWeek: 3),
+    Program(id: 2, name: "4-day Program", daysPerWeek: 4),
+    Program(id: 3, name: "5-day Program", daysPerWeek: 5),
   ];
 
   // Dias dos programas (baseado em program_days.csv)

@@ -69,6 +69,12 @@ class UserExerciseData {
     ExerciseVariation(id: 5, exerciseId: 1, variationIndex: 5, variationName: "Seated Flat Cable Press", youtubeUrl: "https://youtu.be/hPpNTAEDnxM"),
     ExerciseVariation(id: 6, exerciseId: 1, variationIndex: 6, variationName: "Neutral Grip DB Press*", youtubeUrl: "https://youtu.be/N-kUwH1uf9c"),
     
+    // FLAT DUMBBELL PRESS (id: 2) - 4 variações
+    ExerciseVariation(id: 33, exerciseId: 2, variationIndex: 1, variationName: "Flat Dumbbell Press", youtubeUrl: "https://youtu.be/VmB1G1K7v94", isPrimary: true),
+    ExerciseVariation(id: 34, exerciseId: 2, variationIndex: 2, variationName: "Flat Machine Chest Press", youtubeUrl: "https://youtu.be/xUm0BiZCWlQ"),
+    ExerciseVariation(id: 35, exerciseId: 2, variationIndex: 3, variationName: "Flat Smith Machine Chest Press", youtubeUrl: "https://youtu.be/rT7DgCr-3pg"),
+    ExerciseVariation(id: 36, exerciseId: 2, variationIndex: 4, variationName: "Seated Flat Cable Press", youtubeUrl: "https://youtu.be/5j5KlnDtSmY"),
+    
     // BARBELL ROMANIAN DEADLIFT (id: 7) - 3 variações
     ExerciseVariation(id: 7, exerciseId: 7, variationIndex: 1, variationName: "Barbell Romanian Deadlift", youtubeUrl: "https://youtu.be/Q-2telZDPRw", isPrimary: true),
     ExerciseVariation(id: 8, exerciseId: 7, variationIndex: 2, variationName: "Dumbbell Romanian Deadlift", youtubeUrl: "https://youtu.be/Xu4DxwKWzl4"),

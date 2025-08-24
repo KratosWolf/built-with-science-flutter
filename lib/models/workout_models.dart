@@ -3,16 +3,22 @@
 class Program {
   final int id;
   final String name;
+  final String? description;
+  final int daysPerWeek;
 
   Program({
     required this.id,
     required this.name,
+    this.description,
+    required this.daysPerWeek,
   });
 
   factory Program.fromJson(Map<String, dynamic> json) {
     return Program(
       id: json['id'] as int,
       name: json['name'] as String,
+      description: json['description'] as String?,
+      daysPerWeek: json['days_per_week'] as int? ?? 3,
     );
   }
 
@@ -20,6 +26,8 @@ class Program {
     return {
       'id': id,
       'name': name,
+      'description': description,
+      'days_per_week': daysPerWeek,
     };
   }
 }
@@ -283,6 +291,7 @@ class WorkoutSet {
   final int? restSec;
   final double? rpe;
   final String? difficulty; // 'easy' | 'medium' | 'hard' | 'max_effort' | 'failed'
+  final int? durationSec;
   final DateTime createdAt;
 
   WorkoutSet({
@@ -296,6 +305,7 @@ class WorkoutSet {
     this.restSec,
     this.rpe,
     this.difficulty,
+    this.durationSec,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -311,6 +321,7 @@ class WorkoutSet {
       restSec: json['rest_sec'] as int?,
       rpe: json['rpe'] != null ? (json['rpe'] as num).toDouble() : null,
       difficulty: json['difficulty'] as String?,
+      durationSec: json['duration_sec'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
@@ -327,6 +338,7 @@ class WorkoutSet {
       'rest_sec': restSec,
       'rpe': rpe,
       'difficulty': difficulty,
+      'duration_sec': durationSec,
       'created_at': createdAt.toIso8601String(),
     };
   }
@@ -519,6 +531,55 @@ class DayExerciseData {
       'is_superset': isSuperset,
       'superset_label': supersetLabel,
       'superset_exercise_label': supersetExerciseLabel,
+    };
+  }
+}
+
+// Personal Record model for statistics
+class PersonalRecord {
+  final int id;
+  final int exerciseId;
+  final String exerciseName;
+  final int variationIndex;
+  final double weightKg;
+  final int reps;
+  final double? estimated1rm;
+  final DateTime achievedAt;
+
+  PersonalRecord({
+    required this.id,
+    required this.exerciseId,
+    required this.exerciseName,
+    required this.variationIndex,
+    required this.weightKg,
+    required this.reps,
+    this.estimated1rm,
+    required this.achievedAt,
+  });
+
+  factory PersonalRecord.fromJson(Map<String, dynamic> json) {
+    return PersonalRecord(
+      id: json['id'],
+      exerciseId: json['exercise_id'],
+      exerciseName: json['exercise_name'],
+      variationIndex: json['variation_index'] ?? 1,
+      weightKg: (json['weight_kg'] as num).toDouble(),
+      reps: json['reps'],
+      estimated1rm: (json['estimated_1rm'] as num?)?.toDouble(),
+      achievedAt: DateTime.parse(json['achieved_at']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'exercise_id': exerciseId,
+      'exercise_name': exerciseName,
+      'variation_index': variationIndex,
+      'weight_kg': weightKg,
+      'reps': reps,
+      'estimated_1rm': estimated1rm,
+      'achieved_at': achievedAt.toIso8601String(),
     };
   }
 }
