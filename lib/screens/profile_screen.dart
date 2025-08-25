@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import '../models/workout_models.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadProfile() async {
     try {
-      final profile = await SupabaseService.getUserProfile();
+      final profile = await // SupabaseService.getUserProfile();
       if (profile != null && mounted) {
         setState(() {
           _userProfile = profile;
@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadDashboardStats() async {
     try {
-      final stats = await SupabaseService.getDashboardStats();
+      final stats = await // SupabaseService.getDashboardStats();
       if (mounted) {
         setState(() {
           _dashboardStats = stats;
@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _updateProfile() async {
     try {
-      await SupabaseService.createOrUpdateUserProfile(
+      await // SupabaseService.createOrUpdateUserProfile(
         displayName: _displayNameController.text.trim().isEmpty 
             ? null 
             : _displayNameController.text.trim(),
@@ -101,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _signOut() async {
     try {
-      await SupabaseService.signOut();
+      await // SupabaseService.signOut();
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/');
       }

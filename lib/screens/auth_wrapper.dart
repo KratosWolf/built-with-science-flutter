@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import 'auth_screen.dart';
 import 'home_screen.dart';
 
@@ -32,14 +32,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _checkAuthState() async {
     try {
-      final user = SupabaseService.currentUser;
+      final user = // SupabaseService.currentUser;
       
       // If user exists, ensure profile exists too
       if (user != null) {
-        final profile = await SupabaseService.getUserProfile();
+        final profile = await // SupabaseService.getUserProfile();
         if (profile == null) {
           // Create profile if it doesn't exist
-          await SupabaseService.createOrUpdateUserProfile();
+          await // SupabaseService.createOrUpdateUserProfile();
         }
       }
       

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -31,7 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_isLogin) {
-        final response = await SupabaseService.signInWithEmailPassword(
+        final response = await // SupabaseService.signInWithEmailPassword(
           _emailController.text.trim(),
           _passwordController.text,
         );
@@ -40,14 +40,14 @@ class _AuthScreenState extends State<AuthScreen> {
           Navigator.pushReplacementNamed(context, '/');
         }
       } else {
-        final response = await SupabaseService.signUpWithEmailPassword(
+        final response = await // SupabaseService.signUpWithEmailPassword(
           _emailController.text.trim(),
           _passwordController.text,
         );
         
         if (response.user != null) {
           // Create user profile
-          await SupabaseService.createOrUpdateUserProfile(
+          await // SupabaseService.createOrUpdateUserProfile(
             email: _emailController.text.trim(),
             displayName: _displayNameController.text.trim().isEmpty 
                 ? null 
@@ -79,10 +79,10 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await SupabaseService.signInAnonymously();
+      final response = await // SupabaseService.signInAnonymously();
       if (response.user != null && mounted) {
         // Create anonymous user profile
-        await SupabaseService.createOrUpdateUserProfile();
+        await // SupabaseService.createOrUpdateUserProfile();
         Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 
 /// Statistics Screen - Track progress and workout analytics  
 class StatisticsScreen extends StatefulWidget {
@@ -73,9 +73,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       });
 
       // Load statistics from Supabase
-      final stats = await SupabaseService.getUserStatistics();
-      final recentPRs = await SupabaseService.getRecentPersonalRecords(limit: 5);
-      final exerciseProgress = await SupabaseService.getExerciseProgressOverTime();
+      final stats = await // SupabaseService.getUserStatistics();
+      final recentPRs = await // SupabaseService.getRecentPersonalRecords(limit: 5);
+      final exerciseProgress = await // SupabaseService.getExerciseProgressOverTime();
       
       setState(() {
         _totalWorkouts = stats['total_workouts'] ?? 0;

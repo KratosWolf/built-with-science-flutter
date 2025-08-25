@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import '../utils/progression_utils.dart';
 import '../widgets/progression_suggestion_card.dart';
 import '../data/user_exercises.dart';
@@ -130,8 +130,8 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
       
       // Load from Supabase or fallback to local data
       try {
-        exercise = await SupabaseService.getExerciseById(widget.exerciseId);
-        variations = await SupabaseService.getExerciseVariations(widget.exerciseId);
+        exercise = await // SupabaseService.getExerciseById(widget.exerciseId);
+        variations = await // SupabaseService.getExerciseVariations(widget.exerciseId);
       } catch (e) {
         // Fallback to local data
         exercise = UserExerciseData.getUserExerciseById(widget.exerciseId);
@@ -152,7 +152,7 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
 
   Future<void> _loadUserData() async {
     try {
-      currentUser = await SupabaseService.getUserProfile();
+      currentUser = await // SupabaseService.getUserProfile();
     } catch (e) {
       developer.log('Error loading user data: $e', name: 'ExerciseSelector');
     }
@@ -163,7 +163,7 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
       setState(() => isLoadingProgression = true);
       
       // Try to load from Supabase first
-      lastSetCache = await SupabaseService.getLastSetCache(widget.exerciseId);
+      lastSetCache = await // SupabaseService.getLastSetCache(widget.exerciseId);
       
       // Fallback to local cache if Supabase fails
       if (lastSetCache == null) {
@@ -201,6 +201,26 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
 
   Future<void> _loadLastWorkoutCache() async {
     try {
+      // Try to load from Supabase first (cloud data)
+      final supabaseData = await // SupabaseService.getLastWorkoutData(widget.exerciseId);
+      
+      if (supabaseData != null) {
+        // Initialize sets with Supabase suggestions
+        exerciseSets = List.generate(widget.sets, (index) {
+          return WorkoutSetData(
+            setNumber: index + 1,
+            weightKg: supabaseData['lastWeight'],
+            reps: supabaseData['lastReps'],
+            difficulty: null, // User needs to set difficulty for each set
+            notes: null,
+          );
+        });
+        
+        developer.log('Loaded Supabase data for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+        return;
+      }
+      
+      // Fallback to local cache if Supabase fails
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = 'last_workout_${widget.exerciseId}';
       final cachedData = prefs.getString(cacheKey);
@@ -221,12 +241,12 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
             setNumber: index + 1,
             weightKg: cachedSet?.weight,
             reps: cachedSet?.reps,
-            difficulty: cachedSet?.difficulty,
-            notes: null, // Notes are session-specific, don't cache
+            difficulty: null, // Reset difficulty for new session
+            notes: null,
           );
         });
         
-        developer.log('Loaded cached workout data for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+        developer.log('Loaded local cached data for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
       } else {
         _initializeEmptySets();
       }
@@ -299,25 +319,17 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
     }
 
     try {
-      await SupabaseService.saveWorkoutSet(
-        sessionId: widget.sessionId!,
+      await // SupabaseService.saveWorkoutSet(
+        sessionId: widget.sessionId!.toString(),
         exerciseId: widget.exerciseId,
-        variationIndex: selectedVariationIndex,
+        exerciseName: exercise?.name ?? 'Unknown Exercise',
         setNumber: setData.setNumber,
         weightKg: setData.weightKg,
         reps: setData.reps,
         difficulty: setData.difficulty,
-        durationSec: _getSetDuration(setData.setNumber),
+        notes: setData.notes,
       );
       
-      // Check and update PR
-      await SupabaseService.checkAndUpdatePR(
-        exerciseId: widget.exerciseId,
-        weightKg: setData.weightKg!,
-        reps: setData.reps!,
-        variationIndex: selectedVariationIndex,
-        sessionId: widget.sessionId,
-      );
       
       developer.log('Saved set: ${setData.weightKg}kg x ${setData.reps} reps', 
                    name: 'ExerciseSelector');
@@ -400,6 +412,26 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
 
   Future<void> _saveWorkoutCache() async {
     try {
+      // Save to Supabase first (cloud backup)
+      if (widget.sessionId != null) {
+        for (final set in exerciseSets) {
+          if (set.weightKg != null && set.reps != null) {
+            await // SupabaseService.saveWorkoutSet(
+              sessionId: widget.sessionId!.toString(),
+              exerciseId: widget.exerciseId,
+              exerciseName: exercise?.name ?? 'Unknown Exercise',
+              setNumber: set.setNumber,
+              weightKg: set.weightKg,
+              reps: set.reps,
+              difficulty: set.difficulty,
+              notes: set.notes,
+            );
+          }
+        }
+        developer.log('Saved to Supabase for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+      }
+      
+      // Keep local cache as backup
       final prefs = await SharedPreferences.getInstance();
       final cacheKey = 'last_workout_${widget.exerciseId}';
       
@@ -410,7 +442,7 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
                 setNumber: set.setNumber,
                 weight: set.weightKg!,
                 reps: set.reps!,
-                difficulty: set.difficulty ?? 'medium',
+                difficulty: set.difficulty ?? 'Perfect',
               ))
           .toList();
       
@@ -422,10 +454,10 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
         };
         
         await prefs.setString(cacheKey, jsonEncode(cacheData));
-        developer.log('Saved workout cache for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
+        developer.log('Saved local backup for exercise ${widget.exerciseId}', name: 'ExerciseSelector');
       }
     } catch (e) {
-      developer.log('Error saving workout cache: $e', name: 'ExerciseSelector');
+      developer.log('Error saving workout data: $e', name: 'ExerciseSelector');
     }
   }
 
@@ -492,29 +524,54 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
     }
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: widget.isSuperset 
-          ? BorderSide(color: Colors.blue.shade500, width: 2) 
-          : BorderSide.none,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildExerciseHeader(),
-            const SizedBox(height: 16),
-            _buildVariationSelector(),
-            const SizedBox(height: 16),
-            _buildVideoSection(),
-            const SizedBox(height: 16),
-            _buildProgressionSuggestion(),
-            const SizedBox(height: 16),
-            _buildSetsSection(),
+      margin: const EdgeInsets.only(bottom: 20),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: widget.isSuperset 
+            ? LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.02),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+          color: widget.isSuperset ? null : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: widget.isSuperset 
+            ? Border.all(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3), 
+                width: 1.5
+              ) 
+            : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildExerciseHeader(),
+              const SizedBox(height: 16),
+              _buildVariationSelector(),
+              const SizedBox(height: 16),
+              _buildVideoSection(),
+              const SizedBox(height: 16),
+              _buildProgressionSuggestion(),
+              const SizedBox(height: 16),
+              _buildSetsSection(),
+            ],
+          ),
         ),
       ),
     );
@@ -525,17 +582,30 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
       children: [
         if (widget.isSuperset && widget.supersetLabel != null) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.blue.shade100,
-              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.secondary,
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Text(
               widget.supersetLabel!,
-              style: TextStyle(
-                color: Colors.blue.shade800,
-                fontSize: 12,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -564,7 +634,7 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
           ),
         ),
         // Connection status indicator
-        if (!SupabaseService.isOnline)
+        if (!// SupabaseService.isOnline)
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
@@ -664,11 +734,21 @@ class _ExerciseSelectorState extends State<ExerciseSelector> with AutomaticKeepA
     ).firstOrNull;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            Theme.of(context).colorScheme.primary.withOpacity(0.02),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [

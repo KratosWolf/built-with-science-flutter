@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import 'workout_session_screen.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
@@ -61,7 +61,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
         _error = null;
       });
 
-      final programDays = await SupabaseService.getProgramDays(widget.program.id);
+      final programDays = await // SupabaseService.getProgramDays(widget.program.id);
       
       setState(() {
         _programDays = programDays;

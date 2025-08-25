@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import '../widgets/exercise_selector.dart';
 import '../widgets/rest_timer.dart';
 
@@ -133,14 +133,12 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     try {
       setState(() => _isStartingWorkout = true);
       
-      // Mock workout session
-      final session = WorkoutSession(
-        id: DateTime.now().millisecondsSinceEpoch,
-        userId: 'mock_user_id',
+      // Create workout session in Supabase
+      final session = await // SupabaseService.createWorkoutSession(
         programId: widget.programId,
-        programDayId: widget.programDayId,
-        startedAt: DateTime.now(),
-        status: 'in_progress',
+        dayId: widget.programDayId,
+        dayName: widget.dayName,
+        totalExercises: _exercises.length,
       );
       
       setState(() {
@@ -161,8 +159,8 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     if (_currentSession == null) return;
     
     try {
-      // Mock finish workout - just update local state
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Complete workout session in Supabase
+      await // SupabaseService.completeWorkoutSession(_currentSession!.id.toString());
       
       // Restore system UI
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -493,8 +491,7 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                       ),
                       
                       // Exercise selector
-                      Expanded(
-                        child: ExerciseSelector(
+                      ExerciseSelector(
                           exerciseId: exercise.exerciseId,
                           sets: exercise.sets,
                           repsTarget: exercise.repsTarget,
@@ -512,7 +509,6 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
                             }
                           },
                         ),
-                      ),
                     ],
                   ),
                 );
@@ -522,40 +518,76 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
           
           // Navigation buttons
           if (!_allExercisesCompleted)
-            Container(
-              padding: const EdgeInsets.all(16),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 15,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
+              ),
               child: Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _currentExerciseIndex > 0
-                        ? () {
-                            _pageController.previousPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Previous'),
+                    child: AnimatedOpacity(
+                      opacity: _currentExerciseIndex > 0 ? 1.0 : 0.5,
+                      duration: const Duration(milliseconds: 200),
+                      child: OutlinedButton.icon(
+                        onPressed: _currentExerciseIndex > 0
+                          ? () {
+                              _pageController.previousPage(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                          : null,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        label: const Text('Previous'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _currentExerciseIndex < _exercises.length - 1
-                        ? () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        : null,
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text('Next'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                    child: AnimatedOpacity(
+                      opacity: _currentExerciseIndex < _exercises.length - 1 ? 1.0 : 0.5,
+                      duration: const Duration(milliseconds: 200),
+                      child: ElevatedButton.icon(
+                        onPressed: _currentExerciseIndex < _exercises.length - 1
+                          ? () {
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeOutCubic,
+                              );
+                            }
+                          : null,
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('Next'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
                       ),
                     ),
                   ),

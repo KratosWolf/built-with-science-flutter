@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+import "supabase_service.dart";
 import '../widgets/exercise_selector.dart';
 import '../widgets/rest_timer.dart';
 import 'dart:async';
@@ -83,10 +83,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
       });
 
       // Load program day exercises
-      final dayExercises = await SupabaseService.getDayExercises(widget.dayId);
+      final dayExercises = await // SupabaseService.getDayExercises(widget.dayId);
       
       // Start workout session
-      final session = await SupabaseService.startWorkoutSession(
+      final session = await // SupabaseService.startWorkoutSession(
         programId: widget.programId,
         programDayId: widget.dayId,
       );
@@ -127,10 +127,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
 
   Future<void> _checkConnectionAndSync() async {
     try {
-      await SupabaseService.setConnectionStatus(true);
-      await SupabaseService.syncOfflineData();
+      await // SupabaseService.setConnectionStatus(true);
+      await // SupabaseService.syncOfflineData();
     } catch (e) {
-      await SupabaseService.setConnectionStatus(false);
+      await // SupabaseService.setConnectionStatus(false);
       developer.log('Connection check failed: $e', name: 'WorkoutScreen');
     }
   }
@@ -140,7 +140,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
     
     try {
       // Update session with current progress
-      await SupabaseService.updateWorkoutSession(
+      await // SupabaseService.updateWorkoutSession(
         currentSession!.id!,
         totalDurationSec: workoutDurationSeconds,
       );
@@ -208,7 +208,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
       );
       
       // Finish the session
-      await SupabaseService.updateWorkoutSession(
+      await // SupabaseService.updateWorkoutSession(
         currentSession!.id!,
         status: 'done',
         finishedAt: DateTime.now(),
@@ -356,7 +356,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
           systemOverlayStyle: SystemUiOverlayStyle.dark,
           actions: [
             // Connection status indicator
-            if (!SupabaseService.isOnline)
+            if (!// SupabaseService.isOnline)
               const Padding(
                 padding: EdgeInsets.only(right: 8.0),
                 child: Icon(Icons.cloud_off, color: Colors.orange, size: 20),

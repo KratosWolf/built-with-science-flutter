@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+// import "supabase_service.dart";
 import 'program_detail_screen.dart';
 
 /// Program Selection Screen - Choose a workout program

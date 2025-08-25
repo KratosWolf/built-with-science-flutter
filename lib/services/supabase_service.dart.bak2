@@ -19,6 +19,183 @@ class SupabaseService {
   // Offline cache keys
   static const String _offlineWorkoutKey = 'offline_workout_data';
   static const String _lastSyncKey = 'last_sync_timestamp';
+  
+  // Workout session methods
+  static Future<WorkoutSession> createWorkoutSession({
+    required int programId,
+    required int dayId,
+    required String dayName,
+    required int totalExercises,
+  }) async {
+    // Auto-login anonymously if not authenticated
+    if (!isAuthenticated) {
+      await signInAnonymously();
+    }
+    
+    try {
+      final response = await _client
+          .from('workout_sessions')
+          .insert({
+            'program_id': programId,
+            'day_id': dayId,
+            'day_name': dayName,
+            'user_id': currentUserId,
+            'total_exercises': totalExercises,
+            'completed_exercises': 0,
+            'status': 'in_progress',
+          })
+          .select()
+          .single();
+      
+      return WorkoutSession.fromJson(response);
+    } catch (e) {
+      developer.log('Error creating workout session: $e');
+      // Fallback to offline mode
+      return _createOfflineWorkoutSession(programId, dayId, dayName, totalExercises);
+    }
+  }
+  
+  static Future<void> saveWorkoutSet({
+    required String sessionId,
+    required int exerciseId,
+    required String exerciseName,
+    required int setNumber,
+    double? weightKg,
+    int? reps,
+    String? difficulty,
+    String? notes,
+  }) async {
+    if (!isAuthenticated) return;
+    
+    try {
+      await _client
+          .from('workout_sets')
+          .upsert({
+            'session_id': sessionId,
+            'exercise_id': exerciseId,
+            'exercise_name': exerciseName,
+            'set_number': setNumber,
+            'weight_kg': weightKg,
+            'reps': reps,
+            'difficulty': difficulty,
+            'notes': notes,
+            'completed_at': DateTime.now().toIso8601String(),
+          });
+      
+      // Update exercise history for progression
+      await _updateExerciseHistory(exerciseId, exerciseName, weightKg, reps, difficulty);
+      
+    } catch (e) {
+      developer.log('Error saving workout set: $e');
+      await _saveWorkoutSetOffline(sessionId, exerciseId, exerciseName, setNumber, weightKg, reps, difficulty, notes);
+    }
+  }
+  
+  static Future<void> completeWorkoutSession(String sessionId) async {
+    if (!isAuthenticated) return;
+    
+    try {
+      await _client
+          .from('workout_sessions')
+          .update({
+            'completed_at': DateTime.now().toIso8601String(),
+            'status': 'completed',
+          })
+          .eq('id', sessionId);
+    } catch (e) {
+      developer.log('Error completing workout session: $e');
+    }
+  }
+  
+  static Future<Map<String, dynamic>?> getLastWorkoutData(int exerciseId) async {
+    if (!isAuthenticated) {
+      return await _getLastWorkoutDataOffline(exerciseId);
+    }
+    
+    try {
+      final response = await _client
+          .from('exercise_history')
+          .select()
+          .eq('user_id', currentUserId!)
+          .eq('exercise_id', exerciseId)
+          .single();
+      
+      return {
+        'lastWeight': response['last_weight_kg']?.toDouble(),
+        'lastReps': response['last_reps'],
+        'lastDifficulty': response['last_difficulty'],
+        'avgWeight': response['avg_weight_kg']?.toDouble(),
+        'avgReps': response['avg_reps']?.toDouble(),
+        'bestWeight': response['best_weight_kg']?.toDouble(),
+        'bestReps': response['best_reps'],
+      };
+    } catch (e) {
+      developer.log('Error getting last workout data: $e');
+      return await _getLastWorkoutDataOffline(exerciseId);
+    }
+  }
+  
+  // Private helper methods
+  static Future<void> _updateExerciseHistory(int exerciseId, String exerciseName, double? weightKg, int? reps, String? difficulty) async {
+    if (!isAuthenticated || weightKg == null || reps == null) return;
+    
+    try {
+      // Get existing history or create new
+      final existing = await _client
+          .from('exercise_history')
+          .select()
+          .eq('user_id', currentUserId!)
+          .eq('exercise_id', exerciseId)
+          .maybeSingle();
+      
+      if (existing == null) {
+        // Create new history record
+        await _client
+            .from('exercise_history')
+            .insert({
+              'user_id': currentUserId,
+              'exercise_id': exerciseId,
+              'exercise_name': exerciseName,
+              'last_weight_kg': weightKg,
+              'last_reps': reps,
+              'last_difficulty': difficulty,
+              'avg_weight_kg': weightKg,
+              'avg_reps': reps.toDouble(),
+              'best_weight_kg': weightKg,
+              'best_reps': reps,
+              'total_sessions': 1,
+            });
+      } else {
+        // Update existing history
+        final totalSessions = (existing['total_sessions'] as int) + 1;
+        final currentAvgWeight = existing['avg_weight_kg']?.toDouble() ?? 0.0;
+        final currentAvgReps = existing['avg_reps']?.toDouble() ?? 0.0;
+        final currentBestWeight = existing['best_weight_kg']?.toDouble() ?? 0.0;
+        final currentBestReps = existing['best_reps'] as int? ?? 0;
+        
+        // Calculate new averages
+        final newAvgWeight = ((currentAvgWeight * (totalSessions - 1)) + weightKg) / totalSessions;
+        final newAvgReps = ((currentAvgReps * (totalSessions - 1)) + reps) / totalSessions;
+        
+        await _client
+            .from('exercise_history')
+            .update({
+              'last_weight_kg': weightKg,
+              'last_reps': reps,
+              'last_difficulty': difficulty,
+              'avg_weight_kg': newAvgWeight,
+              'avg_reps': newAvgReps,
+              'best_weight_kg': weightKg > currentBestWeight ? weightKg : currentBestWeight,
+              'best_reps': reps > currentBestReps ? reps : currentBestReps,
+              'total_sessions': totalSessions,
+            })
+            .eq('user_id', currentUserId!)
+            .eq('exercise_id', exerciseId);
+      }
+    } catch (e) {
+      developer.log('Error updating exercise history: $e');
+    }
+  }
 
   // Authentication methods
   static Future<AuthResponse> signInAnonymously() async {
@@ -225,78 +402,6 @@ class SupabaseService {
         .toList();
   }
 
-  // Workout set methods
-  static Future<WorkoutSet> saveWorkoutSet({
-    required int sessionId,
-    required int exerciseId,
-    int? variationIndex,
-    required int setNumber,
-    double? weightKg,
-    int? reps,
-    int? restSec,
-    double? rpe,
-    String? difficulty,
-    int? durationSec,
-  }) async {
-    if (!isAuthenticated) throw Exception('User not authenticated');
-
-    final setData = {
-      'session_id': sessionId,
-      'exercise_id': exerciseId,
-      'variation_index': variationIndex,
-      'set_number': setNumber,
-      'weight_kg': weightKg,
-      'reps': reps,
-      'rest_sec': restSec,
-      'rpe': rpe,
-      'difficulty': difficulty,
-      'duration_sec': durationSec,
-    };
-
-    try {
-      final response = await _client
-          .from('workout_sets')
-          .insert(setData)
-          .select()
-          .single();
-      
-      final workoutSet = WorkoutSet.fromJson(response);
-      
-      // Update cache if set is complete
-      if (weightKg != null && reps != null && difficulty != null) {
-        await _updateLastSetCache(
-          exerciseId: exerciseId,
-          variationIndex: variationIndex ?? 1,
-          weightKg: weightKg,
-          reps: reps,
-          difficulty: difficulty,
-          restSec: restSec,
-        );
-      }
-      
-      return workoutSet;
-    } catch (e) {
-      // If online save fails, cache for offline sync
-      if (!_isOnline) {
-        await _cacheOfflineData('workout_set', setData);
-        
-        // Return a local WorkoutSet instance
-        return WorkoutSet(
-          sessionId: sessionId,
-          exerciseId: exerciseId,
-          variationIndex: variationIndex,
-          setNumber: setNumber,
-          weightKg: weightKg,
-          reps: reps,
-          restSec: restSec,
-          rpe: rpe,
-          difficulty: difficulty,
-          durationSec: durationSec,
-        );
-      }
-      rethrow;
-    }
-  }
 
   static Future<List<WorkoutSet>> getSessionSets(int sessionId) async {
     if (!isAuthenticated) return [];
@@ -946,5 +1051,62 @@ class SupabaseService {
       print('Error calculating workout streak: $e');
       return 0;
     }
+  }
+
+  // Offline fallback methods
+  static Future<WorkoutSession> _createOfflineWorkoutSession(int programId, int dayId, String dayName, int totalExercises) async {
+    return WorkoutSession(
+      id: DateTime.now().millisecondsSinceEpoch,
+      userId: 'offline_user',
+      programId: programId,
+      programDayId: dayId,
+      startedAt: DateTime.now(),
+      status: 'in_progress',
+    );
+  }
+
+  static Future<void> _saveWorkoutSetOffline(String sessionId, int exerciseId, String exerciseName, int setNumber, double? weightKg, int? reps, String? difficulty, String? notes) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'offline_set_${sessionId}_${exerciseId}_$setNumber';
+      final data = {
+        'sessionId': sessionId,
+        'exerciseId': exerciseId,
+        'exerciseName': exerciseName,
+        'setNumber': setNumber,
+        'weightKg': weightKg,
+        'reps': reps,
+        'difficulty': difficulty,
+        'notes': notes,
+        'completedAt': DateTime.now().toIso8601String(),
+      };
+      await prefs.setString(key, jsonEncode(data));
+    } catch (e) {
+      developer.log('Error saving offline workout set: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>?> _getLastWorkoutDataOffline(int exerciseId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'exercise_cache_$exerciseId';
+      final cachedData = prefs.getString(cacheKey);
+      
+      if (cachedData != null) {
+        final jsonData = jsonDecode(cachedData);
+        return {
+          'lastWeight': jsonData['lastWeight']?.toDouble(),
+          'lastReps': jsonData['lastReps'],
+          'lastDifficulty': jsonData['lastDifficulty'],
+          'avgWeight': jsonData['avgWeight']?.toDouble(),
+          'avgReps': jsonData['avgReps']?.toDouble(),
+          'bestWeight': jsonData['bestWeight']?.toDouble(),
+          'bestReps': jsonData['bestReps'],
+        };
+      }
+    } catch (e) {
+      developer.log('Error loading offline workout data: $e');
+    }
+    return null;
   }
 }
