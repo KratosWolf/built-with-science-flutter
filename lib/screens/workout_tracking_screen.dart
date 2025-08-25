@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import '../data/mock_data.dart';
 import '../widgets/exercise_tracking_widget.dart';
 import '../widgets/rest_timer_widget.dart';
+import '../services/supabase_service.dart';
 
 class WorkoutTrackingScreen extends StatefulWidget {
   final int programId;
@@ -148,6 +149,11 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     // Carregar dados do último treino para cada exercício
     await _loadLastWorkoutData();
     
+    // Se logado, tentar carregar dados da nuvem e mesclar com local
+    if (SupabaseService.instance.isLoggedIn) {
+      await _loadAndMergeCloudData();
+    }
+    
     setState(() {
       _exercises = exercises;
       _isLoading = false;
@@ -224,6 +230,42 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     }
   }
 
+  Future<void> _loadAndMergeCloudData() async {
+    try {
+      print('☁️ Carregando dados da nuvem para mesclar...');
+      
+      final cloudData = await SupabaseService.instance.loadLastWorkoutData(
+        widget.programId, 
+        widget.dayId
+      );
+      
+      if (cloudData.isNotEmpty) {
+        print('📊 Dados da nuvem encontrados: ${cloudData.length} exercícios');
+        
+        // Mesclar dados da nuvem com dados locais
+        // Prioridade: dados mais recentes (local vs nuvem)
+        for (final entry in cloudData.entries) {
+          final exerciseId = entry.key;
+          final cloudSets = entry.value;
+          
+          // Se não temos dados locais, usar os da nuvem
+          if (!_completedSets.containsKey(exerciseId)) {
+            _completedSets[exerciseId] = cloudSets;
+            print('📥 Usando dados da nuvem para exercício $exerciseId');
+          } else {
+            // TODO: Implementar merge inteligente baseado em timestamps
+            // Por enquanto, manter dados locais se existirem
+            print('🔄 Mantendo dados locais para exercício $exerciseId');
+          }
+        }
+      } else {
+        print('📭 Nenhum dado na nuvem encontrado');
+      }
+    } catch (error) {
+      print('❌ Erro ao carregar dados da nuvem: $error');
+    }
+  }
+
   Future<void> _saveSetData(int exerciseId, WorkoutSet setData) async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -282,7 +324,24 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
         .toList();
     
     await prefs.setStringList(cacheKey, setStrings);
-    print('✅ Cache salvo com ${setStrings.length} sets para exercício $exerciseId');
+    print('✅ Cache local salvo com ${setStrings.length} sets para exercício $exerciseId');
+    
+    // Tentar salvar na nuvem se logado
+    if (SupabaseService.instance.isLoggedIn) {
+      final cloudSaved = await SupabaseService.instance.saveWorkoutSet(
+        correctedSetData, 
+        widget.programId, 
+        widget.dayId
+      );
+      
+      if (cloudSaved) {
+        print('☁️ Dados também salvos na nuvem');
+      } else {
+        print('⚠️ Erro ao salvar na nuvem - mantendo apenas localmente');
+      }
+    } else {
+      print('📱 Usuário não logado - salvando apenas localmente');
+    }
     
     // Vibração de feedback
     HapticFeedback.lightImpact();
@@ -418,6 +477,32 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          // Indicador de sincronização
+          if (SupabaseService.instance.isLoggedIn)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: 'Logado - Sincronizando na nuvem',
+                child: Icon(
+                  Icons.cloud_done,
+                  color: Colors.white.withOpacity(0.9),
+                  size: 20,
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: 'Apenas local - Faça login para sincronizar',
+                child: Icon(
+                  Icons.cloud_off,
+                  color: Colors.white.withOpacity(0.6),
+                  size: 20,
+                ),
+              ),
+            ),
+          
           if (_workoutStartTime != null)
             Padding(
               padding: const EdgeInsets.only(right: 16),

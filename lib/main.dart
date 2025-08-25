@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
+import 'services/supabase_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/program_selection_screen.dart';
@@ -8,15 +8,20 @@ import 'screens/programs_screen.dart';
 import 'screens/program_detail_screen.dart';
 import 'screens/workout_tracking_screen.dart';
 import 'screens/simple_profile_screen.dart';
+import 'screens/login_screen.dart';
 import 'widgets/page_transition.dart';
+import 'widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // await Supabase.initialize(
-  //   url: 'https://gktvfldykmzhynqthbdn.supabase.co',
-  //   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQzMzQ1NzQsImV4cCI6MjAzOTkxMDU3NH0.WGkqrCyHe1AYD8D9HHLCD_g_7i2k8RyQNjZN5wPJmUE',
-  // );
+  // Initialize Supabase
+  try {
+    await SupabaseService.initialize();
+    print('✅ Supabase initialized successfully');
+  } catch (error) {
+    print('❌ Error initializing Supabase: $error');
+  }
   
   runApp(const BuiltWithScienceApp());
 }
@@ -87,11 +92,13 @@ class BuiltWithScienceApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const ProgramSelectionScreen(),
+      home: const AuthWrapper(),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
-            return FadePageRoute(child: const SimpleHomeScreen(), settings: settings);
+            return FadePageRoute(child: const AuthWrapper(), settings: settings);
+          case '/login':
+            return FadePageRoute(child: const LoginScreen(), settings: settings);
           case '/home':
             return FadePageRoute(child: const SimpleHomeScreen(), settings: settings);
           case '/programs':
