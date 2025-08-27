@@ -15,12 +15,18 @@ import 'widgets/auth_wrapper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Supabase
+  // Inicialização mais robusta com timeout
   try {
-    await SupabaseService.initialize();
+    await SupabaseService.initialize().timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        print('⏰ Timeout na inicialização do Supabase - continuando offline');
+        return;
+      },
+    );
     print('✅ Supabase initialized successfully');
   } catch (error) {
-    print('❌ Error initializing Supabase: $error');
+    print('❌ Error initializing Supabase: $error - continuando offline');
   }
   
   runApp(const BuiltWithScienceApp());
@@ -92,13 +98,15 @@ class BuiltWithScienceApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const AuthWrapper(),
+      home: const AuthWrapper(), // Reativado com melhorias
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
             return FadePageRoute(child: const AuthWrapper(), settings: settings);
           case '/login':
             return FadePageRoute(child: const LoginScreen(), settings: settings);
+          case '/program-selection':
+            return FadePageRoute(child: const ProgramSelectionScreen(), settings: settings);
           case '/home':
             return FadePageRoute(child: const SimpleHomeScreen(), settings: settings);
           case '/programs':
@@ -141,6 +149,3 @@ class BuiltWithScienceApp extends StatelessWidget {
     );
   }
 }
-
-// Helper para acessar Supabase client
-// final supabase = Supabase.instance.client;

@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="built_with_science_app"
+        android:label="Built With Science"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

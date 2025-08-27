@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase/supabase.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../models/workout_models.dart';
 
@@ -9,11 +9,27 @@ class SupabaseService {
   SupabaseService._();
   
   // Supabase client
-  SupabaseClient get client => Supabase.instance.client;
+  SupabaseClient? _client;
+  SupabaseClient? get client => _client;
   
   // Auth state
-  User? get currentUser => client.auth.currentUser;
-  bool get isLoggedIn => currentUser != null;
+  User? get currentUser {
+    try {
+      return _client?.auth.currentUser;
+    } catch (e) {
+      print('❌ Erro ao obter usuário: $e');
+      return null;
+    }
+  }
+  
+  bool get isLoggedIn {
+    try {
+      return currentUser != null;
+    } catch (e) {
+      print('❌ Erro ao verificar login: $e');
+      return false;
+    }
+  }
   
   // Google Sign-in instance
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -22,14 +38,34 @@ class SupabaseService {
   
   /// Initialize Supabase
   static Future<void> initialize() async {
-    await Supabase.initialize(
-      url: 'https://myqxlznxgmkfpgvwzsed.supabase.co',
-      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15cXhsem54Z21rZnBndnd6c2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ0MzExNTgsImV4cCI6MjA0MDAwNzE1OH0.eZlOKfJQfMLfJp2kFaWPj-9dQAJgfI-VhF0Y6n1WQsk',
-    );
+    try {
+      print('🔧 Inicializando Supabase...');
+      
+      instance._client = SupabaseClient(
+        'https://gktvfldykmzhynqthbdn.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Nzg4NzAsImV4cCI6MjA3MTU1NDg3MH0.Nd2KdEGj8hQApxmTk8nkBM81R4ROJPhwRMtgPXadGVw',
+      );
+      
+      print('✅ Supabase cliente criado');
+      
+      // Teste básico para verificar se está funcionando
+      await instance._client!.from('user_profiles').select().limit(1);
+      print('✅ Conexão com Supabase testada');
+      
+    } catch (error) {
+      print('⚠️ Erro na inicialização do Supabase: $error');
+      print('📱 Continuando em modo offline...');
+      // Não throw error - app deve continuar funcionando offline
+    }
   }
   
   /// Sign in with Google
   Future<AuthResponse?> signInWithGoogle() async {
+    if (_client == null) {
+      print('❌ Supabase não inicializado');
+      return null;
+    }
+    
     try {
       print('🔐 Iniciando Google Sign-in...');
       
@@ -54,8 +90,8 @@ class SupabaseService {
       print('🔑 Tokens Google obtidos, fazendo login no Supabase...');
       
       // Sign in to Supabase with Google credentials
-      final AuthResponse response = await client.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
+      final AuthResponse response = await _client!.auth.signInWithIdToken(
+        provider: Provider.google,
         idToken: googleAuth.idToken!,
         accessToken: googleAuth.accessToken!,
       );
@@ -84,7 +120,9 @@ class SupabaseService {
       await _googleSignIn.signOut();
       
       // Sign out from Supabase
-      await client.auth.signOut();
+      if (_client != null) {
+        await _client!.auth.signOut();
+      }
       
       print('✅ Logout realizado');
     } catch (error) {
@@ -94,9 +132,11 @@ class SupabaseService {
   
   /// Create user profile in database if needed
   Future<void> _createUserProfileIfNeeded(User user) async {
+    if (_client == null) return;
+    
     try {
       // Check if profile already exists
-      final response = await client
+      final response = await _client!
           .from('user_profiles')
           .select()
           .eq('id', user.id)
@@ -104,7 +144,7 @@ class SupabaseService {
       
       if (response == null) {
         // Create new profile
-        await client.from('user_profiles').insert({
+        await _client!.from('user_profiles').insert({
           'id': user.id,
           'email': user.email,
           'full_name': user.userMetadata?['full_name'] ?? user.email?.split('@')[0],
@@ -123,15 +163,15 @@ class SupabaseService {
   
   /// Save workout set to cloud
   Future<bool> saveWorkoutSet(WorkoutSet workoutSet, int programId, int dayId) async {
-    if (!isLoggedIn) {
-      print('❌ Usuário não logado - salvando apenas localmente');
+    if (!isLoggedIn || _client == null) {
+      print('❌ Usuário não logado ou Supabase não inicializado');
       return false;
     }
     
     try {
       print('☁️ Salvando set na nuvem...');
       
-      await client.from('workout_sessions').upsert({
+      await _client!.from('workout_sessions').upsert({
         'user_id': currentUser!.id,
         'program_id': programId,
         'day_id': dayId,
@@ -154,15 +194,15 @@ class SupabaseService {
   
   /// Load user's last workout data from cloud
   Future<Map<int, List<WorkoutSet>>> loadLastWorkoutData(int programId, int dayId) async {
-    if (!isLoggedIn) {
-      print('❌ Usuário não logado - usando apenas cache local');
+    if (!isLoggedIn || _client == null) {
+      print('❌ Usuário não logado ou Supabase não inicializado');
       return {};
     }
     
     try {
       print('☁️ Carregando dados do último treino da nuvem...');
       
-      final response = await client
+      final response = await _client!
           .from('workout_sessions')
           .select()
           .eq('user_id', currentUser!.id)
@@ -198,41 +238,17 @@ class SupabaseService {
     }
   }
   
-  /// Get user's workout statistics
-  Future<Map<String, dynamic>> getUserStats() async {
-    if (!isLoggedIn) return {};
-    
+  /// Listen to auth state changes
+  Stream<AuthState> get authStateChanges {
+    if (_client == null) {
+      // Return empty stream if Supabase not initialized
+      return const Stream.empty();
+    }
     try {
-      final response = await client
-          .from('workout_sessions')
-          .select()
-          .eq('user_id', currentUser!.id);
-      
-      final totalSets = response.length;
-      final exerciseIds = response.map((r) => r['exercise_id']).toSet();
-      final totalExercises = exerciseIds.length;
-      
-      // Calculate total weight lifted
-      double totalWeight = 0;
-      for (final row in response) {
-        final weight = (row['weight_kg'] as num?)?.toDouble() ?? 0;
-        final reps = (row['reps'] as num?)?.toInt() ?? 0;
-        totalWeight += weight * reps;
-      }
-      
-      return {
-        'total_sets': totalSets,
-        'total_exercises': totalExercises,
-        'total_weight_kg': totalWeight,
-        'total_workouts': response.map((r) => '${r['program_id']}_${r['day_id']}').toSet().length,
-      };
-      
-    } catch (error) {
-      print('❌ Erro ao carregar estatísticas: $error');
-      return {};
+      return _client!.auth.onAuthStateChange;
+    } catch (e) {
+      print('❌ Erro no stream de auth: $e');
+      return const Stream.empty();
     }
   }
-  
-  /// Listen to auth state changes
-  Stream<AuthState> get authStateChanges => client.auth.onAuthStateChange;
 }

@@ -444,11 +444,11 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
                       items: const [
-                        DropdownMenuItem(value: 'Muito Fácil', child: Text('Muito Fácil')),
-                        DropdownMenuItem(value: 'Fácil', child: Text('Fácil')),
-                        DropdownMenuItem(value: 'Perfeito', child: Text('Perfeito')),
-                        DropdownMenuItem(value: 'Difícil', child: Text('Difícil')),
-                        DropdownMenuItem(value: 'Muito Difícil', child: Text('Muito Difícil')),
+                        DropdownMenuItem(value: 'Muito Fácil', child: Text('Muito Fácil - +3 reps')),
+                        DropdownMenuItem(value: 'Fácil', child: Text('Fácil - +2 reps')),
+                        DropdownMenuItem(value: 'Perfeito', child: Text('Perfeito - +1 rep')),
+                        DropdownMenuItem(value: 'Difícil', child: Text('Difícil - Limite')),
+                        DropdownMenuItem(value: 'Falhei', child: Text('Falhei - Não acabei')),
                       ],
                       onChanged: isCompleted ? null : (value) {
                         setState(() {

@@ -183,7 +183,7 @@ class UserExerciseData {
     final minReps = repsRange.isNotEmpty ? repsRange[0] : 8;
     final maxReps = repsRange.length > 1 ? repsRange[1] : minReps + 2;
     
-    if (difficulty == 'easy') {
+    if (difficulty == 'Muito Fácil' || difficulty == 'Fácil') {
       if (lastReps < maxReps) {
         // Aumentar 1 rep até chegar no máximo
         return ProgressionSuggestion(
@@ -203,7 +203,7 @@ class UserExerciseData {
           reason: 'Máximo de reps atingido com facilidade. Aumente peso para ${roundedWeight}kg e volte para $minReps reps.',
         );
       }
-    } else if (difficulty == 'medium') {
+    } else if (difficulty == 'Perfeito') {
       // Manter peso e reps, está no ponto ideal
       return ProgressionSuggestion(
         type: 'both',
@@ -211,7 +211,7 @@ class UserExerciseData {
         suggested: ProgressionData(weight: lastWeight, reps: lastReps),
         reason: 'Dificuldade ideal. Mantenha o mesmo peso e reps.',
       );
-    } else if (difficulty == 'hard') {
+    } else if (difficulty == 'Difícil') {
       if (lastReps > minReps) {
         // Diminuir 1 rep para facilitar
         return ProgressionSuggestion(
@@ -231,7 +231,7 @@ class UserExerciseData {
           reason: 'Muito difícil no mínimo de reps. Diminua peso para ${roundedWeight}kg.',
         );
       }
-    } else if (difficulty == 'max_effort') {
+    } else if (difficulty == 'Muito Difícil') {
       // Diminuir levemente o peso ou reps
       if (lastReps > minReps) {
         return ProgressionSuggestion(
@@ -250,7 +250,7 @@ class UserExerciseData {
           reason: 'Máximo esforço no mínimo de reps. Diminua peso para ${roundedWeight}kg.',
         );
       }
-    } else if (difficulty == 'failed') {
+    } else if (difficulty == 'Falhei') {
       // Diminuir peso significativamente
       final suggestedWeight = lastWeight - (lastWeight * 0.10); // 10% de redução
       final roundedWeight = (suggestedWeight * 2).round() / 2;
@@ -273,10 +273,10 @@ class UserExerciseData {
 
   // Labels para dificuldades
   static const Map<String, String> difficultyLabels = {
-    'easy': '😎 Easy - I could have done 3 more reps',
-    'medium': '😊 Medium - I could have done 2 more reps', 
-    'hard': '😅 Hard - I could have done 1 more rep',
-    'max_effort': '🔥 Max effort - I could not have done any more reps',
-    'failed': '💥 Failed - I tried to do another rep but couldn\'t'
+    'Muito Fácil': 'Muito Fácil - Poderia ter feito +3 reps',
+    'Fácil': 'Fácil - Poderia ter feito +2 reps', 
+    'Perfeito': 'Perfeito - Poderia ter feito +1 rep',
+    'Difícil': 'Difícil - Cheguei no limite',
+    'Falhei': 'Falhei - Não consegui acabar'
   };
 }

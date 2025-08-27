@@ -39,15 +39,14 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.1.12
   
-  # Supabase
-  supabase_flutter: ^2.7.0
+  # Supabase - Versão core sem dependências problemáticas
+  supabase: ^1.11.11
   
-  # Google Sign-in
-  google_sign_in: ^6.2.1
+  # Para Google Sign-in
+  google_sign_in: ^6.1.5
   
-  # Auth & HTTP
+  # HTTP requests
   http: ^1.2.2
-  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:

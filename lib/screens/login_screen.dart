@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/supabase_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -125,60 +124,59 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 const SizedBox(height: 48),
                 
-                // Google Sign-in Button
+                // Modo offline é o principal agora
+                Text(
+                  'Use o app offline ou aguarde Google Sign-in em breve!',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Botão principal - Começar Treinos
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 60,
                   child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _signInWithGoogle,
-                    icon: _isLoading 
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Image.asset(
-                            'assets/google_logo.png',
-                            height: 24,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.account_circle, color: Colors.black87);
-                            },
-                          ),
-                    label: Text(
-                      _isLoading ? 'Fazendo login...' : 'Continuar com Google',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/program-selection');
+                    },
+                    icon: const Icon(Icons.fitness_center, color: Colors.white, size: 28),
+                    label: const Text(
+                      'COMEÇAR TREINOS',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      elevation: 2,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white, width: 2),
+                      elevation: 8,
+                      shadowColor: Colors.black.withOpacity(0.3),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                   ),
                 ),
                 
-                const SizedBox(height: 24),
-                
-                // Skip/Continue without login option
-                TextButton(
-                  onPressed: _isLoading ? null : () {
-                    // Navigate to home without login (local-only mode)
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                  child: Text(
-                    'Continuar sem login (apenas local)',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
-                      decoration: TextDecoration.underline,
-                    ),
+                const SizedBox(height: 16),
+                Text(
+                  '✨ Todos os seus treinos ficam salvos no celular ✨\n📊 Acompanhe seu progresso e evolução',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 
                 if (_errorMessage != null) ...[
@@ -210,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 
                 const Spacer(),
                 
-                // Benefits of signing in
+                // App features
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -220,17 +218,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       Text(
-                        'Benefícios do login:',
+                        'Built With Science App:',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _buildBenefit(Icons.cloud_sync, 'Sincronização automática na nuvem'),
-                      _buildBenefit(Icons.devices, 'Acesse seus treinos em qualquer dispositivo'),
-                      _buildBenefit(Icons.backup, 'Nunca perca seu progresso'),
-                      _buildBenefit(Icons.analytics, 'Estatísticas detalhadas de performance'),
+                      _buildBenefit(Icons.fitness_center, 'Programas 3, 4 e 5 dias por semana'),
+                      _buildBenefit(Icons.trending_up, 'Progressão inteligente baseada em ciência'),
+                      _buildBenefit(Icons.timer, 'Rest timer automático'),
+                      _buildBenefit(Icons.save, 'Dados salvos localmente no celular'),
                     ],
                   ),
                 ),

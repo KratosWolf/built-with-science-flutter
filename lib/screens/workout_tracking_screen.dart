@@ -149,10 +149,10 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     // Carregar dados do último treino para cada exercício
     await _loadLastWorkoutData();
     
-    // Se logado, tentar carregar dados da nuvem e mesclar com local
-    if (SupabaseService.instance.isLoggedIn) {
-      await _loadAndMergeCloudData();
-    }
+    // Cloud sync será implementado em versão futura
+    // if (SupabaseService.instance.isLoggedIn) {
+    //   await _loadAndMergeCloudData();
+    // }
     
     setState(() {
       _exercises = exercises;
@@ -201,7 +201,11 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
                 difficulty = 'Difícil';
                 break;
               case 'Too Hard':
-                difficulty = 'Muito Difícil';
+              case 'Muito Difícil':
+                difficulty = 'Difícil';
+                break;
+              case 'Failed':
+                difficulty = 'Falhei';
                 break;
             }
             
@@ -289,7 +293,11 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
         difficulty = 'Difícil';
         break;
       case 'Too Hard':
-        difficulty = 'Muito Difícil';
+      case 'Muito Difícil':
+        difficulty = 'Difícil';
+        break;
+      case 'Failed':
+        difficulty = 'Falhei';
         break;
     }
     
@@ -326,21 +334,25 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     await prefs.setStringList(cacheKey, setStrings);
     print('✅ Cache local salvo com ${setStrings.length} sets para exercício $exerciseId');
     
-    // Tentar salvar na nuvem se logado
+    // Tentar salvar na nuvem se logado (sem bloquear se falhar)
     if (SupabaseService.instance.isLoggedIn) {
-      final cloudSaved = await SupabaseService.instance.saveWorkoutSet(
-        correctedSetData, 
-        widget.programId, 
-        widget.dayId
-      );
-      
-      if (cloudSaved) {
-        print('☁️ Dados também salvos na nuvem');
-      } else {
-        print('⚠️ Erro ao salvar na nuvem - mantendo apenas localmente');
+      try {
+        final cloudSaved = await SupabaseService.instance.saveWorkoutSet(
+          correctedSetData, 
+          widget.programId, 
+          widget.dayId
+        ).timeout(const Duration(seconds: 5));
+        
+        if (cloudSaved) {
+          print('☁️ Dados também salvos na nuvem');
+        } else {
+          print('⚠️ Falha ao salvar na nuvem, mantidos localmente');
+        }
+      } catch (error) {
+        print('❌ Timeout/erro cloud sync: $error - dados mantidos localmente');
       }
     } else {
-      print('📱 Usuário não logado - salvando apenas localmente');
+      print('📱 Modo offline - dados salvos apenas localmente');
     }
     
     // Vibração de feedback
