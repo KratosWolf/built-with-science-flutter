@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../services/supabase_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/program_selection_screen.dart';
@@ -12,35 +13,59 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoading = true;
-  bool _hasError = false;
-  bool _showLoginScreen = false;
+  bool _showLoginScreen = true; // Start with login screen by default
+  StreamSubscription? _authSubscription;
   
   @override
   void initState() {
     super.initState();
-    _checkAuthWithTimeout();
+    _initializeAuth();
   }
   
-  Future<void> _checkAuthWithTimeout() async {
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+  
+  Future<void> _initializeAuth() async {
     try {
-      // Timeout mais agressivo para não travar
-      await Future.delayed(const Duration(milliseconds: 1000));
-      
-      // Verificar se Supabase foi inicializado e se usuário está logado
+      // Check initial auth state
       final isLoggedIn = SupabaseService.instance.isLoggedIn;
-      print('🔍 Status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
+      print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
       
       setState(() {
+        _showLoginScreen = !isLoggedIn;
         _isLoading = false;
-        _showLoginScreen = !isLoggedIn; // Mostrar login se não estiver logado
       });
+      
+      // Listen for auth state changes
+      _authSubscription = SupabaseService.instance.authStateChanges.listen(
+        (authState) {
+          final user = authState.session?.user;
+          final isAuthenticated = user != null;
+          
+          print('🔄 Auth state changed: ${isAuthenticated ? 'Logado' : 'Deslogado'}');
+          
+          if (mounted) {
+            setState(() {
+              _showLoginScreen = !isAuthenticated;
+            });
+          }
+        },
+        onError: (error) {
+          print('❌ Erro no auth stream: $error');
+        },
+      );
+      
     } catch (error) {
-      print('❌ Erro no AuthWrapper: $error - continuando offline');
-      setState(() {
-        _isLoading = false;
-        _hasError = false; // Não tratar como erro, só ir para app
-        _showLoginScreen = false;
-      });
+      print('❌ Erro na inicialização do auth: $error');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _showLoginScreen = true; // Default to login screen on error
+        });
+      }
     }
   }
 

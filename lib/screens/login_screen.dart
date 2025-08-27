@@ -10,34 +10,113 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
-  String? _errorMessage;
+  bool _isLoginMode = true; // true = login, false = register
+  
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  Future<void> _signInWithGoogle() async {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     try {
-      final response = await SupabaseService.instance.signInWithGoogle();
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
       
-      if (response?.user != null) {
-        // Login successful - navigation will be handled by AuthWrapper
-        print('✅ Login realizado com sucesso!');
+      if (_isLoginMode) {
+        // Login
+        final user = await SupabaseService.instance.signInWithEmailPassword(email, password);
+        if (user != null && mounted) {
+          Navigator.of(context).pushReplacementNamed('/home');
+        }
       } else {
-        setState(() {
-          _errorMessage = 'Login cancelado ou erro desconhecido.';
-        });
+        // Register
+        final fullName = _nameController.text.trim();
+        final user = await SupabaseService.instance.signUpWithEmailPassword(email, password, fullName);
+        if (user != null && mounted) {
+          _showSuccessSnackBar('Conta criada com sucesso! Verifique seu email.');
+          setState(() {
+            _isLoginMode = true;
+          });
+        }
       }
     } catch (error) {
-      setState(() {
-        _errorMessage = 'Erro no login: ${error.toString()}';
-      });
+      String message = error.toString();
+      if (message.contains('Invalid login credentials')) {
+        message = 'Email ou senha incorretos';
+      } else if (message.contains('User already registered')) {
+        message = 'Este email já está cadastrado';
+      } else if (message.contains('Password should be')) {
+        message = 'Senha deve ter pelo menos 6 caracteres';
+      } else if (message.contains('Unable to validate email address')) {
+        message = 'Email inválido';
+      }
+      _showErrorSnackBar(message);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      _showErrorSnackBar('Digite seu email primeiro');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await SupabaseService.instance.resetPassword(email);
+      _showSuccessSnackBar('Email de recuperação enviado!');
+    } catch (error) {
+      _showErrorSnackBar('Erro ao enviar email: ${error.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -50,189 +129,279 @@ class _LoginScreenState extends State<LoginScreen> {
             end: Alignment.bottomCenter,
             colors: [
               Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.secondary,
+              Theme.of(context).colorScheme.primary.withOpacity(0.8),
             ],
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // App Logo/Title
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.fitness_center,
-                        size: 80,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Built With Science',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Science-Based Workout Tracking',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Welcome text
-                Text(
-                  'Bem-vindo!',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                Text(
-                  'Faça login para sincronizar seus treinos na nuvem e nunca perder seu progresso.',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 48),
-                
-                // Modo offline é o principal agora
-                Text(
-                  'Use o app offline ou aguarde Google Sign-in em breve!',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Botão principal - Começar Treinos
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/program-selection');
-                    },
-                    icon: const Icon(Icons.fitness_center, color: Colors.white, size: 28),
-                    label: const Text(
-                      'COMEÇAR TREINOS',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white, width: 2),
-                      elevation: 8,
-                      shadowColor: Colors.black.withOpacity(0.3),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 16),
-                Text(
-                  '✨ Todos os seus treinos ficam salvos no celular ✨\n📊 Acompanhe seu progresso e evolução',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: 24),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 40),
+                  
+                  // App Logo and Title
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.shade300),
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red.shade600),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: Colors.red.shade700,
-                              fontSize: 14,
-                            ),
+                        Icon(
+                          Icons.fitness_center,
+                          size: 64,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Built With Science',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Seu treino baseado em ciência',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
                   ),
-                ],
-                
-                const Spacer(),
-                
-                // App features
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // Login/Register Form
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Toggle between Login/Register
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: () => setState(() => _isLoginMode = true),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: _isLoginMode 
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                    foregroundColor: _isLoginMode 
+                                        ? Colors.white 
+                                        : Theme.of(context).colorScheme.primary,
+                                  ),
+                                  child: const Text('Entrar', style: TextStyle(fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: TextButton(
+                                  onPressed: () => setState(() => _isLoginMode = false),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: !_isLoginMode 
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.transparent,
+                                    foregroundColor: !_isLoginMode 
+                                        ? Colors.white 
+                                        : Theme.of(context).colorScheme.primary,
+                                  ),
+                                  child: const Text('Criar Conta', style: TextStyle(fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Name Field (only for register)
+                          if (!_isLoginMode) ...[
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                labelText: 'Nome Completo',
+                                prefixIcon: Icon(Icons.person),
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (value) {
+                                if (!_isLoginMode && (value == null || value.isEmpty)) {
+                                  return 'Digite seu nome';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          
+                          // Email Field
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: Icon(Icons.email),
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Digite seu email';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Email inválido';
+                              }
+                              return null;
+                            },
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Password Field
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Senha',
+                              prefixIcon: Icon(Icons.lock),
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Digite sua senha';
+                              }
+                              if (!_isLoginMode && value.length < 6) {
+                                return 'Senha deve ter pelo menos 6 caracteres';
+                              }
+                              return null;
+                            },
+                          ),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Submit Button
+                          SizedBox(
+                            height: 50,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _submitForm,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : Text(
+                                      _isLoginMode ? 'ENTRAR' : 'CRIAR CONTA',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          
+                          // Forgot Password (only for login)
+                          if (_isLoginMode) ...[
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: _isLoading ? null : _resetPassword,
+                              child: const Text('Esqueci minha senha'),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Column(
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Divider
+                  Row(
                     children: [
-                      Text(
-                        'Built With Science App:',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
+                      const Expanded(child: Divider(color: Colors.white54)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'ou',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider(color: Colors.white54)),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Offline Mode Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pushReplacementNamed('/program-selection');
+                      },
+                      icon: const Icon(Icons.phone_android, size: 28),
+                      label: const Text(
+                        'USAR OFFLINE',
+                        style: TextStyle(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      _buildBenefit(Icons.fitness_center, 'Programas 3, 4 e 5 dias por semana'),
-                      _buildBenefit(Icons.trending_up, 'Progressão inteligente baseada em ciência'),
-                      _buildBenefit(Icons.timer, 'Rest timer automático'),
-                      _buildBenefit(Icons.save, 'Dados salvos localmente no celular'),
-                    ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Info text
+                  Text(
+                    'Modo offline: seus dados ficam apenas no celular\n'
+                    'Modo online: dados sincronizados na nuvem',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -240,28 +409,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildBenefit(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: Colors.white.withOpacity(0.9),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'services/supabase_service.dart';
-import 'screens/splash_screen.dart';
-import 'screens/onboarding_screen.dart';
 import 'screens/program_selection_screen.dart';
 import 'screens/simple_home.dart';
 import 'screens/programs_screen.dart';
@@ -9,6 +7,7 @@ import 'screens/program_detail_screen.dart';
 import 'screens/workout_tracking_screen.dart';
 import 'screens/simple_profile_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/backup_screen.dart';
 import 'widgets/page_transition.dart';
 import 'widgets/auth_wrapper.dart';
 
@@ -140,6 +139,12 @@ class BuiltWithScienceApp extends StatelessWidget {
             return SlidePageRoute(
               child: const SimpleProfileScreen(),
               direction: SlideDirection.bottomToTop,
+              settings: settings,
+            );
+          case '/backup':
+            return SlidePageRoute(
+              child: const BackupScreen(),
+              direction: SlideDirection.rightToLeft,
               settings: settings,
             );
           default:

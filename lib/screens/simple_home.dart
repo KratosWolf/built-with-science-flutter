@@ -13,7 +13,7 @@ class SimpleHomeScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,8 +65,11 @@ class SimpleHomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               
-              Expanded(
+              // Grid of action cards - fixed height
+              SizedBox(
+                height: 400,
                 child: GridView.count(
+                  physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
@@ -140,8 +143,8 @@ class SimpleHomeScreen extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: () {
-          if (route == '/programs') {
-            Navigator.pushNamed(context, '/programs');
+          if (route == '/programs' || route == '/profile') {
+            Navigator.pushNamed(context, route);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('$title feature coming soon!')),

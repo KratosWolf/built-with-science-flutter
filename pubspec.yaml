@@ -47,6 +47,9 @@ dependencies:
   
   # HTTP requests
   http: ^1.2.2
+  
+  # File picker and permissions for backup system
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

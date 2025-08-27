@@ -111,6 +111,93 @@ class SupabaseService {
     }
   }
   
+  /// Sign in with Email/Password
+  Future<User?> signInWithEmailPassword(String email, String password) async {
+    if (_client == null) {
+      print('❌ Supabase não inicializado');
+      return null;
+    }
+    
+    try {
+      print('🔐 Tentando login com email/password...');
+      
+      final response = await _client!.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (response.user != null) {
+        print('✅ Login com email realizado com sucesso!');
+        // Create user profile if doesn't exist
+        await _createUserProfileIfNeeded(response.user!);
+        return response.user;
+      } else {
+        print('❌ Falha no login: usuário nulo');
+        return null;
+      }
+      
+    } catch (error) {
+      print('❌ Erro no login com email: $error');
+      throw error; // Re-throw to show specific error to user
+    }
+  }
+
+  /// Sign up with Email/Password
+  Future<User?> signUpWithEmailPassword(String email, String password, String fullName) async {
+    if (_client == null) {
+      print('❌ Supabase não inicializado');
+      return null;
+    }
+    
+    try {
+      print('📝 Criando nova conta com email/password...');
+      
+      final response = await _client!.auth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': fullName,
+          'app_name': 'Built With Science',
+        },
+      );
+      
+      if (response.user != null) {
+        print('✅ Conta criada com sucesso!');
+        // Create user profile
+        await _createUserProfileIfNeeded(response.user!);
+        return response.user;
+      } else {
+        print('❌ Falha na criação: usuário nulo');
+        return null;
+      }
+      
+    } catch (error) {
+      print('❌ Erro na criação da conta: $error');
+      throw error; // Re-throw to show specific error to user
+    }
+  }
+
+  /// Reset Password
+  Future<bool> resetPassword(String email) async {
+    if (_client == null) {
+      print('❌ Supabase não inicializado');
+      return false;
+    }
+    
+    try {
+      print('🔄 Enviando reset de senha para: $email');
+      
+      await _client!.auth.resetPasswordForEmail(email);
+      
+      print('✅ Email de reset enviado com sucesso!');
+      return true;
+      
+    } catch (error) {
+      print('❌ Erro no reset de senha: $error');
+      throw error;
+    }
+  }
+
   /// Sign out
   Future<void> signOut() async {
     try {
