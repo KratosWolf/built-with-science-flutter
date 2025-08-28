@@ -40,6 +40,17 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     _initializeControllers();
     _loadPreviousData();
   }
+
+  @override
+  void didUpdateWidget(ExerciseTrackingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Recarregar variações quando o exercício mudar
+    if (oldWidget.exercise.id != widget.exercise.id) {
+      _loadVariations();
+      _initializeControllers();
+      _loadPreviousData();
+    }
+  }
   
   void _loadVariations() {
     // Carregar variações do exercício atual
@@ -257,7 +268,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              '📊 Sugestão: 3 sets x 8-12 reps',
+                              '📊 Sugestão: ${widget.exercise.sets} sets x ${widget.exercise.repsTarget} reps',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.onPrimaryContainer,

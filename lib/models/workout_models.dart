@@ -67,16 +67,22 @@ class ProgramDay {
 class Exercise {
   final int id;
   final String name;
+  final int sets;
+  final String repsTarget;
 
   Exercise({
     required this.id,
     required this.name,
+    this.sets = 3,
+    this.repsTarget = "8-12",
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
       id: json['id'] as int,
       name: json['name'] as String,
+      sets: json['sets'] as int? ?? 3,
+      repsTarget: json['reps_target'] as String? ?? "8-12",
     );
   }
 
@@ -84,6 +90,8 @@ class Exercise {
     return {
       'id': id,
       'name': name,
+      'sets': sets,
+      'reps_target': repsTarget,
     };
   }
 }

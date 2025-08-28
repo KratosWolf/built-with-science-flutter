@@ -125,27 +125,27 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
         MockData.exercises[31], // Single Leg Weighted Calf Raise (id: 32, index: 31)
         MockData.exercises[35], // Standing Face Pulls (id: 36, index: 35)
       ];
-    } else if (widget.dayId == 2) { // Full Body B - Será implementado
+    } else if (widget.dayId == 2) { // Full Body B - 8 exercícios corretos do CSV
       exercises = [
-        MockData.exercises[1], // Flat Dumbbell Press (id: 2, index: 1)
-        MockData.exercises[7], // Dumbbell Romanian Deadlift (id: 8, index: 7)
-        MockData.exercises[14], // Lat Pulldown (id: 15, index: 14)
-        MockData.exercises[17], // Heel Elevated Split Squat (id: 18, index: 17)
-        MockData.exercises[22], // Seated Mid-Chest Cable Fly (id: 23, index: 22)
-        MockData.exercises[27], // Cable Lateral Raise (id: 28, index: 27)
-        MockData.exercises[32], // Toes-Elevated Smith Machine Calf Raise (id: 33, index: 32)
-        MockData.exercises[36], // Bent Over Dumbbell Face Pulls (id: 37, index: 36)
+        MockData.exercises[39], // Barbell Back Squat (id: 40, index: 39)
+        MockData.exercises[40], // Standing Barbell Overhead Press (id: 41, index: 40)
+        MockData.exercises[41], // Seated Leg Curls (id: 42, index: 41)
+        MockData.exercises[42], // DB Chest Supported Row (id: 43, index: 42) - SUPERSET A1
+        MockData.exercises[4], // Banded Push-Ups (id: 5, index: 4) - SUPERSET A2
+        MockData.exercises[43], // Incline DB Overhead Extensions (id: 44, index: 43)
+        MockData.exercises[44], // Seated Weighted Calf Raise (id: 45, index: 44) - SUPERSET B1
+        MockData.exercises[45], // Side Plank (id: 46, index: 45) - SUPERSET B2
       ];
-    } else { // Full Body C - Será implementado
+    } else { // Full Body C - 8 exercícios corretos do CSV
       exercises = [
-        MockData.exercises[2], // Flat Machine Chest Press (id: 3, index: 2)
-        MockData.exercises[8], // Hyperextensions (back/hamstring) (id: 9, index: 8)
-        MockData.exercises[10], // (Weighted) Chin-Ups (id: 11, index: 10)
-        MockData.exercises[18], // Bulgarian Split Squat (quad focus) (id: 19, index: 18)
-        MockData.exercises[23], // Pec-Deck Machine Fly (id: 24, index: 23)
-        MockData.exercises[28], // Lying Incline Lateral Raise (id: 29, index: 28)
-        MockData.exercises[33], // Standing Weighted Calf Raise (id: 34, index: 33)
-        MockData.exercises[37], // (Weighted) Prone Arm Circles (id: 38, index: 37)
+        MockData.exercises[46], // Barbell Deadlift (id: 47, index: 46)
+        MockData.exercises[47], // Low Incline Dumbbell Press (id: 48, index: 47) - SUPERSET A1
+        MockData.exercises[42], // DB Chest Supported Row (id: 43, index: 42) - SUPERSET A2
+        MockData.exercises[48], // Seated Leg Extensions (id: 49, index: 48)
+        MockData.exercises[27], // Cable Lateral Raise (id: 28, index: 27)
+        MockData.exercises[49], // Seated Dumbbell Curls (id: 50, index: 49)
+        MockData.exercises[35], // Standing Face Pulls (id: 36, index: 35) - SUPERSET B1
+        MockData.exercises[45], // Side Plank (id: 46, index: 45) - SUPERSET B2
       ];
     }
     
@@ -379,41 +379,46 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   void _nextExercise() {
     if (_currentExerciseIndex < _exercises.length - 1) {
       setState(() {
-        // Lógica especial para Super Sets
-        if (_currentExerciseIndex == 4) {
-          // Estamos no primeiro exercício do Superset A (índice 4)
-          // Só avançamos se AMBOS exercícios 4 e 5 estiverem completos (3 sets cada)
-          final setsA = _completedSets[_exercises[4].id]?.length ?? 0;
-          final setsB = _completedSets[_exercises[5].id]?.length ?? 0;
-          
-          if (setsA >= 3 && setsB >= 3) {
-            _currentExerciseIndex = 6; // Pular para exercício 7 (Superset B)
-          }
-          // Se não estiver completo, fica no 4 mesmo (widget de superset gerencia)
-        } else if (_currentExerciseIndex == 6) {
-          // Estamos no primeiro exercício do Superset B (índice 6)
-          // Só avançamos se AMBOS exercícios 6 e 7 estiverem completos
-          final setsA = _completedSets[_exercises[6].id]?.length ?? 0;
-          final setsB = _completedSets[_exercises[7].id]?.length ?? 0;
-          
-          if (setsA >= 3 && setsB >= 3) {
-            // Superset B completo, fim do treino
-            _completeWorkout();
+        // Lógica especial para Super Sets baseada no treino
+        if (widget.dayId == 1) { // Full Body A
+          if (_currentExerciseIndex == 4) {
+            _currentExerciseIndex = 6; // Pular para Superset B
+          } else if (_currentExerciseIndex == 6) {
+            _completeWorkout(); // Fim do treino
             return;
-          }
-          // Se não estiver completo, fica no 6 mesmo
-        } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
-          // Nunca devemos estar diretamente nos índices 5 ou 7 
-          // (são gerenciados pelo widget de superset)
-          // Mas se estivermos, volta para o primeiro do superset
-          if (_currentExerciseIndex == 5) {
-            _currentExerciseIndex = 4; // Volta para início do Superset A
+          } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
+            // Voltar para início do superset respectivo
+            if (_currentExerciseIndex == 5) _currentExerciseIndex = 4;
+            else _currentExerciseIndex = 6;
           } else {
-            _currentExerciseIndex = 6; // Volta para início do Superset B
+            _currentExerciseIndex++; // Navegação normal
           }
-        } else {
-          // Navegação normal para exercícios regulares
-          _currentExerciseIndex++;
+        } else if (widget.dayId == 2) { // Full Body B
+          if (_currentExerciseIndex == 3) {
+            _currentExerciseIndex = 5; // Pular para exercício 6 (após Superset A)
+          } else if (_currentExerciseIndex == 6) {
+            _completeWorkout(); // Fim do treino
+            return;
+          } else if (_currentExerciseIndex == 4 || _currentExerciseIndex == 7) {
+            // Voltar para início do superset respectivo
+            if (_currentExerciseIndex == 4) _currentExerciseIndex = 3;
+            else _currentExerciseIndex = 6;
+          } else {
+            _currentExerciseIndex++; // Navegação normal
+          }
+        } else { // Full Body C
+          if (_currentExerciseIndex == 1) {
+            _currentExerciseIndex = 3; // Pular para exercício 4 (após Superset A)
+          } else if (_currentExerciseIndex == 6) {
+            _completeWorkout(); // Fim do treino
+            return;
+          } else if (_currentExerciseIndex == 2 || _currentExerciseIndex == 7) {
+            // Voltar para início do superset respectivo
+            if (_currentExerciseIndex == 2) _currentExerciseIndex = 1;
+            else _currentExerciseIndex = 6;
+          } else {
+            _currentExerciseIndex++; // Navegação normal
+          }
         }
       });
       HapticFeedback.selectionClick();
@@ -575,31 +580,81 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   }
 
   bool _isInSuperset(int exerciseIndex) {
-    // Supersets são exercícios 5-6 (índices 4-5) e 7-8 (índices 6-7)
-    return (exerciseIndex >= 4 && exerciseIndex <= 7);
+    if (widget.dayId == 1) { // Full Body A
+      // Supersets são exercícios 5-6 (índices 4-5) e 7-8 (índices 6-7)
+      return (exerciseIndex >= 4 && exerciseIndex <= 7);
+    } else if (widget.dayId == 2) { // Full Body B
+      // SUPERSET A: índices 3-4, SUPERSET B: índices 6-7
+      return (exerciseIndex >= 3 && exerciseIndex <= 4) || (exerciseIndex >= 6 && exerciseIndex <= 7);
+    } else { // Full Body C
+      // SUPERSET A: índices 1-2, SUPERSET B: índices 6-7
+      return (exerciseIndex >= 1 && exerciseIndex <= 2) || (exerciseIndex >= 6 && exerciseIndex <= 7);
+    }
   }
   
   Map<String, dynamic>? _getSupersetPair(int exerciseIndex) {
     if (!_isInSuperset(exerciseIndex)) return null;
     
-    if (exerciseIndex == 4 || exerciseIndex == 5) {
-      // Superset A: exercícios 4 e 5
-      return {
-        'exerciseA': _exercises[4],
-        'exerciseB': _exercises[5],
-        'indexA': 4,
-        'indexB': 5,
-        'name': 'Superset A',
-      };
-    } else if (exerciseIndex == 6 || exerciseIndex == 7) {
-      // Superset B: exercícios 6 e 7
-      return {
-        'exerciseA': _exercises[6],
-        'exerciseB': _exercises[7],
-        'indexA': 6,
-        'indexB': 7,
-        'name': 'Superset B',
-      };
+    if (widget.dayId == 1) { // Full Body A
+      if (exerciseIndex == 4 || exerciseIndex == 5) {
+        // Superset A: exercícios 4 e 5
+        return {
+          'exerciseA': _exercises[4],
+          'exerciseB': _exercises[5],
+          'indexA': 4,
+          'indexB': 5,
+          'name': 'Superset A',
+        };
+      } else if (exerciseIndex == 6 || exerciseIndex == 7) {
+        // Superset B: exercícios 6 e 7
+        return {
+          'exerciseA': _exercises[6],
+          'exerciseB': _exercises[7],
+          'indexA': 6,
+          'indexB': 7,
+          'name': 'Superset B',
+        };
+      }
+    } else if (widget.dayId == 2) { // Full Body B
+      if (exerciseIndex == 3 || exerciseIndex == 4) {
+        // Superset A: exercícios 3 e 4
+        return {
+          'exerciseA': _exercises[3], // DB Chest Supported Row
+          'exerciseB': _exercises[4], // Banded Push-Ups
+          'indexA': 3,
+          'indexB': 4,
+          'name': 'Superset A',
+        };
+      } else if (exerciseIndex == 6 || exerciseIndex == 7) {
+        // Superset B: exercícios 6 e 7
+        return {
+          'exerciseA': _exercises[6], // Seated Weighted Calf Raise
+          'exerciseB': _exercises[7], // Side Plank
+          'indexA': 6,
+          'indexB': 7,
+          'name': 'Superset B',
+        };
+      }
+    } else { // Full Body C
+      if (exerciseIndex == 1 || exerciseIndex == 2) {
+        // Superset A: exercícios 1 e 2
+        return {
+          'exerciseA': _exercises[1], // Low Incline Dumbbell Press
+          'exerciseB': _exercises[2], // DB Chest Supported Row
+          'indexA': 1,
+          'indexB': 2,
+          'name': 'Superset A',
+        };
+      } else if (exerciseIndex == 6 || exerciseIndex == 7) {
+        // Superset B: exercícios 6 e 7
+        return {
+          'exerciseA': _exercises[6], // Standing Face Pulls
+          'exerciseB': _exercises[7], // Side Plank
+          'indexA': 6,
+          'indexB': 7,
+          'name': 'Superset B',
+        };
+      }
     }
     return null;
   }
@@ -782,6 +837,10 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
                           },
                           onRestNeeded: (seconds) {
                             _startRestTimer(seconds);
+                          },
+                          onSkipSuperset: () {
+                            // Pular para próximo exercício após o superset
+                            _nextExercise();
                           },
                         )
                       : ExerciseTrackingWidget(

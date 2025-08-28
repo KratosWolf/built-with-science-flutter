@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/workout_models.dart';
+import '../data/mock_data.dart';
 import 'exercise_tracking_widget.dart';
 
 class SupersetTrackingWidget extends StatefulWidget {
@@ -10,6 +12,7 @@ class SupersetTrackingWidget extends StatefulWidget {
   final List<WorkoutSet> completedSetsB;
   final Function(WorkoutSet) onSetCompleted;
   final Function(int) onRestNeeded;
+  final VoidCallback? onSkipSuperset;
 
   const SupersetTrackingWidget({
     super.key,
@@ -19,6 +22,7 @@ class SupersetTrackingWidget extends StatefulWidget {
     required this.completedSetsB,
     required this.onSetCompleted,
     required this.onRestNeeded,
+    this.onSkipSuperset,
   });
 
   @override
@@ -29,6 +33,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   // Controla qual exercício está ativo no momento
   bool _isExerciseA = true;
   int _currentSetNumber = 1;
+  
+  // Variações dos exercícios
+  List<ExerciseVariation> _variationsA = [];
+  List<ExerciseVariation> _variationsB = [];
+  ExerciseVariation? _selectedVariationA;
+  ExerciseVariation? _selectedVariationB;
   
   // Controllers para ambos os exercícios
   final Map<String, Map<int, TextEditingController>> _weightControllers = {
@@ -47,8 +57,27 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   @override
   void initState() {
     super.initState();
+    _loadVariations();
     _initializeControllers();
     _determineCurrentPosition();
+  }
+  
+  void _loadVariations() {
+    // Carregar variações para exercício A
+    _variationsA = MockData.exerciseVariations
+        .where((v) => v.exerciseId == widget.exerciseA.id)
+        .toList();
+    _selectedVariationA = _variationsA.isNotEmpty 
+        ? _variationsA.firstWhere((v) => v.isPrimary, orElse: () => _variationsA.first)
+        : null;
+    
+    // Carregar variações para exercício B
+    _variationsB = MockData.exerciseVariations
+        .where((v) => v.exerciseId == widget.exerciseB.id)
+        .toList();
+    _selectedVariationB = _variationsB.isNotEmpty 
+        ? _variationsB.firstWhere((v) => v.isPrimary, orElse: () => _variationsB.first)
+        : null;
   }
 
   void _initializeControllers() {
@@ -182,6 +211,42 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       ),
     );
   }
+  
+  Future<void> _openYouTubeVideo(bool isA) async {
+    try {
+      final variation = isA ? _selectedVariationA : _selectedVariationB;
+      final exerciseName = isA ? widget.exerciseA.name : widget.exerciseB.name;
+      
+      print('🎬 Tentando abrir YouTube para ${isA ? "A" : "B"}: $exerciseName');
+      print('🎬 Variação selecionada: ${variation?.variationName}');
+      print('🎬 URL: ${variation?.youtubeUrl}');
+      
+      if (variation?.youtubeUrl != null && variation!.youtubeUrl.isNotEmpty) {
+        final uri = Uri.parse(variation.youtubeUrl);
+        print('🎬 URI parsed: $uri');
+        
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          print('✅ YouTube aberto com sucesso');
+        } else {
+          print('❌ canLaunchUrl retornou false');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Não foi possível abrir: ${variation.youtubeUrl}')),
+          );
+        }
+      } else {
+        print('❌ URL não encontrada para $exerciseName');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vídeo não disponível para $exerciseName')),
+        );
+      }
+    } catch (e) {
+      print('❌ Erro ao abrir YouTube: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao abrir YouTube: $e')),
+      );
+    }
+  }
 
   bool _isSetCompleted(String exercise, int setNumber) {
     if (exercise == 'A') {
@@ -256,6 +321,270 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   ),
                   textAlign: TextAlign.center,
                 ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Cards dos Exercícios A1 e B1
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _isExerciseA ? Colors.blue.shade300 : Colors.blue.shade100,
+                width: _isExerciseA ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade700,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'A1',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.exerciseA.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade600,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${widget.exerciseA.sets} sets x ${widget.exerciseA.repsTarget} reps',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => _openYouTubeVideo(true),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_variationsA.isNotEmpty && _currentSetNumber == 1) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.blue.shade300,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButton<ExerciseVariation>(
+                      value: _selectedVariationA,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      items: _variationsA.map((variation) =>
+                        DropdownMenuItem(
+                          value: variation,
+                          child: Text(
+                            variation.variationName,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        )
+                      ).toList(),
+                      onChanged: (ExerciseVariation? newVariation) {
+                        setState(() {
+                          _selectedVariationA = newVariation;
+                        });
+                      },
+                    ),
+                  ),
+                ] else if (_selectedVariationA != null && _selectedVariationA!.variationName != widget.exerciseA.name) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Variação: ${_selectedVariationA!.variationName}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade800,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          // Card do Exercício B1
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: !_isExerciseA ? Colors.green.shade300 : Colors.green.shade100,
+                width: !_isExerciseA ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade700,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'B1',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        widget.exerciseB.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.green.shade800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade600,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${widget.exerciseB.sets} sets x ${widget.exerciseB.repsTarget} reps',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => _openYouTubeVideo(false),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_variationsB.isNotEmpty && _currentSetNumber == 1) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.green.shade300,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButton<ExerciseVariation>(
+                      value: _selectedVariationB,
+                      isExpanded: true,
+                      underline: const SizedBox(),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      items: _variationsB.map((variation) =>
+                        DropdownMenuItem(
+                          value: variation,
+                          child: Text(
+                            variation.variationName,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        )
+                      ).toList(),
+                      onChanged: (ExerciseVariation? newVariation) {
+                        setState(() {
+                          _selectedVariationB = newVariation;
+                        });
+                      },
+                    ),
+                  ),
+                ] else if (_selectedVariationB != null && _selectedVariationB!.variationName != widget.exerciseB.name) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Variação: ${_selectedVariationB!.variationName}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green.shade800,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -484,6 +813,51 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                 ],
               ),
             ),
+            
+          const SizedBox(height: 20),
+          
+          // Botões de navegação rápida
+          Row(
+            children: [
+              // Botão para pular para próximo exercício (fora do superset)
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    // Navegar para próximo exercício após o superset
+                    widget.onSkipSuperset?.call();
+                  },
+                  icon: const Icon(Icons.skip_next),
+                  label: const Text('Pular SuperSet'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Botão para alternar exercício atual (A ↔ B)
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _isExerciseA = !_isExerciseA;
+                    });
+                    HapticFeedback.selectionClick();
+                  },
+                  icon: Icon(_isExerciseA ? Icons.arrow_forward : Icons.arrow_back),
+                  label: Text('Ir para ${_isExerciseA ? "B" : "A"}$_currentSetNumber'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
