@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
 import '../widgets/exercise_tracking_widget.dart';
+import '../widgets/superset_tracking_widget.dart';
 import '../widgets/rest_timer_widget.dart';
 import '../services/supabase_service.dart';
 
@@ -378,7 +379,42 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   void _nextExercise() {
     if (_currentExerciseIndex < _exercises.length - 1) {
       setState(() {
-        _currentExerciseIndex++;
+        // Lógica especial para Super Sets
+        if (_currentExerciseIndex == 4) {
+          // Estamos no primeiro exercício do Superset A (índice 4)
+          // Só avançamos se AMBOS exercícios 4 e 5 estiverem completos (3 sets cada)
+          final setsA = _completedSets[_exercises[4].id]?.length ?? 0;
+          final setsB = _completedSets[_exercises[5].id]?.length ?? 0;
+          
+          if (setsA >= 3 && setsB >= 3) {
+            _currentExerciseIndex = 6; // Pular para exercício 7 (Superset B)
+          }
+          // Se não estiver completo, fica no 4 mesmo (widget de superset gerencia)
+        } else if (_currentExerciseIndex == 6) {
+          // Estamos no primeiro exercício do Superset B (índice 6)
+          // Só avançamos se AMBOS exercícios 6 e 7 estiverem completos
+          final setsA = _completedSets[_exercises[6].id]?.length ?? 0;
+          final setsB = _completedSets[_exercises[7].id]?.length ?? 0;
+          
+          if (setsA >= 3 && setsB >= 3) {
+            // Superset B completo, fim do treino
+            _completeWorkout();
+            return;
+          }
+          // Se não estiver completo, fica no 6 mesmo
+        } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
+          // Nunca devemos estar diretamente nos índices 5 ou 7 
+          // (são gerenciados pelo widget de superset)
+          // Mas se estivermos, volta para o primeiro do superset
+          if (_currentExerciseIndex == 5) {
+            _currentExerciseIndex = 4; // Volta para início do Superset A
+          } else {
+            _currentExerciseIndex = 6; // Volta para início do Superset B
+          }
+        } else {
+          // Navegação normal para exercícios regulares
+          _currentExerciseIndex++;
+        }
       });
       HapticFeedback.selectionClick();
     } else {
@@ -389,7 +425,21 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   void _previousExercise() {
     if (_currentExerciseIndex > 0) {
       setState(() {
-        _currentExerciseIndex--;
+        // Lógica especial para Super Sets
+        if (_currentExerciseIndex == 6) {
+          // Voltando do Superset B para o Superset A
+          _currentExerciseIndex = 4;
+        } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
+          // Nunca devemos estar diretamente aqui, mas se estivermos:
+          if (_currentExerciseIndex == 5) {
+            _currentExerciseIndex = 4; // Vai para Superset A
+          } else {
+            _currentExerciseIndex = 6; // Vai para Superset B
+          }
+        } else {
+          // Navegação normal
+          _currentExerciseIndex--;
+        }
       });
       HapticFeedback.selectionClick();
     }
@@ -524,6 +574,36 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     );
   }
 
+  bool _isInSuperset(int exerciseIndex) {
+    // Supersets são exercícios 5-6 (índices 4-5) e 7-8 (índices 6-7)
+    return (exerciseIndex >= 4 && exerciseIndex <= 7);
+  }
+  
+  Map<String, dynamic>? _getSupersetPair(int exerciseIndex) {
+    if (!_isInSuperset(exerciseIndex)) return null;
+    
+    if (exerciseIndex == 4 || exerciseIndex == 5) {
+      // Superset A: exercícios 4 e 5
+      return {
+        'exerciseA': _exercises[4],
+        'exerciseB': _exercises[5],
+        'indexA': 4,
+        'indexB': 5,
+        'name': 'Superset A',
+      };
+    } else if (exerciseIndex == 6 || exerciseIndex == 7) {
+      // Superset B: exercícios 6 e 7
+      return {
+        'exerciseA': _exercises[6],
+        'exerciseB': _exercises[7],
+        'indexA': 6,
+        'indexB': 7,
+        'name': 'Superset B',
+      };
+    }
+    return null;
+  }
+
   void _showCompletionDialog(Duration duration) {
     showDialog(
       context: context,
@@ -590,6 +670,8 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     }
 
     final currentExercise = _exercises[_currentExerciseIndex];
+  final isInSuperset = _isInSuperset(_currentExerciseIndex);
+  final supersetPair = _getSupersetPair(_currentExerciseIndex);
 
     return Scaffold(
       appBar: AppBar(
@@ -601,7 +683,9 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})'),
+              Text(isInSuperset && supersetPair != null 
+                  ? '${widget.dayName} - ${supersetPair['name']}'
+                  : '${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})'),
               const Icon(Icons.arrow_drop_down, size: 24),
             ],
           ),
@@ -687,16 +771,29 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
                 
                 // Widget de tracking do exercício atual
                 Expanded(
-                  child: ExerciseTrackingWidget(
-                    exercise: currentExercise,
-                    onSetCompleted: (setData) {
-                      _saveSetData(currentExercise.id, setData);
-                    },
-                    onRestNeeded: (seconds) {
-                      _startRestTimer(seconds);
-                    },
-                    completedSets: _completedSets[currentExercise.id] ?? [],
-                  ),
+                  child: isInSuperset && supersetPair != null
+                      ? SupersetTrackingWidget(
+                          exerciseA: supersetPair['exerciseA'],
+                          exerciseB: supersetPair['exerciseB'],
+                          completedSetsA: _completedSets[supersetPair['exerciseA'].id] ?? [],
+                          completedSetsB: _completedSets[supersetPair['exerciseB'].id] ?? [],
+                          onSetCompleted: (setData) {
+                            _saveSetData(setData.exerciseId, setData);
+                          },
+                          onRestNeeded: (seconds) {
+                            _startRestTimer(seconds);
+                          },
+                        )
+                      : ExerciseTrackingWidget(
+                          exercise: currentExercise,
+                          onSetCompleted: (setData) {
+                            _saveSetData(currentExercise.id, setData);
+                          },
+                          onRestNeeded: (seconds) {
+                            _startRestTimer(seconds);
+                          },
+                          completedSets: _completedSets[currentExercise.id] ?? [],
+                        ),
                 ),
                 
                 // Botões de navegação
