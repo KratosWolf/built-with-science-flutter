@@ -109,40 +109,42 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     List<Exercise> exercises = [];
     
     // Selecionar exercícios baseados no programa real do usuário
+    // IMPORTANTE: exercises array índices começam em 0, mas IDs começam em 1
+    // Então exercício com ID 1 está no índice 0, ID 7 está no índice 6, etc.
     if (widget.dayId == 1) { // Full Body A - 8 exercícios exatos do SQL
       exercises = [
-        MockData.exercises[0], // Barbell Bench Press (id: 1)
-        MockData.exercises[6], // Barbell Romanian Deadlift (id: 7)  
-        MockData.exercises[9], // (Weighted) Pull-Ups (id: 10)
-        MockData.exercises[16], // Walking Lunges (quad focus) (id: 17)
+        MockData.exercises[0], // Barbell Bench Press (id: 1, index: 0)
+        MockData.exercises[6], // Barbell Romanian Deadlift (id: 7, index: 6)  
+        MockData.exercises[9], // (Weighted) Pull-Ups (id: 10, index: 9)
+        MockData.exercises[16], // Walking Lunges (quad focus) (id: 17, index: 16)
         // Superset A
-        MockData.exercises[21], // Standing Mid-Chest Cable Fly (id: 22)
-        MockData.exercises[26], // Dumbbell Lateral Raise (id: 27)
+        MockData.exercises[21], // Standing Mid-Chest Cable Fly (id: 22, index: 21)
+        MockData.exercises[26], // Dumbbell Lateral Raise (id: 27, index: 26)
         // Superset B
-        MockData.exercises[31], // Single Leg Weighted Calf Raise (id: 32)
-        MockData.exercises[35], // Standing Face Pulls (id: 36)
+        MockData.exercises[31], // Single Leg Weighted Calf Raise (id: 32, index: 31)
+        MockData.exercises[35], // Standing Face Pulls (id: 36, index: 35)
       ];
     } else if (widget.dayId == 2) { // Full Body B - Será implementado
       exercises = [
-        MockData.exercises[1], // Flat Dumbbell Press
-        MockData.exercises[7], // Dumbbell Romanian Deadlift
-        MockData.exercises[14], // Lat Pulldown
-        MockData.exercises[17], // Heel Elevated Split Squat
-        MockData.exercises[22], // Seated Mid-Chest Cable Fly
-        MockData.exercises[27], // Cable Lateral Raise
-        MockData.exercises[32], // Toes-Elevated Smith Machine Calf Raise
-        MockData.exercises[36], // Bent Over Dumbbell Face Pulls
+        MockData.exercises[1], // Flat Dumbbell Press (id: 2, index: 1)
+        MockData.exercises[7], // Dumbbell Romanian Deadlift (id: 8, index: 7)
+        MockData.exercises[14], // Lat Pulldown (id: 15, index: 14)
+        MockData.exercises[17], // Heel Elevated Split Squat (id: 18, index: 17)
+        MockData.exercises[22], // Seated Mid-Chest Cable Fly (id: 23, index: 22)
+        MockData.exercises[27], // Cable Lateral Raise (id: 28, index: 27)
+        MockData.exercises[32], // Toes-Elevated Smith Machine Calf Raise (id: 33, index: 32)
+        MockData.exercises[36], // Bent Over Dumbbell Face Pulls (id: 37, index: 36)
       ];
     } else { // Full Body C - Será implementado
       exercises = [
-        MockData.exercises[2], // Flat Machine Chest Press
-        MockData.exercises[8], // Hyperextensions (back/hamstring)
-        MockData.exercises[10], // (Weighted) Chin-Ups
-        MockData.exercises[18], // Bulgarian Split Squat (quad focus)
-        MockData.exercises[23], // Pec-Deck Machine Fly
-        MockData.exercises[28], // Lying Incline Lateral Raise
-        MockData.exercises[33], // Standing Weighted Calf Raise
-        MockData.exercises[37], // (Weighted) Prone Arm Circles
+        MockData.exercises[2], // Flat Machine Chest Press (id: 3, index: 2)
+        MockData.exercises[8], // Hyperextensions (back/hamstring) (id: 9, index: 8)
+        MockData.exercises[10], // (Weighted) Chin-Ups (id: 11, index: 10)
+        MockData.exercises[18], // Bulgarian Split Squat (quad focus) (id: 19, index: 18)
+        MockData.exercises[23], // Pec-Deck Machine Fly (id: 24, index: 23)
+        MockData.exercises[28], // Lying Incline Lateral Raise (id: 29, index: 28)
+        MockData.exercises[33], // Standing Weighted Calf Raise (id: 34, index: 33)
+        MockData.exercises[37], // (Weighted) Prone Arm Circles (id: 38, index: 37)
       ];
     }
     
@@ -415,6 +417,113 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     _showCompletionDialog(duration);
   }
 
+  void _showExerciseSelector() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Selecione um exercício',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = _exercises[index];
+                    final completedSets = _completedSets[exercise.id]?.length ?? 0;
+                    final isSuperset = index > 3; // Exercícios 5-8 são supersets
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: index == _currentExerciseIndex 
+                            ? Theme.of(context).colorScheme.primary
+                            : completedSets > 0 
+                                ? Colors.green 
+                                : Colors.grey.shade300,
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: index == _currentExerciseIndex || completedSets > 0 
+                                ? Colors.white 
+                                : Colors.black54,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        exercise.name,
+                        style: TextStyle(
+                          fontWeight: index == _currentExerciseIndex 
+                              ? FontWeight.bold 
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      subtitle: Row(
+                        children: [
+                          if (isSuperset) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'SUPER',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            completedSets > 0 
+                                ? '✅ $completedSets/3 sets' 
+                                : 'Não iniciado',
+                            style: TextStyle(
+                              color: completedSets > 0 ? Colors.green : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: index == _currentExerciseIndex 
+                          ? Icon(Icons.radio_button_checked, color: Theme.of(context).colorScheme.primary)
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          _currentExerciseIndex = index;
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showCompletionDialog(Duration duration) {
     showDialog(
       context: context,
@@ -484,7 +593,19 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})'),
+        title: GestureDetector(
+          onTap: () {
+            // Mostrar menu de seleção de exercícios
+            _showExerciseSelector();
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})'),
+              const Icon(Icons.arrow_drop_down, size: 24),
+            ],
+          ),
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,

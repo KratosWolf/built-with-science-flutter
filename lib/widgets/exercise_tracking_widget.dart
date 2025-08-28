@@ -159,6 +159,28 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     widget.onRestNeeded(restSeconds);
   }
 
+  String _getExerciseDescription(String exerciseName) {
+    final name = exerciseName.toLowerCase();
+    
+    if (name.contains('bench') || name.contains('chest press') || name.contains('fly')) {
+      return 'Exercício de peito - Foco em peitoral maior';
+    } else if (name.contains('deadlift') || name.contains('hyperextension')) {
+      return 'Exercício composto - Posterior/Hamstrings';
+    } else if (name.contains('pull-up') || name.contains('chin-up') || name.contains('pulldown')) {
+      return 'Exercício de costas - Múltiplos músculos';
+    } else if (name.contains('lunge') || name.contains('squat') || name.contains('step')) {
+      return 'Exercício de pernas - Foco em quadríceps';
+    } else if (name.contains('lateral raise') || name.contains('upright row')) {
+      return 'Exercício de ombros - Deltoides laterais';
+    } else if (name.contains('calf')) {
+      return 'Exercício de panturrilha - Gastrocnêmio/Sóleo';
+    } else if (name.contains('face pull') || name.contains('arm circle')) {
+      return 'Exercício de deltoides posteriores';
+    } else {
+      return 'Exercício de força e hipertrofia';
+    }
+  }
+
   Future<void> _openYouTubeVideo() async {
     if (_selectedVariation?.youtubeUrl != null) {
       final url = Uri.parse(_selectedVariation!.youtubeUrl);
@@ -227,8 +249,24 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                             ),
                           ],
                           const SizedBox(height: 8),
+                          // Label com repetições sugeridas
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '📊 Sugestão: 3 sets x 8-12 reps',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                           Text(
-                            'Exercício composto - Múltiplos grupos musculares',
+                            _getExerciseDescription(widget.exercise.name),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ),
