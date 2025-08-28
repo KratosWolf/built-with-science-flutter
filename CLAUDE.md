@@ -4,13 +4,13 @@
 Built With Science é uma aplicação de tracking de exercícios baseada em ciência, com dois projetos em desenvolvimento paralelo:
 
 ### 🌐 **Next.js Web Version**
-- **Localização**: `/Users/tiagofernandes/Desktop/VIBE/Built-With-Science`
+- **Localização**: `/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/NextJS-Web-Version`
 - **GitHub**: https://github.com/KratosWolf/Built-With-Science
 - **Branch**: `develop`
 - **Status**: ✅ Completo e funcional
 
 ### 📱 **Flutter Mobile Version** (Projeto Principal)
-- **Localização**: `/Users/tiagofernandes/built_with_science_app`
+- **Localização**: `/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version`
 - **GitHub**: https://github.com/KratosWolf/built-with-science-flutter
 - **Branch Ativa**: `feature/backup-system`
 - **Status**: ✅ Totalmente funcional com 3-day program
@@ -160,12 +160,12 @@ Text('📊 Sugestão: ${widget.exercise.sets} sets x ${widget.exercise.repsTarge
 
 ### **Projetos Principais**
 ```
-~/Desktop/VIBE/Built-With-Science/          # Next.js (Web Version)
+~/Desktop/VIBE/Built-With-Science-Projects/NextJS-Web-Version/     # Next.js (Web Version)
 ├── src/app/programs/[id]/days/[dayId]/     # Workout tracking pages
 ├── src/components/ui/                      # UI components
 └── src/lib/mock-data/                      # Integrated CSV data
 
-~/built_with_science_app/                   # Flutter (Mobile - PRINCIPAL)  
+~/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version/ # Flutter (Mobile - PRINCIPAL)  
 ├── lib/screens/                            # App screens
 ├── lib/widgets/                            # UI widgets
 ├── lib/data/mock_data.dart                 # Exercícios com sets/reps corretos
@@ -256,7 +256,7 @@ Text('📊 Sugestão: ${widget.exercise.sets} sets x ${widget.exercise.repsTarge
 ### **Build e Deploy**
 ```bash
 # Navigate to Flutter project
-cd /Users/tiagofernandes/built_with_science_app
+cd "/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version"
 
 # Build APK
 flutter build apk --release
