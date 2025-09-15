@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import "supabase_service.dart";
-import '../widgets/exercise_selector.dart';
+import '../services/supabase_service.dart';
+// import '../widgets/exercise_selector.dart'; // Arquivo não existe
 import '../widgets/rest_timer.dart';
 import 'dart:async';
 import 'dart:developer' as developer;

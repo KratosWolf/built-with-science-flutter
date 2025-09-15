@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
 
@@ -32,6 +34,9 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
   final int _maxSets = 3; // 3 sets por exercício
   List<ExerciseVariation> _variations = [];
   ExerciseVariation? _selectedVariation;
+
+  // Cache do último treino
+  Map<String, dynamic>? _lastWorkoutData;
 
   @override
   void initState() {
@@ -73,15 +78,110 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     }
   }
 
-  void _loadPreviousData() {
-    // Carregar dados dos sets já completados
+  void _loadPreviousData() async {
+    // Carregar dados dos sets já completados (sessão atual)
     for (final set in widget.completedSets) {
       if (_weightControllers.containsKey(set.setNumber)) {
         _weightControllers[set.setNumber]!.text = set.weightKg?.toString() ?? '';
         _repsControllers[set.setNumber]!.text = set.reps?.toString() ?? '';
-        _notesControllers[set.setNumber]!.text = ''; // Adicionar campo de notas depois
+        _notesControllers[set.setNumber]!.text = '';
         _difficulties[set.setNumber] = set.difficulty ?? 'Perfeito';
       }
+    }
+
+    // Carregar cache do último treino para pré-preenchimento
+    await _loadLastWorkoutCache();
+  }
+
+  Future<void> _loadLastWorkoutCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'lastWorkout_${widget.exercise.id}';
+      final cacheData = prefs.getString(cacheKey);
+
+      if (cacheData != null) {
+        _lastWorkoutData = jsonDecode(cacheData);
+        _prefillFromCache();
+      }
+    } catch (e) {
+      print('⚠️ Erro ao carregar cache: $e');
+    }
+  }
+
+  void _prefillFromCache() {
+    if (_lastWorkoutData == null) return;
+
+    // Pré-preencher apenas sets que não foram completados ainda
+    for (int setNumber = 1; setNumber <= _maxSets; setNumber++) {
+      if (!_isSetCompleted(setNumber) && _lastWorkoutData!['set$setNumber'] != null) {
+        final lastSet = _lastWorkoutData!['set$setNumber'];
+
+        // Pré-preencher com dados do último treino (set 3)
+        if (_lastWorkoutData!['lastSet3'] != null) {
+          final lastSet3 = _lastWorkoutData!['lastSet3'];
+          _weightControllers[setNumber]!.text = lastSet3['weight']?.toString() ?? '';
+          _repsControllers[setNumber]!.text = lastSet3['reps']?.toString() ?? '';
+          _difficulties[setNumber] = lastSet3['difficulty'] ?? 'Perfeito';
+        }
+      }
+    }
+
+    setState(() {}); // Atualizar UI
+  }
+
+  Future<void> _saveToCache(WorkoutSet lastSet) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cacheKey = 'lastWorkout_${widget.exercise.id}';
+
+      // Dados do último set (set 3) para usar no próximo treino
+      final cacheData = {
+        'exerciseId': widget.exercise.id,
+        'exerciseName': widget.exercise.name,
+        'lastSet3': {
+          'weight': lastSet.weightKg,
+          'reps': lastSet.reps,
+          'difficulty': lastSet.difficulty,
+          'date': DateTime.now().toIso8601String(),
+        },
+        'variationId': _selectedVariation?.id,
+        'variationName': _selectedVariation?.variationName,
+      };
+
+      await prefs.setString(cacheKey, jsonEncode(cacheData));
+      print('✅ Cache salvo para exercício ${widget.exercise.name}');
+    } catch (e) {
+      print('⚠️ Erro ao salvar cache: $e');
+    }
+  }
+
+  Color _getDifficultyColor(String? difficulty) {
+    switch (difficulty) {
+      case 'Perfeito':
+        return Colors.green;
+      case 'Fácil':
+        return Colors.blue;
+      case 'Difícil':
+        return Colors.orange;
+      case 'Muito Difícil':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getDifficultyEmoji(String? difficulty) {
+    switch (difficulty) {
+      case 'Perfeito':
+        return '😊';
+      case 'Fácil':
+        return '😌';
+      case 'Difícil':
+        return '😤';
+      case 'Muito Difícil':
+        return '🔥';
+      default:
+        return '🤔';
     }
   }
 
@@ -127,10 +227,15 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     );
 
     widget.onSetCompleted(setData);
-    
+
+    // Salvar no cache se for o set 3 (último set)
+    if (setNumber == 3) {
+      _saveToCache(setData);
+    }
+
     // Haptic feedback
     HapticFeedback.mediumImpact();
-    
+
     // Sempre iniciar timer após completar um set
     _startAutoRest();
     
@@ -143,19 +248,8 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
   }
 
   void _startAutoRest() {
-    // Tempos de descanso baseados no tipo de exercício
-    int restSeconds = 90; // Padrão
-    
-    final exerciseName = widget.exercise.name.toLowerCase();
-    if (exerciseName.contains('squat') || 
-        exerciseName.contains('deadlift') || 
-        exerciseName.contains('row')) {
-      restSeconds = 120; // Exercícios compostos = mais descanso
-    } else if (exerciseName.contains('curl') || 
-               exerciseName.contains('extension') || 
-               exerciseName.contains('raise')) {
-      restSeconds = 60; // Exercícios de isolamento = menos descanso
-    }
+    // Tempo de descanso fixo de 1:30 (90 segundos) para todos os exercícios
+    int restSeconds = 90;
 
     // Mostrar snackbar com timer automático
     ScaffoldMessenger.of(context).showSnackBar(
@@ -424,6 +518,27 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                             ),
                           ),
                         ),
+                        // Tag de avaliação anterior
+                        if (_lastWorkoutData != null && _lastWorkoutData!['lastSet3'] != null && !isCompleted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: _getDifficultyColor(_lastWorkoutData!['lastSet3']['difficulty']).withOpacity(0.1),
+                              border: Border.all(
+                                color: _getDifficultyColor(_lastWorkoutData!['lastSet3']['difficulty']),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Anterior: ${_getDifficultyEmoji(_lastWorkoutData!['lastSet3']['difficulty'])} ${_lastWorkoutData!['lastSet3']['difficulty']}',
+                              style: TextStyle(
+                                color: _getDifficultyColor(_lastWorkoutData!['lastSet3']['difficulty']),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                         if (isCompleted)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

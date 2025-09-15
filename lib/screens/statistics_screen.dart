@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import "supabase_service.dart";
+import '../services/supabase_service.dart';
 
 /// Statistics Screen - Track progress and workout analytics  
 class StatisticsScreen extends StatefulWidget {

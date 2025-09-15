@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import "supabase_service.dart";
-import 'auth_screen.dart';
-import 'home_screen.dart';
+import '../services/supabase_service.dart';
+import 'login_screen.dart';
+import 'simple_home.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -32,17 +32,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _checkAuthState() async {
     try {
-      final user = // SupabaseService.currentUser;
-      
-      // If user exists, ensure profile exists too
-      if (user != null) {
-        final profile = await // SupabaseService.getUserProfile();
-        if (profile == null) {
-          // Create profile if it doesn't exist
-          await // SupabaseService.createOrUpdateUserProfile();
-        }
-      }
-      
+      final user = SupabaseService.instance.currentUser;
+
       setState(() {
         _user = user;
         _isLoading = false;
@@ -84,6 +75,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
-    return _user != null ? const HomeScreen() : const AuthScreen();
+    return _user != null ? const SimpleHomeScreen() : const LoginScreen();
   }
 }

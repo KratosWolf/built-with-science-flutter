@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
-import 'exercise_tracking_widget.dart';
 
 class SupersetTrackingWidget extends StatefulWidget {
   final Exercise exerciseA;
@@ -54,12 +55,17 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     'B': {},
   };
 
+  // Cache do último treino para cada exercício
+  Map<String, dynamic>? _lastWorkoutDataA;
+  Map<String, dynamic>? _lastWorkoutDataB;
+
   @override
   void initState() {
     super.initState();
     _loadVariations();
     _initializeControllers();
     _determineCurrentPosition();
+    _loadLastWorkoutCache();
   }
   
   void _loadVariations() {
@@ -67,17 +73,31 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     _variationsA = MockData.exerciseVariations
         .where((v) => v.exerciseId == widget.exerciseA.id)
         .toList();
-    _selectedVariationA = _variationsA.isNotEmpty 
+    _selectedVariationA = _variationsA.isNotEmpty
         ? _variationsA.firstWhere((v) => v.isPrimary, orElse: () => _variationsA.first)
         : null;
-    
+
     // Carregar variações para exercício B
     _variationsB = MockData.exerciseVariations
         .where((v) => v.exerciseId == widget.exerciseB.id)
         .toList();
-    _selectedVariationB = _variationsB.isNotEmpty 
+    _selectedVariationB = _variationsB.isNotEmpty
         ? _variationsB.firstWhere((v) => v.isPrimary, orElse: () => _variationsB.first)
         : null;
+  }
+
+  // Método auxiliar para obter nome do exercício com variação
+  String _getExerciseName(bool isA) {
+    if (isA) {
+      return _selectedVariationA?.variationName ?? widget.exerciseA.name;
+    } else {
+      return _selectedVariationB?.variationName ?? widget.exerciseB.name;
+    }
+  }
+
+  // Método auxiliar para obter nome do exercício atual
+  String _getCurrentExerciseName() {
+    return _getExerciseName(_isExerciseA);
   }
 
   void _initializeControllers() {
@@ -180,8 +200,8 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     // Determinar próximo exercício na sequência
     _moveToNext();
     
-    // Iniciar timer de descanso
-    widget.onRestNeeded(_isExerciseA ? 45 : 90); // 45s entre A->B, 90s entre B->A
+    // Iniciar timer de descanso - sempre 1:30 (90 segundos)
+    widget.onRestNeeded(90); // Sempre 90 segundos entre sets
   }
 
   void _moveToNext() {
@@ -314,7 +334,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Alternância: ${widget.exerciseA.name} ↔ ${widget.exerciseB.name}',
+                  'Alternância: ${_getExerciseName(true)} ↔ ${_getExerciseName(false)}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 12,
@@ -362,7 +382,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        widget.exerciseA.name,
+                        _getExerciseName(true),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -494,7 +514,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        widget.exerciseB.name,
+                        _getExerciseName(false),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -666,7 +686,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        currentExercise.name,
+                        _getCurrentExerciseName(),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -802,7 +822,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                           style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Text(
-                          !_isExerciseA ? '${widget.exerciseA.name} - Set ${_currentSetNumber + 1}' : '${widget.exerciseB.name} - Set $_currentSetNumber',
+                          !_isExerciseA ? '${_getExerciseName(true)} - Set ${_currentSetNumber + 1}' : '${_getExerciseName(false)} - Set $_currentSetNumber',
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -897,5 +917,85 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       size: 16,
       color: Colors.grey.shade400,
     );
+  }
+
+  Future<void> _loadLastWorkoutCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Carregar cache do exercício A
+      final cacheDataA = prefs.getString('lastWorkout_${widget.exerciseA.id}');
+      if (cacheDataA != null) {
+        _lastWorkoutDataA = jsonDecode(cacheDataA);
+      }
+
+      // Carregar cache do exercício B
+      final cacheDataB = prefs.getString('lastWorkout_${widget.exerciseB.id}');
+      if (cacheDataB != null) {
+        _lastWorkoutDataB = jsonDecode(cacheDataB);
+      }
+
+      setState(() {}); // Atualizar UI com dados do cache
+    } catch (e) {
+      print('⚠️ Erro ao carregar cache do SuperSet: $e');
+    }
+  }
+
+  Future<void> _saveToCache(WorkoutSet lastSet, bool isExerciseA) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final exercise = isExerciseA ? widget.exerciseA : widget.exerciseB;
+      final selectedVariation = isExerciseA ? _selectedVariationA : _selectedVariationB;
+      final cacheKey = 'lastWorkout_${exercise.id}';
+
+      // Dados do último set (set 3) para usar no próximo treino
+      final cacheData = {
+        'exerciseId': exercise.id,
+        'exerciseName': exercise.name,
+        'lastSet3': {
+          'weight': lastSet.weightKg,
+          'reps': lastSet.reps,
+          'difficulty': lastSet.difficulty,
+          'date': DateTime.now().toIso8601String(),
+        },
+        'variationId': selectedVariation?.id,
+        'variationName': selectedVariation?.variationName,
+      };
+
+      await prefs.setString(cacheKey, jsonEncode(cacheData));
+      print('✅ Cache salvo para exercício ${exercise.name} (SuperSet)');
+    } catch (e) {
+      print('⚠️ Erro ao salvar cache do SuperSet: $e');
+    }
+  }
+
+  Color _getDifficultyColor(String? difficulty) {
+    switch (difficulty) {
+      case 'Perfeito':
+        return Colors.green;
+      case 'Fácil':
+        return Colors.blue;
+      case 'Difícil':
+        return Colors.orange;
+      case 'Muito Difícil':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getDifficultyEmoji(String? difficulty) {
+    switch (difficulty) {
+      case 'Perfeito':
+        return '😊';
+      case 'Fácil':
+        return '😌';
+      case 'Difícil':
+        return '😤';
+      case 'Muito Difícil':
+        return '🔥';
+      default:
+        return '🤔';
+    }
   }
 }

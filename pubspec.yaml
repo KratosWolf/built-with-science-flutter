@@ -39,7 +39,8 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.1.12
   
-  # Supabase - Versão core sem dependências problemáticas
+  # Supabase - Versão completa com Flutter integration
+  supabase_flutter: ^1.10.25
   supabase: ^1.11.11
   
   # Para Google Sign-in
