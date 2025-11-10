@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2025-11-10
+
+### Fixed
+- **CRITICAL**: Dashboard agora acessível na tela de seleção de programas
+- Adicionado ícone de insights no header da ProgramSelectionScreen
+- Navegação corrigida (app usa USAR OFFLINE → ProgramSelectionScreen)
+
+### Added
+- IconButton "insights" no header para acessar Dashboard rapidamente
+
 ## [4.4.0] - 2025-11-10
 
 ### Added
@@ -16,11 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cores do GitHub para visualização de frequência (5 níveis)
 - Tooltips nos quadrados do calendário
 - Estado vazio com mensagem motivacional
-- Navegação integrada no HomeScreen (botão "View History")
-
-### Changed
-- HomeScreen: botão "View History" agora abre Dashboard funcional
-- Removido import não utilizado (supabase_service)
 
 ### Features
 - Sistema 100% offline (apenas SharedPreferences)
@@ -150,7 +155,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### APK Releases
 All APK files are available in the `releases/` directory:
-- v4.4: `BuiltWithScience_v4.4_DASHBOARD.apk` (21MB)
+- v4.4.1: `BuiltWithScience_v4.4.1_DASHBOARD_FIXED.apk` (21MB) ⭐ **LATEST**
+- v4.4: `BuiltWithScience_v4.4_DASHBOARD.apk` (21MB) - deprecated
 - v4.3: `BuiltWithScience_v4.3_TIMER_OPTIONS.apk`
 - v4.2: `BuiltWithScience_v4.2_SPOTIFY_FIX.apk`
 - v4.1: `BuiltWithScience_v4.1_OFFLINE_MODE.apk`

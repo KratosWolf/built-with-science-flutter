@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
 // import "supabase_service.dart";
 import 'program_detail_screen.dart';
+import 'dashboard_screen.dart';
 
 /// Program Selection Screen - Choose a workout program
 class ProgramSelectionScreen extends StatefulWidget {
@@ -240,6 +241,23 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                               ),
                             ],
                           ),
+                        ),
+                        // Dashboard button
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DashboardScreen(),
+                              ),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.insights,
+                            color: Colors.blue.shade600,
+                            size: 28,
+                          ),
+                          tooltip: 'Dashboard de Consistência',
                         ),
                       ],
                     ),
