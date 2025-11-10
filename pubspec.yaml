@@ -39,12 +39,12 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.1.12
   
-  # Supabase - TEMPORARIAMENTE DESABILITADO (comentado para build)
-  # supabase_flutter: ^2.10.3
-  # supabase: ^2.10.0
+  # Supabase - REATIVADO
+  supabase_flutter: ^2.10.3
+  supabase: ^2.10.0
 
-  # Para Google Sign-in - TEMPORARIAMENTE DESABILITADO
-  # google_sign_in: ^6.1.5
+  # Para Google Sign-in (opcional)
+  google_sign_in: ^6.1.5
   
   # HTTP requests
   http: ^1.2.2
@@ -72,6 +72,7 @@ dependency_overrides:
   package_info_plus: 8.0.0
   device_info_plus: 10.1.2
   wakelock_plus: 1.1.4
+  app_links: 6.0.0  # Fix for app_links gradle issue
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

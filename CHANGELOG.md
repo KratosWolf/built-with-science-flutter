@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.0.0] - 2025-11-10
+
+### Added
+- **MAJOR**: Supabase reactivated with full authentication
+- Email/Password login and registration
+- Google Sign-in support (OAuth)
+- Password reset via email
+- Cloud sync for workout data (hybrid mode)
+- Session management and automatic refresh
+- Auth state changes stream
+
+### Changed
+- App now operates in **hybrid mode** (online + offline)
+- Supabase Service completely rewritten with real authentication
+- Dependencies reactivated: supabase_flutter ^2.10.3, supabase ^2.10.0
+- Android build configuration updated for compatibility
+
+### Fixed
+- app_links gradle compatibility issue (forced to v6.0.0)
+- WorkoutSet model integration with Supabase
+- Auth wrapper flow with login/offline options
+
+### Technical
+- Supabase URL: https://gktvfldykmzhynqthbdn.supabase.co
+- Login methods: Email/Password, Google OAuth
+- Fallback: "USAR OFFLINE" button remains functional
+- APK size: 23.9MB (includes Supabase libraries)
+
 ## [4.4.1] - 2025-11-10
 
 ### Fixed
@@ -155,7 +183,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### APK Releases
 All APK files are available in the `releases/` directory:
-- v4.4.1: `BuiltWithScience_v4.4.1_DASHBOARD_FIXED.apk` (21MB) ⭐ **LATEST**
+- v5.0: `BuiltWithScience_v5.0_SUPABASE_REACTIVATED.apk` (23.9MB) ⭐ **LATEST**
+- v4.4.1: `BuiltWithScience_v4.4.1_DASHBOARD_FIXED.apk` (21MB)
 - v4.4: `BuiltWithScience_v4.4_DASHBOARD.apk` (21MB) - deprecated
 - v4.3: `BuiltWithScience_v4.3_TIMER_OPTIONS.apk`
 - v4.2: `BuiltWithScience_v4.2_SPOTIFY_FIX.apk`

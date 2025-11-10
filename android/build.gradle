@@ -23,6 +23,13 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// Global Android configuration for all subprojects
+ext {
+    compileSdkVersion = 34
+    minSdkVersion = 21
+    targetSdkVersion = 34
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

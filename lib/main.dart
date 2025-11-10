@@ -30,25 +30,23 @@ void main() async {
     ),
   );
 
-  // SUPABASE TEMPORARIAMENTE DESABILITADO - App funcionando 100% offline
-  print('📱 Modo offline ativo - Usando persistência local (SharedPreferences)');
-  print('✅ App pronto para uso - Todos os dados salvos localmente');
-  print('ℹ️  Supabase será reativado quando novo projeto for criado');
+  // SUPABASE REATIVADO - Modo híbrido (online + offline)
+  print('🔄 Inicializando Supabase...');
 
-  // TODO: Reativar quando criar novo projeto Supabase
   // Inicialização mais robusta com timeout
-  // try {
-  //   await SupabaseService.initialize().timeout(
-  //     const Duration(seconds: 10),
-  //     onTimeout: () {
-  //       print('⏰ Timeout na inicialização do Supabase - continuando offline');
-  //       return;
-  //     },
-  //   );
-  //   print('✅ Supabase initialized successfully');
-  // } catch (error) {
-  //   print('❌ Error initializing Supabase: $error - continuando offline');
-  // }
+  try {
+    await SupabaseService.initialize().timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        print('⏰ Timeout na inicialização do Supabase - continuando offline');
+        return;
+      },
+    );
+    print('✅ Supabase initialized successfully');
+  } catch (error) {
+    print('❌ Error initializing Supabase: $error - continuando offline');
+    print('ℹ️  App funcionará em modo offline');
+  }
   
   runApp(const BuiltWithScienceApp());
 }
