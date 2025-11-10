@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dashboard_screen.dart';
 
 class SimpleHomeScreen extends StatelessWidget {
   const SimpleHomeScreen({super.key});
@@ -145,6 +146,12 @@ class SimpleHomeScreen extends StatelessWidget {
         onTap: () {
           if (route == '/programs' || route == '/profile') {
             Navigator.pushNamed(context, route);
+          } else if (route == '/progress') {
+            // Abrir Dashboard de Consistência
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardScreen()),
+            );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('$title feature coming soon!')),
