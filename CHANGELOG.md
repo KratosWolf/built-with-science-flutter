@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2025-11-10
+
+### Added
+- Dashboard de Consistência com dados locais do SharedPreferences
+- Calendário estilo GitHub contributions (últimos 90 dias)
+- Card de Streak: dias consecutivos de treino
+- Card de Total: treinos nos últimos 30 dias
+- Card de Último Treino: data do treino mais recente
+- Cores do GitHub para visualização de frequência (5 níveis)
+- Tooltips nos quadrados do calendário
+- Estado vazio com mensagem motivacional
+- Navegação integrada no HomeScreen (botão "View History")
+
+### Changed
+- HomeScreen: botão "View History" agora abre Dashboard funcional
+- Removido import não utilizado (supabase_service)
+
+### Features
+- Sistema 100% offline (apenas SharedPreferences)
+- Cálculo automático de métricas de consistência
+- UI responsiva com scroll horizontal no calendário
+- Performance otimizada (cálculos em memória)
+
 ## [4.3.0] - 2024-11-09
 
 ### Added
@@ -127,6 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### APK Releases
 All APK files are available in the `releases/` directory:
+- v4.4: `BuiltWithScience_v4.4_DASHBOARD.apk` (21MB)
 - v4.3: `BuiltWithScience_v4.3_TIMER_OPTIONS.apk`
 - v4.2: `BuiltWithScience_v4.2_SPOTIFY_FIX.apk`
 - v4.1: `BuiltWithScience_v4.1_OFFLINE_MODE.apk`
@@ -144,4 +168,4 @@ All APK files are available in the `releases/` directory:
 
 ---
 
-*Last updated: November 9, 2024*
+*Last updated: November 10, 2025*

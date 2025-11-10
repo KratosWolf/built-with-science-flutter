@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/supabase_service.dart';
+import 'dashboard_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -92,9 +92,9 @@ class HomeScreen extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              // TODO: Implementar histórico
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Histórico em desenvolvimento')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => DashboardScreen()),
                               );
                             },
                             style: OutlinedButton.styleFrom(
