@@ -39,17 +39,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
         _isLoading = false;
       });
       
-      // Listen for auth state changes
+      // Listen for auth state changes (stub - won't emit any events in offline mode)
       _authSubscription = SupabaseService.instance.authStateChanges.listen(
         (authState) {
-          final user = authState.session?.user;
-          final isAuthenticated = user != null;
-          
-          print('🔄 Auth state changed: ${isAuthenticated ? 'Logado' : 'Deslogado'}');
-          
+          // In offline mode, this stream is empty and won't emit events
+          // But keep the listener for future Supabase re-activation
+          print('🔄 Auth state changed: Modo offline ativo');
+
           if (mounted) {
             setState(() {
-              _showLoginScreen = !isAuthenticated;
+              _showLoginScreen = true; // Always show login in offline mode
             });
           }
         },
