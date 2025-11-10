@@ -1,271 +1,260 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/background_timer_service.dart';
 
 class RestTimerWidget extends StatefulWidget {
-  final int seconds;
-  final VoidCallback onComplete;
-  final VoidCallback onSkip;
+  final VoidCallback? onTimerComplete;
 
-  const RestTimerWidget({
-    super.key,
-    required this.seconds,
-    required this.onComplete,
-    required this.onSkip,
-  });
+  const RestTimerWidget({Key? key, this.onTimerComplete}) : super(key: key);
 
   @override
-  State<RestTimerWidget> createState() => _RestTimerWidgetState();
+  _RestTimerWidgetState createState() => _RestTimerWidgetState();
 }
 
-class _RestTimerWidgetState extends State<RestTimerWidget>
-    with TickerProviderStateMixin {
-  late int _remainingSeconds;
+class _RestTimerWidgetState extends State<RestTimerWidget> {
   Timer? _timer;
-  late AnimationController _pulseController;
-  late AnimationController _progressController;
-  bool _isPaused = false;
+  int _selectedSeconds = 60; // Padrão 60s
+  int _currentSeconds = 0;
+  bool _isRunning = false;
+
+  // OPÇÕES DE TEMPO
+  final List<int> _timeOptions = [60, 75, 90];
+  final Map<int, String> _timeLabels = {
+    60: '1:00',
+    75: '1:15',
+    90: '1:30',
+  };
 
   @override
   void initState() {
     super.initState();
-    _remainingSeconds = widget.seconds;
-    
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1000),
-      vsync: this,
-    )..repeat(reverse: true);
-    
-    _progressController = AnimationController(
-      duration: Duration(seconds: widget.seconds),
-      vsync: this,
-    );
-    
-    _startTimer();
+    _loadPreferredTime();
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _pulseController.dispose();
-    _progressController.dispose();
-    super.dispose();
+  // Carregar última preferência
+  Future<void> _loadPreferredTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedSeconds = prefs.getInt('preferred_rest_time') ?? 60;
+      _currentSeconds = _selectedSeconds;
+    });
+  }
+
+  // Salvar preferência
+  Future<void> _savePreferredTime(int seconds) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('preferred_rest_time', seconds);
   }
 
   void _startTimer() {
-    _progressController.forward();
-    
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingSeconds > 0) {
+    if (_isRunning) return;
+
+    setState(() {
+      _isRunning = true;
+      _currentSeconds = _selectedSeconds;
+    });
+
+    // Usar o BackgroundTimerService para continuar em background
+    BackgroundTimerService.startRestTimer(
+      _selectedSeconds,
+      onComplete: () {
+        if (mounted) {
+          setState(() {
+            _isRunning = false;
+            _currentSeconds = _selectedSeconds;
+          });
+          widget.onTimerComplete?.call();
+        }
+      },
+    );
+
+    // Timer local para atualizar UI
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
         setState(() {
-          _remainingSeconds--;
+          _currentSeconds--;
+          if (_currentSeconds <= 0) {
+            _isRunning = false;
+            _currentSeconds = _selectedSeconds;
+            timer.cancel();
+          }
         });
-        
-        // Vibração nos últimos 3 segundos
-        if (_remainingSeconds <= 3 && _remainingSeconds > 0) {
-          HapticFeedback.mediumImpact();
-        }
-        
-        // Timer completo
-        if (_remainingSeconds == 0) {
-          HapticFeedback.heavyImpact();
-          timer.cancel();
-          widget.onComplete();
-        }
       }
     });
   }
 
-  void _pauseResumeTimer() {
-    if (_isPaused) {
-      _startTimer();
-      _progressController.forward();
-    } else {
-      _timer?.cancel();
-      _progressController.stop();
-    }
-    
+  void _stopTimer() {
+    _timer?.cancel();
+    BackgroundTimerService.cancelTimer();
     setState(() {
-      _isPaused = !_isPaused;
+      _isRunning = false;
+      _currentSeconds = _selectedSeconds;
     });
-  }
-
-  void _addTime(int seconds) {
-    setState(() {
-      _remainingSeconds += seconds;
-    });
-    HapticFeedback.selectionClick();
   }
 
   String _formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+    int minutes = seconds ~/ 60;
+    int secs = seconds % 60;
+    return '$minutes:${secs.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black.withOpacity(0.8),
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(32),
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.all(16),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // TÍTULO
+            Text(
+              'REST TIMER',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
+            ),
+            SizedBox(height: 8),
+
+            // SELETOR DE TEMPO (só aparece quando parado)
+            if (!_isRunning) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _timeOptions.map((seconds) {
+                  bool isSelected = _selectedSeconds == seconds;
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: ChoiceChip(
+                      label: Text(
+                        _timeLabels[seconds]!,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      selected: isSelected,
+                      selectedColor: Theme.of(context).primaryColor,
+                      onSelected: (selected) {
+                        if (selected && !_isRunning) {
+                          setState(() {
+                            _selectedSeconds = seconds;
+                            _currentSeconds = seconds;
+                          });
+                          _savePreferredTime(seconds);
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+              SizedBox(height: 16),
+            ],
+
+            // DISPLAY DO TIMER
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _isRunning
+                    ? (_currentSeconds <= 10 ? Colors.red : Theme.of(context).primaryColor)
+                    : Colors.grey[300]!,
+                  width: 4,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  _formatTime(_currentSeconds),
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: _isRunning
+                      ? (_currentSeconds <= 10 ? Colors.red : Colors.black87)
+                      : Colors.grey[600],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+
+            // BOTÕES
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // BOTÃO START/STOP
+                ElevatedButton.icon(
+                  onPressed: _isRunning ? _stopTimer : _startTimer,
+                  icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow),
+                  label: Text(_isRunning ? 'PARAR' : 'INICIAR'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _isRunning ? Colors.red : Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  ),
+                ),
+
+                // BOTÃO SKIP (só quando rodando)
+                if (_isRunning) ...[
+                  SizedBox(width: 16),
+                  OutlinedButton(
+                    onPressed: () {
+                      _stopTimer();
+                      widget.onTimerComplete?.call();
+                    },
+                    child: Text('PULAR'),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+
+            // DICA
+            if (!_isRunning) ...[
+              SizedBox(height: 12),
+              Text(
+                'Escolha o tempo de descanso acima',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Título
+
+            // INDICADOR BACKGROUND
+            if (_isRunning) ...[
+              SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.timer,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
+                  Icon(Icons.info_outline, size: 14, color: Colors.blue),
+                  SizedBox(width: 4),
                   Text(
-                    'Descanso',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Timer circular
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Progress ring
-                  SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: AnimatedBuilder(
-                      animation: _progressController,
-                      builder: (context, child) {
-                        return CircularProgressIndicator(
-                          value: 1 - _progressController.value,
-                          strokeWidth: 8,
-                          backgroundColor: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                          valueColor: AlwaysStoppedAnimation(
-                            _remainingSeconds <= 10 
-                                ? Colors.red 
-                                : Theme.of(context).colorScheme.secondary,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  
-                  // Timer text
-                  AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _remainingSeconds <= 3 
-                            ? 1.0 + (_pulseController.value * 0.1)
-                            : 1.0,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _formatTime(_remainingSeconds),
-                              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: _remainingSeconds <= 10 
-                                    ? Colors.red 
-                                    : Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            if (_remainingSeconds <= 3 && _remainingSeconds > 0)
-                              Text(
-                                'Prepare-se!',
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Botões de controle de tempo
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildTimeButton('-30s', () => _addTime(-30)),
-                  _buildTimeButton('-10s', () => _addTime(-10)),
-                  _buildTimeButton('+10s', () => _addTime(10)),
-                  _buildTimeButton('+30s', () => _addTime(30)),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Botões de ação
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _pauseResumeTimer,
-                      icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
-                      label: Text(_isPaused ? 'Retomar' : 'Pausar'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: widget.onSkip,
-                      icon: const Icon(Icons.skip_next),
-                      label: const Text('Pular'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.secondary,
-                        foregroundColor: Colors.white,
-                      ),
+                    'Timer continua no background',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue,
                     ),
                   ),
                 ],
               ),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildTimeButton(String label, VoidCallback onPressed) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        minimumSize: const Size(60, 36),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-      ),
-    );
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 }

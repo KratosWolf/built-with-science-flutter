@@ -39,18 +39,22 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.1.12
   
-  # Supabase - Versão completa com Flutter integration
-  supabase_flutter: ^1.10.25
-  supabase: ^1.11.11
-  
-  # Para Google Sign-in
-  google_sign_in: ^6.1.5
+  # Supabase - TEMPORARIAMENTE DESABILITADO (comentado para build)
+  # supabase_flutter: ^2.10.3
+  # supabase: ^2.10.0
+
+  # Para Google Sign-in - TEMPORARIAMENTE DESABILITADO
+  # google_sign_in: ^6.1.5
   
   # HTTP requests
   http: ^1.2.2
   
   # File picker and permissions for backup system
   permission_handler: ^11.3.1
+
+  # Background timer e vibração
+  vibration: ^1.8.4
+  wakelock_plus: ^1.1.4
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +66,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+
+# Fix dependency conflicts
+dependency_overrides:
+  package_info_plus: 8.0.0
+  device_info_plus: 10.1.2
+  wakelock_plus: 1.1.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

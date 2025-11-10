@@ -7,6 +7,7 @@ import '../widgets/exercise_tracking_widget.dart';
 import '../widgets/superset_tracking_widget.dart';
 import '../widgets/rest_timer_widget.dart';
 import '../services/supabase_service.dart';
+import '../services/background_timer_service.dart';
 
 class WorkoutTrackingScreen extends StatefulWidget {
   final int programId;
@@ -26,7 +27,8 @@ class WorkoutTrackingScreen extends StatefulWidget {
   State<WorkoutTrackingScreen> createState() => _WorkoutTrackingScreenState();
 }
 
-class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
+class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
+    with WidgetsBindingObserver {
   List<Exercise> _exercises = [];
   int _currentExerciseIndex = 0;
   bool _isLoading = true;
@@ -34,14 +36,125 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   DateTime? _workoutStartTime;
   Map<int, List<WorkoutSet>> _completedSets = {};
   bool _showRestTimer = false;
-  int _restSeconds = 0;
 
   @override
   void initState() {
     super.initState();
+    // Observar mudanças de lifecycle (IMPORTANTE para Spotify fix!)
+    WidgetsBinding.instance.addObserver(this);
+    // Inicializar serviço de timer em background
+    BackgroundTimerService.initialize();
     _cleanOldCache(); // Limpar cache antigo
     _loadWorkout();
     _debugShowAllCachedData(); // Debug: mostrar todos os dados salvos
+  }
+
+  @override
+  void dispose() {
+    // Remover observer
+    WidgetsBinding.instance.removeObserver(this);
+    // Limpar timer se estiver rodando
+    BackgroundTimerService.cancelTimer();
+    super.dispose();
+  }
+
+  /// PRINCIPAL: Detectar quando app vai pra background (ex: Spotify)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.paused:
+        // Indo pro Spotify/background
+        print('📱 App indo para background - Timer continua rodando');
+        _saveWorkoutStateToCache(); // Salvar estado atual
+        break;
+
+      case AppLifecycleState.resumed:
+        // Voltando do Spotify
+        print('✅ App retornado - Restaurando estado');
+        _restoreWorkoutStateFromCache(); // Restaurar estado
+        setState(() {}); // Atualizar UI
+        break;
+
+      case AppLifecycleState.inactive:
+        // Transição, não fazer nada
+        break;
+
+      case AppLifecycleState.detached:
+        // App sendo destruído
+        print('🔴 App sendo fechado - Salvando tudo');
+        _saveWorkoutStateToCache();
+        break;
+
+      case AppLifecycleState.hidden:
+        // Android 15 - nova state
+        print('🔒 App hidden - Quick save');
+        _saveWorkoutStateToCache();
+        break;
+    }
+  }
+
+  /// Salvar estado do workout no cache para recuperar após voltar do background
+  Future<void> _saveWorkoutStateToCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Salvar índice do exercício atual
+      await prefs.setInt('current_workout_exercise_index', _currentExerciseIndex);
+
+      // Salvar tempo de início do workout
+      if (_workoutStartTime != null) {
+        await prefs.setString('current_workout_start_time', _workoutStartTime!.toIso8601String());
+      }
+
+      // Salvar status do timer
+      if (BackgroundTimerService.isRunning) {
+        await prefs.setInt('rest_timer_remaining', BackgroundTimerService.remainingSeconds);
+      } else {
+        await prefs.remove('rest_timer_remaining');
+      }
+
+      print('💾 Estado do workout salvo - Exercício: $_currentExerciseIndex');
+    } catch (e) {
+      print('❌ Erro ao salvar estado: $e');
+    }
+  }
+
+  /// Restaurar estado do workout do cache
+  Future<void> _restoreWorkoutStateFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Restaurar índice do exercício
+      final savedIndex = prefs.getInt('current_workout_exercise_index');
+      if (savedIndex != null && savedIndex < _exercises.length) {
+        setState(() {
+          _currentExerciseIndex = savedIndex;
+        });
+        print('🔄 Exercício restaurado: $savedIndex');
+      }
+
+      // Restaurar tempo de início
+      final savedStartTime = prefs.getString('current_workout_start_time');
+      if (savedStartTime != null) {
+        _workoutStartTime = DateTime.parse(savedStartTime);
+        print('🔄 Tempo de início restaurado');
+      }
+
+      // Restaurar timer se estava rodando
+      final remainingSeconds = prefs.getInt('rest_timer_remaining');
+      if (remainingSeconds != null && remainingSeconds > 0) {
+        setState(() {
+          _showRestTimer = true;
+          // Nota: O novo RestTimerWidget gerencia o tempo internamente
+          // O usuário pode reselecionar o tempo preferido (60s, 75s, 90s)
+        });
+        print('🔄 Timer restaurado - usuário pode reselecionar tempo');
+      }
+    } catch (e) {
+      print('❌ Erro ao restaurar estado: $e');
+    }
   }
   
   Future<void> _debugShowAllCachedData() async {
@@ -112,18 +225,18 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     // Selecionar exercícios baseados no programa real do usuário
     // IMPORTANTE: exercises array índices começam em 0, mas IDs começam em 1
     // Então exercício com ID 1 está no índice 0, ID 7 está no índice 6, etc.
-    if (widget.dayId == 1) { // Full Body A - 8 exercícios exatos do SQL
+    if (widget.dayId == 1) { // Full Body A - 8 exercícios corretos baseados no CSV
       exercises = [
         MockData.exercises[0], // Barbell Bench Press (id: 1, index: 0)
-        MockData.exercises[6], // Barbell Romanian Deadlift (id: 7, index: 6)  
+        MockData.exercises[6], // Barbell Romanian Deadlift (id: 7, index: 6)
         MockData.exercises[9], // (Weighted) Pull-Ups (id: 10, index: 9)
         MockData.exercises[16], // Walking Lunges (quad focus) (id: 17, index: 16)
-        // Superset A
-        MockData.exercises[21], // Standing Mid-Chest Cable Fly (id: 22, index: 21)
-        MockData.exercises[26], // Dumbbell Lateral Raise (id: 27, index: 26)
-        // Superset B
-        MockData.exercises[31], // Single Leg Weighted Calf Raise (id: 32, index: 31)
-        MockData.exercises[35], // Standing Face Pulls (id: 36, index: 35)
+        // Superset A: A1 ↔ A2
+        MockData.exercises[21], // Standing Mid-Chest Cable Fly (A1)
+        MockData.exercises[26], // Dumbbell Lateral Raise (A2)
+        // Superset B: B1 ↔ B2
+        MockData.exercises[31], // Single Leg Weighted Calf Raise (B1) - Index 31 = id 32 - CORRIGIDO!
+        MockData.exercises[35], // Standing Face Pulls (B2)
       ];
     } else if (widget.dayId == 2) { // Full Body B - 8 exercícios corretos do CSV
       exercises = [
@@ -363,9 +476,10 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
   }
 
   void _startRestTimer(int seconds) {
+    // Ignorar o parâmetro seconds - o novo RestTimerWidget gerencia o tempo internamente
+    // com opções selecionáveis de 60s, 75s e 90s
     setState(() {
       _showRestTimer = true;
-      _restSeconds = seconds;
     });
   }
 
@@ -373,25 +487,37 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     setState(() {
       _showRestTimer = false;
     });
-    HapticFeedback.mediumImpact();
+    // Vibração já é feita pelo BackgroundTimerService
+    // HapticFeedback.mediumImpact(); <- Removido para evitar dupla vibração
   }
 
   void _nextExercise() {
+    print('🚀 _nextExercise chamado - índice atual: $_currentExerciseIndex, total exercícios: ${_exercises.length}');
+
     if (_currentExerciseIndex < _exercises.length - 1) {
       setState(() {
         // Lógica especial para Super Sets baseada no treino
         if (widget.dayId == 1) { // Full Body A
+          print('🏃 Navegação Full Body A - índice atual: $_currentExerciseIndex');
+          print('📋 Exercício atual: ${_exercises[_currentExerciseIndex].name}');
+
           if (_currentExerciseIndex == 4) {
-            _currentExerciseIndex = 6; // Pular para Superset B
+            print('✅ SuperSet A completo - indo para SuperSet B (índice 6)');
+            _currentExerciseIndex = 6; // Ir para Superset B após completar Superset A
+            print('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
           } else if (_currentExerciseIndex == 6) {
-            _completeWorkout(); // Fim do treino
+            print('🏁 SuperSet B completo - finalizando treino');
+            _completeWorkout(); // Fim do treino após Superset B
             return;
           } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
-            // Voltar para início do superset respectivo
+            // Se estiver em exercício não principal do superset, voltar ao principal
+            print('⚠️ Exercício secundário de SuperSet - voltando ao principal');
             if (_currentExerciseIndex == 5) _currentExerciseIndex = 4;
             else _currentExerciseIndex = 6;
           } else {
+            print('➡️ Navegação normal - próximo exercício');
             _currentExerciseIndex++; // Navegação normal
+            print('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
           }
         } else if (widget.dayId == 2) { // Full Body B
           if (_currentExerciseIndex == 3) {
@@ -725,8 +851,9 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
     }
 
     final currentExercise = _exercises[_currentExerciseIndex];
-  final isInSuperset = _isInSuperset(_currentExerciseIndex);
-  final supersetPair = _getSupersetPair(_currentExerciseIndex);
+    final isInSuperset = _isInSuperset(_currentExerciseIndex);
+    final supersetPair = _getSupersetPair(_currentExerciseIndex);
+
 
     return Scaffold(
       appBar: AppBar(
@@ -738,9 +865,15 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(isInSuperset && supersetPair != null 
-                  ? '${widget.dayName} - ${supersetPair['name']}'
-                  : '${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})'),
+              Flexible(
+                child: Text(
+                  isInSuperset && supersetPair != null
+                      ? '${widget.dayName} - ${supersetPair['name']}'
+                      : '${widget.dayName} (${_currentExerciseIndex + 1}/${_exercises.length})',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
               const Icon(Icons.arrow_drop_down, size: 24),
             ],
           ),
@@ -828,6 +961,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
                 Expanded(
                   child: isInSuperset && supersetPair != null
                       ? SupersetTrackingWidget(
+                          key: Key('superset_${_currentExerciseIndex}'), // FORÇA REBUILD QUANDO MUDA ÍNDICE
                           exerciseA: supersetPair['exerciseA'],
                           exerciseB: supersetPair['exerciseB'],
                           completedSetsA: _completedSets[supersetPair['exerciseA'].id] ?? [],
@@ -837,6 +971,33 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
                           },
                           onRestNeeded: (seconds) {
                             _startRestTimer(seconds);
+                          },
+                          onSupersetCompleted: () {
+                            // SuperSet A completo (índice 4/5) -> ir para SuperSet B (índice 6)
+                            if (_currentExerciseIndex == 4 || _currentExerciseIndex == 5) {
+                              setState(() {
+                                _currentExerciseIndex = 6;
+                              });
+
+                              // Mostrar feedback visual
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('🎉 SuperSet A completo! Iniciando SuperSet B...'),
+                                  backgroundColor: Colors.green,
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // SuperSet B completo (índice 6/7) -> finalizar treino
+                            if (_currentExerciseIndex == 6 || _currentExerciseIndex == 7) {
+                              _completeWorkout();
+                              return;
+                            }
+
+                            // Caso inesperado
+                            _nextExercise();
                           },
                           onSkipSuperset: () {
                             // Pular para próximo exercício após o superset
@@ -902,9 +1063,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen> {
           // Rest Timer Overlay
           if (_showRestTimer)
             RestTimerWidget(
-              seconds: _restSeconds,
-              onComplete: _onRestTimerComplete,
-              onSkip: () => setState(() => _showRestTimer = false),
+              onTimerComplete: _onRestTimerComplete,
             ),
         ],
       ),

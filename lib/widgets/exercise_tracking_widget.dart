@@ -111,19 +111,29 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
   void _prefillFromCache() {
     if (_lastWorkoutData == null) return;
 
-    // Pré-preencher apenas sets que não foram completados ainda
-    for (int setNumber = 1; setNumber <= _maxSets; setNumber++) {
-      if (!_isSetCompleted(setNumber) && _lastWorkoutData!['set$setNumber'] != null) {
-        final lastSet = _lastWorkoutData!['set$setNumber'];
+    // 1. Restaurar variação selecionada
+    if (_lastWorkoutData!['variationId'] != null) {
+      final savedVariationId = _lastWorkoutData!['variationId'];
+      _selectedVariation = _variations.firstWhere(
+        (v) => v.id == savedVariationId,
+        orElse: () => _variations.first,
+      );
+      print('🔄 Variação restaurada: ${_selectedVariation?.variationName}');
+    }
 
-        // Pré-preencher com dados do último treino (set 3)
-        if (_lastWorkoutData!['lastSet3'] != null) {
-          final lastSet3 = _lastWorkoutData!['lastSet3'];
+    // 2. Pré-preencher dados do último treino (peso, reps, dificuldade)
+    if (_lastWorkoutData!['lastSet3'] != null) {
+      final lastSet3 = _lastWorkoutData!['lastSet3'];
+
+      for (int setNumber = 1; setNumber <= _maxSets; setNumber++) {
+        if (!_isSetCompleted(setNumber)) {
           _weightControllers[setNumber]!.text = lastSet3['weight']?.toString() ?? '';
           _repsControllers[setNumber]!.text = lastSet3['reps']?.toString() ?? '';
           _difficulties[setNumber] = lastSet3['difficulty'] ?? 'Perfeito';
+          _notesControllers[setNumber]!.text = lastSet3['notes']?.toString() ?? '';
         }
       }
+      print('🔄 Dados restaurados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
     }
 
     setState(() {}); // Atualizar UI
@@ -142,6 +152,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
           'weight': lastSet.weightKg,
           'reps': lastSet.reps,
           'difficulty': lastSet.difficulty,
+          'notes': _notesControllers[3]?.text ?? '',
           'date': DateTime.now().toIso8601String(),
         },
         'variationId': _selectedVariation?.id,
@@ -366,7 +377,10 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontSize: 12,
                               ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -398,7 +412,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
           // Seletor de variações
           if (_variations.length > 1) ...[
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
@@ -419,15 +433,19 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                   DropdownButtonFormField<ExerciseVariation>(
                     value: _selectedVariation,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    items: _variations.map((variation) => 
+                    items: _variations.map((variation) =>
                       DropdownMenuItem<ExerciseVariation>(
                         value: variation,
-                        child: Text(variation.variationName),
+                        child: Text(
+                          variation.variationName,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       )
                     ).toList(),
                     onChanged: (newVariation) {

@@ -72,11 +72,11 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         _error = null;
       });
 
-      // Load statistics from Supabase
-      final stats = await // SupabaseService.getUserStatistics();
-      final recentPRs = await // SupabaseService.getRecentPersonalRecords(limit: 5);
-      final exerciseProgress = await // SupabaseService.getExerciseProgressOverTime();
-      
+      // TODO: Load statistics from Supabase when implemented
+      final stats = <String, dynamic>{}; // SupabaseService.getUserStatistics();
+      final recentPRs = <PersonalRecord>[]; // SupabaseService.getRecentPersonalRecords(limit: 5);
+      final exerciseProgress = <String, double>{}; // SupabaseService.getExerciseProgressOverTime();
+
       setState(() {
         _totalWorkouts = stats['total_workouts'] ?? 0;
         _totalSets = stats['total_sets'] ?? 0;

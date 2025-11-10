@@ -14,6 +14,7 @@ class SupersetTrackingWidget extends StatefulWidget {
   final Function(WorkoutSet) onSetCompleted;
   final Function(int) onRestNeeded;
   final VoidCallback? onSkipSuperset;
+  final VoidCallback? onSupersetCompleted;
 
   const SupersetTrackingWidget({
     super.key,
@@ -24,6 +25,7 @@ class SupersetTrackingWidget extends StatefulWidget {
     required this.onSetCompleted,
     required this.onRestNeeded,
     this.onSkipSuperset,
+    this.onSupersetCompleted,
   });
 
   @override
@@ -100,6 +102,17 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     return _getExerciseName(_isExerciseA);
   }
 
+  // Método auxiliar para obter label do set atual (A1 ou A2)
+  String _getCurrentSetLabel(bool isA) {
+    // No padrão A1-A2-A1-A2-A1-A2:
+    // exerciseA sempre é A1, exerciseB sempre é A2
+    if (isA) {
+      return 'A1'; // Exercício A sempre é A1
+    } else {
+      return 'A2'; // Exercício B sempre é A2
+    }
+  }
+
   void _initializeControllers() {
     for (int i = 1; i <= 3; i++) {
       // Para exercício A
@@ -141,25 +154,25 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     // Determinar onde estamos na sequência do superset
     final setsA = widget.completedSetsA.length;
     final setsB = widget.completedSetsB.length;
-    
-    // Lógica: A1, B1, A2, B2, A3, B3
+
+    // Lógica: A1, A2, A1, A2, A1, A2 (alternando entre exercícios A e B)
     if (setsA == 0 && setsB == 0) {
-      _isExerciseA = true;
+      _isExerciseA = true; // Começar com A1
       _currentSetNumber = 1;
     } else if (setsA == 1 && setsB == 0) {
-      _isExerciseA = false; // Próximo é B1
+      _isExerciseA = false; // Próximo é A2 (que é exerciseB)
       _currentSetNumber = 1;
     } else if (setsA == 1 && setsB == 1) {
-      _isExerciseA = true; // Próximo é A2
+      _isExerciseA = true; // Próximo é A1 novamente
       _currentSetNumber = 2;
     } else if (setsA == 2 && setsB == 1) {
-      _isExerciseA = false; // Próximo é B2
+      _isExerciseA = false; // Próximo é A2 novamente
       _currentSetNumber = 2;
     } else if (setsA == 2 && setsB == 2) {
-      _isExerciseA = true; // Próximo é A3
+      _isExerciseA = true; // Próximo é A1 final
       _currentSetNumber = 3;
     } else if (setsA == 3 && setsB == 2) {
-      _isExerciseA = false; // Próximo é B3
+      _isExerciseA = false; // Próximo é A2 final
       _currentSetNumber = 3;
     } else {
       // Superset completo ou estado inconsistente
@@ -215,8 +228,16 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
           _isExerciseA = true;
           _currentSetNumber++;
         } else {
-          // Superset completo
+          // Superset completo - chegamos ao final da sequência (B3)
+          print('🎉 SuperSet completo! Chegamos no final da sequência');
+          print('📊 Status final - currentSetNumber: $_currentSetNumber, isExerciseA: $_isExerciseA');
+          print('📋 ExerciseA: ${widget.exerciseA.name}');
+          print('📋 ExerciseB: ${widget.exerciseB.name}');
+
           _showCompletionMessage();
+
+          // REMOVIDO: callback duplicado estava causando bug
+          // O callback será chamado apenas pelo botão manual na SnackBar
         }
       }
     });
@@ -225,9 +246,25 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   void _showCompletionMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('🎉 Superset completo! Próximo exercício...'),
+        content: Row(
+          children: [
+            const Text('🎉 Superset completo!'),
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                print('🔥 Botão manual pressionado - forçando próximo SuperSet');
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                widget.onSupersetCompleted?.call();
+              },
+              child: const Text(
+                'PRÓXIMO SUPERSET',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 5),
       ),
     );
   }
@@ -370,9 +407,9 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         color: Colors.blue.shade700,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'A1',
-                        style: TextStyle(
+                      child: Text(
+                        _getCurrentSetLabel(true),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 12,
@@ -400,10 +437,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       child: Text(
                         '${widget.exerciseA.sets} sets x ${widget.exerciseA.repsTarget} reps',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -429,6 +468,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
+                      color: Colors.white,
                       border: Border.all(
                         color: Colors.blue.shade300,
                       ),
@@ -438,13 +478,29 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       value: _selectedVariationA,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                       items: _variationsA.map((variation) =>
                         DropdownMenuItem(
                           value: variation,
-                          child: Text(
-                            variation.variationName,
-                            style: const TextStyle(fontSize: 14),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            child: Text(
+                              variation.variationName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         )
                       ).toList(),
@@ -470,6 +526,8 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         color: Colors.blue.shade800,
                         fontWeight: FontWeight.w500,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -502,9 +560,9 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         color: Colors.green.shade700,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'B1',
-                        style: TextStyle(
+                      child: Text(
+                        _getCurrentSetLabel(false),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                           fontSize: 12,
@@ -532,10 +590,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       child: Text(
                         '${widget.exerciseB.sets} sets x ${widget.exerciseB.repsTarget} reps',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -561,6 +621,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
+                      color: Colors.white,
                       border: Border.all(
                         color: Colors.green.shade300,
                       ),
@@ -570,13 +631,29 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       value: _selectedVariationB,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      dropdownColor: Colors.white,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                       items: _variationsB.map((variation) =>
                         DropdownMenuItem(
                           value: variation,
-                          child: Text(
-                            variation.variationName,
-                            style: const TextStyle(fontSize: 14),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                            ),
+                            child: Text(
+                              variation.variationName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         )
                       ).toList(),
@@ -602,6 +679,8 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         color: Colors.green.shade800,
                         fontWeight: FontWeight.w500,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -636,15 +715,15 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   children: [
                     _buildSequenceIndicator('A1', _isSetCompleted('A', 1)),
                     _buildArrow(),
-                    _buildSequenceIndicator('B1', _isSetCompleted('B', 1)),
+                    _buildSequenceIndicator('A2', _isSetCompleted('B', 1)),
                     _buildArrow(),
-                    _buildSequenceIndicator('A2', _isSetCompleted('A', 2)),
+                    _buildSequenceIndicator('A1', _isSetCompleted('A', 2)),
                     _buildArrow(),
-                    _buildSequenceIndicator('B2', _isSetCompleted('B', 2)),
+                    _buildSequenceIndicator('A2', _isSetCompleted('B', 2)),
                     _buildArrow(),
-                    _buildSequenceIndicator('A3', _isSetCompleted('A', 3)),
+                    _buildSequenceIndicator('A1', _isSetCompleted('A', 3)),
                     _buildArrow(),
-                    _buildSequenceIndicator('B3', _isSetCompleted('B', 3)),
+                    _buildSequenceIndicator('A2', _isSetCompleted('B', 3)),
                   ],
                 ),
               ],
@@ -676,7 +755,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'AGORA: ${_isExerciseA ? "A" : "B"}$_currentSetNumber',
+                        'AGORA: ${_isExerciseA ? "A1" : "A2"}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -690,6 +769,8 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
                       ),
                     ),
                   ],
@@ -770,15 +851,17 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     onPressed: _completeCurrentSet,
                     icon: const Icon(Icons.check_circle),
                     label: Text(
-                      _isExerciseA && _currentSetNumber < 3 
-                          ? 'Completar e ir para ${otherExercise.name.split(' ').first}...'
+                      _isExerciseA && _currentSetNumber < 3
+                          ? 'Próximo (A2)'
                           : !_isExerciseA && _currentSetNumber == 3
                               ? 'Finalizar Super Set'
                               : 'Completar Set',
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -867,7 +950,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     HapticFeedback.selectionClick();
                   },
                   icon: Icon(_isExerciseA ? Icons.arrow_forward : Icons.arrow_back),
-                  label: Text('Ir para ${_isExerciseA ? "B" : "A"}$_currentSetNumber'),
+                  label: Text('Ir para ${_isExerciseA ? "A2" : "A1"}'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.secondary,
                     side: BorderSide(
@@ -884,9 +967,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   }
 
   Widget _buildSequenceIndicator(String label, bool completed) {
-    final isActive = (_isExerciseA && label.startsWith('A') && label.endsWith(_currentSetNumber.toString())) ||
-                     (!_isExerciseA && label.startsWith('B') && label.endsWith(_currentSetNumber.toString()));
-    
+    // No padrão A1-A2-A1-A2-A1-A2:
+    // - _isExerciseA = true significa A1
+    // - _isExerciseA = false significa A2
+    final isActive = (_isExerciseA && label == 'A1') ||
+                     (!_isExerciseA && label == 'A2');
+
     return Container(
       width: 32,
       height: 32,
@@ -935,10 +1021,46 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         _lastWorkoutDataB = jsonDecode(cacheDataB);
       }
 
-      setState(() {}); // Atualizar UI com dados do cache
+      _prefillFromCache();
     } catch (e) {
       print('⚠️ Erro ao carregar cache do SuperSet: $e');
     }
+  }
+
+  void _prefillFromCache() {
+    // 1. Restaurar variação do exercício A
+    if (_lastWorkoutDataA != null && _lastWorkoutDataA!['variationId'] != null) {
+      final savedVariationId = _lastWorkoutDataA!['variationId'];
+      _selectedVariationA = _variationsA.firstWhere(
+        (v) => v.id == savedVariationId,
+        orElse: () => _variationsA.first,
+      );
+      print('🔄 Variação A restaurada: ${_selectedVariationA?.variationName}');
+    }
+
+    // 2. Restaurar variação do exercício B
+    if (_lastWorkoutDataB != null && _lastWorkoutDataB!['variationId'] != null) {
+      final savedVariationId = _lastWorkoutDataB!['variationId'];
+      _selectedVariationB = _variationsB.firstWhere(
+        (v) => v.id == savedVariationId,
+        orElse: () => _variationsB.first,
+      );
+      print('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
+    }
+
+    // 3. Dados do exercício A (apenas log por enquanto)
+    if (_lastWorkoutDataA != null && _lastWorkoutDataA!['lastSet3'] != null) {
+      final lastSet3 = _lastWorkoutDataA!['lastSet3'];
+      print('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+    }
+
+    // 4. Dados do exercício B (apenas log por enquanto)
+    if (_lastWorkoutDataB != null && _lastWorkoutDataB!['lastSet3'] != null) {
+      final lastSet3 = _lastWorkoutDataB!['lastSet3'];
+      print('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+    }
+
+    setState(() {}); // Atualizar UI
   }
 
   Future<void> _saveToCache(WorkoutSet lastSet, bool isExerciseA) async {

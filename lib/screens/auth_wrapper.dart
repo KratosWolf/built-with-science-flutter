@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
 import '../services/supabase_service.dart';
 import 'login_screen.dart';
-import 'simple_home.dart';
+import 'program_selection_screen.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -13,61 +13,87 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoading = true;
-  User? _user;
+  bool _showLoginScreen = true; // Start with login screen by default
+  StreamSubscription? _authSubscription;
 
   @override
   void initState() {
     super.initState();
-    _checkAuthState();
-    
-    // Listen to auth changes
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      if (mounted) {
-        setState(() {
-          _user = data.session?.user;
-        });
-      }
-    });
+    _initializeAuth();
   }
 
-  Future<void> _checkAuthState() async {
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initializeAuth() async {
     try {
-      final user = SupabaseService.instance.currentUser;
+      // Check initial auth state
+      final isLoggedIn = SupabaseService.instance.isLoggedIn;
+      print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
 
       setState(() {
-        _user = user;
+        _showLoginScreen = !isLoggedIn;
         _isLoading = false;
       });
-    } catch (e) {
-      // If there's an error, show auth screen
-      setState(() {
-        _user = null;
-        _isLoading = false;
-      });
+
+      // Listen for auth state changes (stub - won't emit any events in offline mode)
+      _authSubscription = SupabaseService.instance.authStateChanges.listen(
+        (authState) {
+          // In offline mode, this stream is empty and won't emit events
+          // But keep the listener for future Supabase re-activation
+          print('🔄 Auth state changed: Modo offline ativo');
+
+          if (mounted) {
+            setState(() {
+              _showLoginScreen = true; // Always show login in offline mode
+            });
+          }
+        },
+        onError: (error) {
+          print('❌ Erro no auth stream: $error');
+        },
+      );
+
+    } catch (error) {
+      print('❌ Erro na inicialização do auth: $error');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _showLoginScreen = true; // Default to login screen on error
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Mostrar loading durante verificação inicial (mais rápido)
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
+              Icon(
+                Icons.fitness_center,
+                size: 80,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 24),
+              CircularProgressIndicator(
+                color: Colors.white,
+              ),
+              const SizedBox(height: 16),
               Text(
-                '🧬 Built With Science',
-                style: TextStyle(
-                  fontSize: 24,
+                'Built With Science',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                'Loading your workout data...',
-                style: TextStyle(color: Colors.grey),
               ),
             ],
           ),
@@ -75,6 +101,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
       );
     }
 
-    return _user != null ? const SimpleHomeScreen() : const LoginScreen();
+    // Decidir qual tela mostrar baseado no status
+    if (_showLoginScreen) {
+      print('🔐 Mostrando tela de login');
+      return const LoginScreen();
+    } else {
+      print('🏠 Indo direto para o app');
+      return const ProgramSelectionScreen();
+    }
   }
 }

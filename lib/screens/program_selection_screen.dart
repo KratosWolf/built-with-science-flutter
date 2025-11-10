@@ -458,6 +458,8 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
                               ),
                               const SizedBox(height: 4),
                               Row(
@@ -481,12 +483,15 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    '${program.daysPerWeek} days/week',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w500,
+                                  Flexible(
+                                    child: Text(
+                                      '${program.daysPerWeek} days/week',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
@@ -521,6 +526,8 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                           color: Colors.grey.shade700,
                           height: 1.4,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -574,8 +581,10 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                           'View Program Details',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                            fontSize: 14,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: color,

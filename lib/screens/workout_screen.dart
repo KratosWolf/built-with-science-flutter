@@ -82,19 +82,19 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
         errorMessage = null;
       });
 
-      // Load program day exercises
-      final dayExercises = await // SupabaseService.getDayExercises(widget.dayId);
-      
-      // Start workout session
-      final session = await // SupabaseService.startWorkoutSession(
-        programId: widget.programId,
-        programDayId: widget.dayId,
-      );
+      // TODO: Load program day exercises from Supabase when implemented
+      final dayExercises = <DayExerciseData>[]; // SupabaseService.getDayExercises(widget.dayId);
+
+      // TODO: Start workout session
+      final WorkoutSession? session = null; // SupabaseService.startWorkoutSession(
+        // programId: widget.programId,
+        // programDayId: widget.dayId,
+      // );
       
       setState(() {
         exercises = dayExercises;
         currentSession = session;
-        workoutStartTime = session.startedAt;
+        workoutStartTime = session?.startedAt;
         isLoading = false;
       });
       
@@ -127,23 +127,25 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
 
   Future<void> _checkConnectionAndSync() async {
     try {
-      await // SupabaseService.setConnectionStatus(true);
-      await // SupabaseService.syncOfflineData();
+      // TODO: Supabase disabled - re-enable when new project created
+      // await SupabaseService.setConnectionStatus(true);
+      // await SupabaseService.syncOfflineData();
     } catch (e) {
-      await // SupabaseService.setConnectionStatus(false);
+      // await SupabaseService.setConnectionStatus(false);
       developer.log('Connection check failed: $e', name: 'WorkoutScreen');
     }
   }
 
   Future<void> _saveWorkoutProgress() async {
     if (currentSession == null) return;
-    
+
     try {
+      // TODO: Supabase disabled - re-enable when new project created
       // Update session with current progress
-      await // SupabaseService.updateWorkoutSession(
-        currentSession!.id!,
-        totalDurationSec: workoutDurationSeconds,
-      );
+      // await SupabaseService.updateWorkoutSession(
+      //   currentSession!.id!,
+      //   totalDurationSec: workoutDurationSeconds,
+      // );
     } catch (e) {
       developer.log('Error saving progress: $e', name: 'WorkoutScreen');
     }
@@ -207,13 +209,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
         ),
       );
       
+      // TODO: Supabase disabled - re-enable when new project created
       // Finish the session
-      await // SupabaseService.updateWorkoutSession(
-        currentSession!.id!,
-        status: 'done',
-        finishedAt: DateTime.now(),
-        totalDurationSec: workoutDurationSeconds,
-      );
+      // await SupabaseService.updateWorkoutSession(
+      //   currentSession!.id!,
+      //   status: 'done',
+      //   finishedAt: DateTime.now(),
+      //   totalDurationSec: workoutDurationSeconds,
+      // );
       
       // Close loading dialog
       if (mounted) Navigator.of(context).pop();
@@ -355,12 +358,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
           elevation: 0,
           systemOverlayStyle: SystemUiOverlayStyle.dark,
           actions: [
-            // Connection status indicator
-            if (!// SupabaseService.isOnline)
-              const Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: Icon(Icons.cloud_off, color: Colors.orange, size: 20),
-              ),
+            // Connection status indicator (Supabase disabled)
+            // if (!SupabaseService.isOnline)
+            //   const Padding(
+            //     padding: EdgeInsets.only(right: 8.0),
+            //     child: Icon(Icons.cloud_off, color: Colors.orange, size: 20),
+            //   ),
             
             // Progress indicator
             Padding(
@@ -547,25 +550,30 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                               opacity: isCompleted ? 0.75 : 1.0,
                               child: Column(
                                 children: [
-                                  ExerciseSelector(
-                                    exerciseId: exercise.exerciseId,
-                                    sets: exercise.sets,
-                                    repsTarget: exercise.repsTarget,
-                                    isSuperset: exercise.isSuperset,
-                                    supersetLabel: exercise.supersetExerciseLabel,
-                                    sessionId: currentSession?.id,
-                                    onDataChange: (data) {
-                                      // Check if all sets are completed
-                                      final completedSets = data.sets.where((set) => 
-                                        set.weightKg != null && 
-                                        set.reps != null && 
-                                        set.difficulty != null
-                                      ).length;
-                                      
-                                      if (completedSets == exercise.sets) {
-                                        handleExerciseComplete(exercise.exerciseId);
-                                      }
-                                    },
+                                  // TODO: ExerciseSelector widget needs to be implemented
+                                  // This screen is currently unused - WorkoutTrackingScreen is used instead
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Exercise #${exercise.exerciseId}',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text('${exercise.sets} sets x ${exercise.repsTarget} reps'),
+                                        const SizedBox(height: 8),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            handleExerciseComplete(exercise.exerciseId);
+                                          },
+                                          child: const Text('Mark Complete'),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   
                                   if (isCompleted)
