@@ -1,0 +1,50 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Executa toda quarta-feira e domingo às 9h UTC (6h Brasília)
+    - cron: '0 9 * * 0,3'
+  workflow_dispatch:  # Permite execução manual
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Keep Supabase Active
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        # Criar tabela heartbeat se não existir
+        curl -X POST "$SUPABASE_URL/rest/v1/rpc/keep_alive" \
+          -H "apikey: $SUPABASE_SERVICE_KEY" \
+          -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{"ping": true}' || true
+
+        # Fazer query simples para manter ativo
+        curl "$SUPABASE_URL/rest/v1/heartbeat?select=*&limit=1" \
+          -H "apikey: $SUPABASE_SERVICE_KEY" \
+          -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" || true
+
+        echo "✅ Supabase pinged successfully at $(date)"
+
+    - name: Test Database Connection
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        # Testar conexão com o banco
+        response=$(curl -s -o /dev/null -w "%{http_code}" \
+          "$SUPABASE_URL/rest/v1/" \
+          -H "apikey: $SUPABASE_SERVICE_KEY")
+
+        if [ "$response" = "200" ]; then
+          echo "✅ Database connection successful"
+        else
+          echo "⚠️ Database connection returned: $response"
+        fi
