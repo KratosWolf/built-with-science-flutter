@@ -24,7 +24,7 @@ jobs:
           -H "apikey: $SUPABASE_SERVICE_KEY" \
           -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
           -H "Content-Type: application/json" \
-          -d '{"ping": true}' || true
+          -d '{}' || true
 
         # Fazer query simples para manter ativo
         curl "$SUPABASE_URL/rest/v1/heartbeat?select=*&limit=1" \
