@@ -35,9 +35,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       try {
         isLoggedIn = SupabaseService.instance.isLoggedIn;
-        print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
+        debugPrint('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
       } catch (e) {
-        print('⚠️ Supabase não inicializado - continuando em modo offline');
+        debugPrint('⚠️ Supabase não inicializado - continuando em modo offline');
         isLoggedIn = false;
       }
 
@@ -50,7 +50,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       try {
         _authSubscription = SupabaseService.instance.authStateChanges.listen(
           (authState) {
-            print('🔄 Auth state changed');
+            debugPrint('🔄 Auth state changed');
 
             if (mounted) {
               final newIsLoggedIn = authState.session != null;
@@ -60,16 +60,16 @@ class _AuthWrapperState extends State<AuthWrapper> {
             }
           },
           onError: (error) {
-            print('❌ Erro no auth stream: $error');
+            debugPrint('❌ Erro no auth stream: $error');
           },
         );
       } catch (e) {
-        print('⚠️ Não foi possível ouvir auth changes: $e');
+        debugPrint('⚠️ Não foi possível ouvir auth changes: $e');
         // Continua sem o listener - não é crítico
       }
 
     } catch (error) {
-      print('❌ Erro na inicialização do auth: $error');
+      debugPrint('❌ Erro na inicialização do auth: $error');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -114,10 +114,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     
     // Decidir qual tela mostrar baseado no status
     if (_showLoginScreen) {
-      print('🔐 Mostrando tela de login');
+      debugPrint('🔐 Mostrando tela de login');
       return const LoginScreen();
     } else {
-      print('🏠 Usuário logado - indo para MainNavigation');
+      debugPrint('🏠 Usuário logado - indo para MainNavigation');
       // Usuário está logado, ir para MainNavigation (Home + Perfil)
       // TODO: No futuro, verificar se usuário já escolheu programa no banco
       return const MainNavigation();

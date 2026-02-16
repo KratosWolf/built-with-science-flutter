@@ -46,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Use mock profile on error
         _userProfile = UserProfile.mock();
       });
-      print('❌ Error loading profile: $e');
+      debugPrint('❌ Error loading profile: $e');
     }
   }
 

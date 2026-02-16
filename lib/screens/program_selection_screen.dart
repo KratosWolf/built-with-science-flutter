@@ -109,7 +109,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
       await prefs.setString('selected_program_name', program.name);
       await prefs.setInt('selected_program_days', program.daysPerWeek);
 
-      print('✅ Programa salvo localmente: ${program.name} (${program.daysPerWeek} dias)');
+      debugPrint('✅ Programa salvo localmente: ${program.name} (${program.daysPerWeek} dias)');
 
       // 2. SYNC COM SUPABASE (opcional, não bloqueia se falhar)
       if (SupabaseService.instance.isLoggedIn) {
@@ -119,12 +119,12 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
             programName: program.name,
             daysPerWeek: program.daysPerWeek,
           ).timeout(const Duration(seconds: 5));
-          print('✅ Programa sincronizado com Supabase');
+          debugPrint('✅ Programa sincronizado com Supabase');
         } catch (e) {
-          print('⚠️ Falhou sync Supabase (OK, salvo localmente): $e');
+          debugPrint('⚠️ Falhou sync Supabase (OK, salvo localmente): $e');
         }
       } else {
-        print('📱 Modo offline - programa salvo apenas localmente');
+        debugPrint('📱 Modo offline - programa salvo apenas localmente');
       }
 
       // 3. NAVEGAR PARA HOME (MainNavigation)
@@ -135,7 +135,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
         );
       }
     } catch (e) {
-      print('❌ Erro ao salvar programa: $e');
+      debugPrint('❌ Erro ao salvar programa: $e');
       // Mostrar erro ao usuário
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

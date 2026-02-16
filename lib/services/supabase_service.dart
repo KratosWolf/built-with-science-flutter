@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,10 +30,10 @@ class SupabaseService {
         anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrdHZmbGR5a216aHlucXRoYmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Nzg4NzAsImV4cCI6MjA3MTU1NDg3MH0.Nd2KdEGj8hQApxmTk8nkBM81R4ROJPhwRMtgPXadGVw',
       );
       instance._client = Supabase.instance.client;
-      print('✅ Supabase initialized successfully');
-      print('🔗 Connected to: gktvfldykmzhynqthbdn.supabase.co');
+      debugPrint('✅ Supabase initialized successfully');
+      debugPrint('🔗 Connected to: gktvfldykmzhynqthbdn.supabase.co');
     } catch (e) {
-      print('❌ Error initializing Supabase: $e');
+      debugPrint('❌ Error initializing Supabase: $e');
       rethrow;
     }
   }
@@ -46,12 +47,12 @@ class SupabaseService {
       );
 
       if (response.user != null) {
-        print('✅ Login successful: ${response.user!.email}');
+        debugPrint('✅ Login successful: ${response.user!.email}');
       }
 
       return response.user;
     } catch (e) {
-      print('❌ Login error: $e');
+      debugPrint('❌ Login error: $e');
       rethrow;
     }
   }
@@ -70,12 +71,12 @@ class SupabaseService {
       );
 
       if (response.user != null) {
-        print('✅ Registration successful: ${response.user!.email}');
+        debugPrint('✅ Registration successful: ${response.user!.email}');
       }
 
       return response.user;
     } catch (e) {
-      print('❌ Registration error: $e');
+      debugPrint('❌ Registration error: $e');
       rethrow;
     }
   }
@@ -84,7 +85,7 @@ class SupabaseService {
   /// Uses google_sign_in package for better UX (stays in app)
   Future<User?> signInWithGoogle() async {
     try {
-      print('🔵 [1/6] Iniciando Google Sign-In nativo...');
+      debugPrint('🔵 [1/6] Iniciando Google Sign-In nativo...');
 
       // Step 1: Configure Google Sign-In with Web Client ID
       // Using Web Client ID from current Firebase project (697794784510)
@@ -93,33 +94,33 @@ class SupabaseService {
         scopes: ['email', 'profile'],
       );
 
-      print('🔵 [2/6] Fazendo sign-in com Google...');
+      debugPrint('🔵 [2/6] Fazendo sign-in com Google...');
 
       // Step 2: Trigger Google Sign-In flow (opens Google account picker in-app)
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        print('⚠️ [CANCELADO] Usuário cancelou o login com Google');
+        debugPrint('⚠️ [CANCELADO] Usuário cancelou o login com Google');
         throw Exception('Login cancelado pelo usuário');
       }
 
-      print('🔵 [3/6] Usuário selecionado: ${googleUser.email}');
-      print('🔵 [4/6] Obtendo tokens de autenticação...');
+      debugPrint('🔵 [3/6] Usuário selecionado: ${googleUser.email}');
+      debugPrint('🔵 [4/6] Obtendo tokens de autenticação...');
 
       // Step 3: Get authentication tokens from Google
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.idToken == null) {
-        print('❌ ID Token não disponível');
+        debugPrint('❌ ID Token não disponível');
         throw Exception('Falha ao obter ID Token do Google');
       }
 
-      print('🔵 [5/6] Tokens obtidos com sucesso');
-      print('   - ID Token: ${googleAuth.idToken?.substring(0, 50)}...');
-      print('   - Access Token: ${googleAuth.accessToken != null ? "Presente" : "Ausente"}');
+      debugPrint('🔵 [5/6] Tokens obtidos com sucesso');
+      debugPrint('   - ID Token: ${googleAuth.idToken?.substring(0, 50)}...');
+      debugPrint('   - Access Token: ${googleAuth.accessToken != null ? "Presente" : "Ausente"}');
 
       // Step 4: Sign in to Supabase with Google ID token
-      print('🔵 [6/6] Autenticando no Supabase...');
+      debugPrint('🔵 [6/6] Autenticando no Supabase...');
       final AuthResponse response = await client.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: googleAuth.idToken!,
@@ -127,16 +128,16 @@ class SupabaseService {
       );
 
       if (response.user != null) {
-        print('✅ Login com Google bem-sucedido!');
-        print('   - Email: ${response.user!.email}');
-        print('   - Nome: ${response.user!.userMetadata?['full_name'] ?? 'N/A'}');
-        print('   - ID: ${response.user!.id}');
+        debugPrint('✅ Login com Google bem-sucedido!');
+        debugPrint('   - Email: ${response.user!.email}');
+        debugPrint('   - Nome: ${response.user!.userMetadata?['full_name'] ?? 'N/A'}');
+        debugPrint('   - ID: ${response.user!.id}');
       }
 
       return response.user;
     } catch (e) {
-      print('❌ Erro no login com Google: $e');
-      print('   Stack trace: ${StackTrace.current}');
+      debugPrint('❌ Erro no login com Google: $e');
+      debugPrint('   Stack trace: ${StackTrace.current}');
       rethrow;
     }
   }
@@ -145,10 +146,10 @@ class SupabaseService {
   Future<bool> resetPassword(String email) async {
     try {
       await client.auth.resetPasswordForEmail(email);
-      print('✅ Password reset email sent to: $email');
+      debugPrint('✅ Password reset email sent to: $email');
       return true;
     } catch (e) {
-      print('❌ Password reset error: $e');
+      debugPrint('❌ Password reset error: $e');
       rethrow;
     }
   }
@@ -157,9 +158,9 @@ class SupabaseService {
   Future<void> signOut() async {
     try {
       await client.auth.signOut();
-      print('✅ User signed out successfully');
+      debugPrint('✅ User signed out successfully');
     } catch (e) {
-      print('❌ Sign out error: $e');
+      debugPrint('❌ Sign out error: $e');
       rethrow;
     }
   }
@@ -172,7 +173,7 @@ class SupabaseService {
   ) async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - saving locally only');
+        debugPrint('⚠️ User not logged in - saving locally only');
         return false;
       }
 
@@ -190,10 +191,10 @@ class SupabaseService {
       };
 
       await client.from('workout_sets').insert(data);
-      print('✅ Workout set saved to cloud');
+      debugPrint('✅ Workout set saved to cloud');
       return true;
     } catch (e) {
-      print('❌ Error saving workout set: $e');
+      debugPrint('❌ Error saving workout set: $e');
       return false;
     }
   }
@@ -206,7 +207,7 @@ class SupabaseService {
   }) async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - session not saved to cloud');
+        debugPrint('⚠️ User not logged in - session not saved to cloud');
         return false;
       }
 
@@ -219,11 +220,11 @@ class SupabaseService {
       };
 
       await client.from('workout_sessions').insert(data);
-      print('✅ Workout session saved to cloud');
-      print('   📊 Program: $programId, Day: $dayId, Duration: ${durationSeconds}s');
+      debugPrint('✅ Workout session saved to cloud');
+      debugPrint('   📊 Program: $programId, Day: $dayId, Duration: ${durationSeconds}s');
       return true;
     } catch (e) {
-      print('❌ Error saving workout session: $e');
+      debugPrint('❌ Error saving workout session: $e');
       return false;
     }
   }
@@ -235,7 +236,7 @@ class SupabaseService {
   ) async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - returning empty data');
+        debugPrint('⚠️ User not logged in - returning empty data');
         return {};
       }
 
@@ -268,10 +269,10 @@ class SupabaseService {
         workoutData[exerciseId]!.add(workoutSet);
       }
 
-      print('✅ Loaded ${workoutData.length} exercises from cloud');
+      debugPrint('✅ Loaded ${workoutData.length} exercises from cloud');
       return workoutData;
     } catch (e) {
-      print('❌ Error loading workout data: $e');
+      debugPrint('❌ Error loading workout data: $e');
       return {};
     }
   }
@@ -298,9 +299,9 @@ class SupabaseService {
   Future<void> refreshSession() async {
     try {
       await client.auth.refreshSession();
-      print('✅ Session refreshed');
+      debugPrint('✅ Session refreshed');
     } catch (e) {
-      print('❌ Error refreshing session: $e');
+      debugPrint('❌ Error refreshing session: $e');
     }
   }
 
@@ -308,7 +309,7 @@ class SupabaseService {
   Future<UserProfile> getUserProfile() async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - returning mock profile');
+        debugPrint('⚠️ User not logged in - returning mock profile');
         return UserProfile.mock();
       }
 
@@ -324,7 +325,7 @@ class SupabaseService {
         stats: stats,
       );
     } catch (e) {
-      print('❌ Error getting user profile: $e');
+      debugPrint('❌ Error getting user profile: $e');
       return UserProfile.mock();
     }
   }
@@ -334,7 +335,7 @@ class SupabaseService {
   Future<UserStats> getUserStats({int? filterDays}) async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - returning empty stats');
+        debugPrint('⚠️ User not logged in - returning empty stats');
         return UserStats.empty();
       }
 
@@ -348,15 +349,15 @@ class SupabaseService {
       if (filterDays != null) {
         final startDate = DateTime.now().subtract(Duration(days: filterDays));
         query = query.gte('created_at', startDate.toIso8601String());
-        print('📊 Filtrando estatísticas: últimos $filterDays dias');
+        debugPrint('📊 Filtrando estatísticas: últimos $filterDays dias');
       } else {
-        print('📊 Carregando estatísticas: todos os tempos');
+        debugPrint('📊 Carregando estatísticas: todos os tempos');
       }
 
       final response = await query.order('created_at', ascending: true);
 
       if (response.isEmpty) {
-        print('ℹ️  No workout data found - returning empty stats');
+        debugPrint('ℹ️  No workout data found - returning empty stats');
         return UserStats.empty();
       }
 
@@ -378,7 +379,7 @@ class SupabaseService {
         memberSince: memberSince,
       );
     } catch (e) {
-      print('❌ Error getting user stats: $e');
+      debugPrint('❌ Error getting user stats: $e');
       return UserStats.empty();
     }
   }
@@ -486,7 +487,7 @@ class SupabaseService {
   }) async {
     try {
       if (!isLoggedIn) {
-        print('⚠️ User not logged in - program not saved to cloud');
+        debugPrint('⚠️ User not logged in - program not saved to cloud');
         return false;
       }
 
@@ -500,10 +501,10 @@ class SupabaseService {
 
       // Upsert - updates if exists, inserts if not
       await client.from('user_profiles').upsert(data, onConflict: 'user_id');
-      print('✅ Selected program saved to cloud: $programName ($daysPerWeek days/week)');
+      debugPrint('✅ Selected program saved to cloud: $programName ($daysPerWeek days/week)');
       return true;
     } catch (e) {
-      print('❌ Error saving selected program: $e');
+      debugPrint('❌ Error saving selected program: $e');
       return false;
     }
   }
@@ -511,7 +512,7 @@ class SupabaseService {
   /// Get weekly volume data for charts (last 8 weeks by default)
   Future<List<Map<String, dynamic>>> getWeeklyVolumes({int weeks = 8}) async {
     if (!isLoggedIn) {
-      print('⚠️ User not logged in - returning empty weekly volumes');
+      debugPrint('⚠️ User not logged in - returning empty weekly volumes');
       return [];
     }
 
@@ -527,7 +528,7 @@ class SupabaseService {
           .order('created_at', ascending: true);
 
       if (response.isEmpty) {
-        print('ℹ️  No workout data for weekly volumes');
+        debugPrint('ℹ️  No workout data for weekly volumes');
         return [];
       }
 
@@ -557,10 +558,10 @@ class SupabaseService {
         });
       }
 
-      print('✅ Weekly volumes calculated: ${result.length} weeks');
+      debugPrint('✅ Weekly volumes calculated: ${result.length} weeks');
       return result;
     } catch (e) {
-      print('❌ Error getting weekly volumes: $e');
+      debugPrint('❌ Error getting weekly volumes: $e');
       return [];
     }
   }
@@ -569,7 +570,7 @@ class SupabaseService {
   /// Returns comparison data with differences and percentages
   Future<Map<String, dynamic>> compareWithPreviousPeriod({required int days}) async {
     if (!isLoggedIn) {
-      print('⚠️ User not logged in - returning empty comparison');
+      debugPrint('⚠️ User not logged in - returning empty comparison');
       return {
         'currentWorkouts': 0,
         'previousWorkouts': 0,
@@ -592,9 +593,9 @@ class SupabaseService {
       final previousEnd = currentStart;
       final previousStart = previousEnd.subtract(Duration(days: days));
 
-      print('📊 Comparing periods:');
-      print('   Current: ${currentStart.toString().split(' ')[0]} to ${now.toString().split(' ')[0]}');
-      print('   Previous: ${previousStart.toString().split(' ')[0]} to ${previousEnd.toString().split(' ')[0]}');
+      debugPrint('📊 Comparing periods:');
+      debugPrint('   Current: ${currentStart.toString().split(' ')[0]} to ${now.toString().split(' ')[0]}');
+      debugPrint('   Previous: ${previousStart.toString().split(' ')[0]} to ${previousEnd.toString().split(' ')[0]}');
 
       // Query current period
       final currentResponse = await client
@@ -635,9 +636,9 @@ class SupabaseService {
           ? ((volumeDiff / previousVolume) * 100)
           : (currentVolume > 0 ? 100.0 : 0.0);
 
-      print('✅ Comparison calculated:');
-      print('   Workouts: $currentWorkouts vs $previousWorkouts (${workoutsPercent.toStringAsFixed(1)}%)');
-      print('   Volume: ${currentVolume.toStringAsFixed(0)}kg vs ${previousVolume.toStringAsFixed(0)}kg (${volumePercent.toStringAsFixed(1)}%)');
+      debugPrint('✅ Comparison calculated:');
+      debugPrint('   Workouts: $currentWorkouts vs $previousWorkouts (${workoutsPercent.toStringAsFixed(1)}%)');
+      debugPrint('   Volume: ${currentVolume.toStringAsFixed(0)}kg vs ${previousVolume.toStringAsFixed(0)}kg (${volumePercent.toStringAsFixed(1)}%)');
 
       return {
         'currentWorkouts': currentWorkouts,
@@ -650,7 +651,7 @@ class SupabaseService {
         'volumePercent': volumePercent,
       };
     } catch (e) {
-      print('❌ Error comparing periods: $e');
+      debugPrint('❌ Error comparing periods: $e');
       return {
         'currentWorkouts': 0,
         'previousWorkouts': 0,
@@ -667,12 +668,12 @@ class SupabaseService {
   /// Get personal records (PRs) - top weights for each exercise
   Future<List<Map<String, dynamic>>> getPersonalRecords() async {
     if (!isLoggedIn) {
-      print('⚠️ User not logged in - returning empty PRs');
+      debugPrint('⚠️ User not logged in - returning empty PRs');
       return [];
     }
 
     try {
-      print('🏆 Fetching personal records...');
+      debugPrint('🏆 Fetching personal records...');
 
       // Buscar todos os sets com peso
       final response = await client
@@ -684,7 +685,7 @@ class SupabaseService {
           .limit(100);
 
       if (response.isEmpty) {
-        print('ℹ️  No workout data for PRs');
+        debugPrint('ℹ️  No workout data for PRs');
         return [];
       }
 
@@ -713,14 +714,14 @@ class SupabaseService {
       // Retornar top 5 PRs
       final topPRs = recordsList.take(5).toList();
 
-      print('✅ Found ${topPRs.length} personal records');
+      debugPrint('✅ Found ${topPRs.length} personal records');
       for (var pr in topPRs) {
-        print('   🏆 ${pr['exercise_name']}: ${pr['weight']}kg x ${pr['reps']} reps');
+        debugPrint('   🏆 ${pr['exercise_name']}: ${pr['weight']}kg x ${pr['reps']} reps');
       }
 
       return topPRs;
     } catch (e) {
-      print('❌ Error getting PRs: $e');
+      debugPrint('❌ Error getting PRs: $e');
       return [];
     }
   }
@@ -836,15 +837,15 @@ class SupabaseService {
   /// Save weekly workout goal locally
   Future<bool> setWeeklyGoal(int workoutsPerWeek) async {
     try {
-      print('🔍 Tentando salvar meta: $workoutsPerWeek treinos/semana');
+      debugPrint('🔍 Tentando salvar meta: $workoutsPerWeek treinos/semana');
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('weekly_workout_goal', workoutsPerWeek);
 
-      print('✅ Meta semanal salva localmente: $workoutsPerWeek treinos/semana');
+      debugPrint('✅ Meta semanal salva localmente: $workoutsPerWeek treinos/semana');
       return true;
     } catch (e) {
-      print('❌ ERRO ao salvar meta: $e');
+      debugPrint('❌ ERRO ao salvar meta: $e');
       return false;
     }
   }
@@ -884,11 +885,11 @@ class SupabaseService {
 
       int remaining = (periodGoal - current).clamp(0, periodGoal);
 
-      print('📊 Progresso do período ($filterDays dias):');
-      print('   Meta base: $weeklyGoal treinos/semana');
-      print('   Período: ${weeksInPeriod.toStringAsFixed(1)} semanas');
-      print('   Meta do período: $periodGoal treinos');
-      print('   Atual: $current treinos (${progress.toStringAsFixed(0)}%)');
+      debugPrint('📊 Progresso do período ($filterDays dias):');
+      debugPrint('   Meta base: $weeklyGoal treinos/semana');
+      debugPrint('   Período: ${weeksInPeriod.toStringAsFixed(1)} semanas');
+      debugPrint('   Meta do período: $periodGoal treinos');
+      debugPrint('   Atual: $current treinos (${progress.toStringAsFixed(0)}%)');
 
       return {
         'weekly_goal': weeklyGoal,          // Meta base (treinos/semana)
@@ -900,7 +901,7 @@ class SupabaseService {
         'show_goal': true,
       };
     } catch (e) {
-      print('❌ Error getting progress: $e');
+      debugPrint('❌ Error getting progress: $e');
       return {
         'weekly_goal': 3,
         'period_goal': 3,

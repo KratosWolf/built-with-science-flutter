@@ -32,7 +32,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       // Check initial auth state
       final isLoggedIn = SupabaseService.instance.isLoggedIn;
-      print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
+      debugPrint('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
 
       setState(() {
         _showLoginScreen = !isLoggedIn;
@@ -44,7 +44,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         (authState) {
           // In offline mode, this stream is empty and won't emit events
           // But keep the listener for future Supabase re-activation
-          print('🔄 Auth state changed: Modo offline ativo');
+          debugPrint('🔄 Auth state changed: Modo offline ativo');
 
           if (mounted) {
             setState(() {
@@ -53,12 +53,12 @@ class _AuthWrapperState extends State<AuthWrapper> {
           }
         },
         onError: (error) {
-          print('❌ Erro no auth stream: $error');
+          debugPrint('❌ Erro no auth stream: $error');
         },
       );
 
     } catch (error) {
-      print('❌ Erro na inicialização do auth: $error');
+      debugPrint('❌ Erro na inicialização do auth: $error');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -103,10 +103,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     // Decidir qual tela mostrar baseado no status
     if (_showLoginScreen) {
-      print('🔐 Mostrando tela de login');
+      debugPrint('🔐 Mostrando tela de login');
       return const LoginScreen();
     } else {
-      print('🏠 Indo direto para o app');
+      debugPrint('🏠 Indo direto para o app');
       return const ProgramSelectionScreen();
     }
   }

@@ -229,10 +229,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
           _currentSetNumber++;
         } else {
           // Superset completo - chegamos ao final da sequência (B3)
-          print('🎉 SuperSet completo! Chegamos no final da sequência');
-          print('📊 Status final - currentSetNumber: $_currentSetNumber, isExerciseA: $_isExerciseA');
-          print('📋 ExerciseA: ${widget.exerciseA.name}');
-          print('📋 ExerciseB: ${widget.exerciseB.name}');
+          debugPrint('🎉 SuperSet completo! Chegamos no final da sequência');
+          debugPrint('📊 Status final - currentSetNumber: $_currentSetNumber, isExerciseA: $_isExerciseA');
+          debugPrint('📋 ExerciseA: ${widget.exerciseA.name}');
+          debugPrint('📋 ExerciseB: ${widget.exerciseB.name}');
 
           _showCompletionMessage();
 
@@ -252,7 +252,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
             const Spacer(),
             TextButton(
               onPressed: () {
-                print('🔥 Botão manual pressionado - forçando próximo SuperSet');
+                debugPrint('🔥 Botão manual pressionado - forçando próximo SuperSet');
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 widget.onSupersetCompleted?.call();
               },
@@ -274,31 +274,31 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       final variation = isA ? _selectedVariationA : _selectedVariationB;
       final exerciseName = isA ? widget.exerciseA.name : widget.exerciseB.name;
       
-      print('🎬 Tentando abrir YouTube para ${isA ? "A" : "B"}: $exerciseName');
-      print('🎬 Variação selecionada: ${variation?.variationName}');
-      print('🎬 URL: ${variation?.youtubeUrl}');
+      debugPrint('🎬 Tentando abrir YouTube para ${isA ? "A" : "B"}: $exerciseName');
+      debugPrint('🎬 Variação selecionada: ${variation?.variationName}');
+      debugPrint('🎬 URL: ${variation?.youtubeUrl}');
       
       if (variation?.youtubeUrl != null && variation!.youtubeUrl.isNotEmpty) {
         final uri = Uri.parse(variation.youtubeUrl);
-        print('🎬 URI parsed: $uri');
+        debugPrint('🎬 URI parsed: $uri');
         
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
-          print('✅ YouTube aberto com sucesso');
+          debugPrint('✅ YouTube aberto com sucesso');
         } else {
-          print('❌ canLaunchUrl retornou false');
+          debugPrint('❌ canLaunchUrl retornou false');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Não foi possível abrir: ${variation.youtubeUrl}')),
           );
         }
       } else {
-        print('❌ URL não encontrada para $exerciseName');
+        debugPrint('❌ URL não encontrada para $exerciseName');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vídeo não disponível para $exerciseName')),
         );
       }
     } catch (e) {
-      print('❌ Erro ao abrir YouTube: $e');
+      debugPrint('❌ Erro ao abrir YouTube: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao abrir YouTube: $e')),
       );
@@ -1023,7 +1023,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
 
       _prefillFromCache();
     } catch (e) {
-      print('⚠️ Erro ao carregar cache do SuperSet: $e');
+      debugPrint('⚠️ Erro ao carregar cache do SuperSet: $e');
     }
   }
 
@@ -1035,7 +1035,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         (v) => v.id == savedVariationId,
         orElse: () => _variationsA.first,
       );
-      print('🔄 Variação A restaurada: ${_selectedVariationA?.variationName}');
+      debugPrint('🔄 Variação A restaurada: ${_selectedVariationA?.variationName}');
     }
 
     // 2. Restaurar variação do exercício B
@@ -1045,19 +1045,19 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         (v) => v.id == savedVariationId,
         orElse: () => _variationsB.first,
       );
-      print('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
+      debugPrint('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
     }
 
     // 3. Dados do exercício A (apenas log por enquanto)
     if (_lastWorkoutDataA != null && _lastWorkoutDataA!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataA!['lastSet3'];
-      print('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+      debugPrint('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
     }
 
     // 4. Dados do exercício B (apenas log por enquanto)
     if (_lastWorkoutDataB != null && _lastWorkoutDataB!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataB!['lastSet3'];
-      print('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+      debugPrint('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
     }
 
     setState(() {}); // Atualizar UI
@@ -1085,9 +1085,9 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       };
 
       await prefs.setString(cacheKey, jsonEncode(cacheData));
-      print('✅ Cache salvo para exercício ${exercise.name} (SuperSet)');
+      debugPrint('✅ Cache salvo para exercício ${exercise.name} (SuperSet)');
     } catch (e) {
-      print('⚠️ Erro ao salvar cache do SuperSet: $e');
+      debugPrint('⚠️ Erro ao salvar cache do SuperSet: $e');
     }
   }
 

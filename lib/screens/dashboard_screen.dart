@@ -80,13 +80,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadWorkoutData() async {
     // Verificar se usuário está logado
     if (!SupabaseService.instance.isLoggedIn) {
-      print('⚠️ Usuário não logado - carregando dados locais');
+      debugPrint('⚠️ Usuário não logado - carregando dados locais');
       await _loadLocalData();
       return;
     }
 
     try {
-      print('📊 Carregando estatísticas do Supabase...');
+      debugPrint('📊 Carregando estatísticas do Supabase...');
 
       // Buscar stats do Supabase com filtro de período
       final stats = await SupabaseService.instance.getUserStats(
@@ -141,7 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final parsedDate = DateTime.parse(dateStr);
           days.add(WorkoutDay(date: parsedDate, workoutCount: count));
         } catch (e) {
-          print('⚠️ Data inválida: $dateStr');
+          debugPrint('⚠️ Data inválida: $dateStr');
         }
       });
 
@@ -160,14 +160,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _isLoading = false;
       });
 
-      print('✅ Dashboard carregado com ${days.length} dias de dados');
-      print('   - Streak: ${stats.currentStreak} dias');
-      print('   - Total workouts: ${stats.totalWorkouts}');
-      print('   - Volume: ${stats.formattedVolume}');
+      debugPrint('✅ Dashboard carregado com ${days.length} dias de dados');
+      debugPrint('   - Streak: ${stats.currentStreak} dias');
+      debugPrint('   - Total workouts: ${stats.totalWorkouts}');
+      debugPrint('   - Volume: ${stats.formattedVolume}');
 
     } catch (e) {
-      print('❌ Erro ao carregar dados do Supabase: $e');
-      print('   Tentando carregar dados locais...');
+      debugPrint('❌ Erro ao carregar dados do Supabase: $e');
+      debugPrint('   Tentando carregar dados locais...');
       await _loadLocalData();
     }
   }
@@ -215,11 +215,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _isLoading = false;
         });
       } catch (e) {
-        print('❌ Erro ao processar histórico local: $e');
+        debugPrint('❌ Erro ao processar histórico local: $e');
         setState(() => _isLoading = false);
       }
     } else {
-      print('📭 Nenhum dado local encontrado');
+      debugPrint('📭 Nenhum dado local encontrado');
       setState(() => _isLoading = false);
     }
   }

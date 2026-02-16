@@ -26,12 +26,12 @@ class ThemeService extends ChangeNotifier {
           orElse: () => ThemeMode.system,
         );
         notifyListeners();
-        print('✅ [THEME] Loaded theme mode: $_themeMode');
+        debugPrint('✅ [THEME] Loaded theme mode: $_themeMode');
       } else {
-        print('ℹ️  [THEME] No saved theme, using system default');
+        debugPrint('ℹ️  [THEME] No saved theme, using system default');
       }
     } catch (error) {
-      print('❌ [THEME] Error loading theme mode: $error');
+      debugPrint('❌ [THEME] Error loading theme mode: $error');
     }
   }
 
@@ -43,9 +43,9 @@ class ThemeService extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_themeKey, mode.toString());
-      print('✅ [THEME] Saved theme mode: $mode');
+      debugPrint('✅ [THEME] Saved theme mode: $mode');
     } catch (error) {
-      print('❌ [THEME] Error saving theme mode: $error');
+      debugPrint('❌ [THEME] Error saving theme mode: $error');
     }
   }
 

@@ -66,13 +66,13 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     switch (state) {
       case AppLifecycleState.paused:
         // Indo pro Spotify/background
-        print('📱 App indo para background - Timer continua rodando');
+        debugPrint('📱 App indo para background - Timer continua rodando');
         _saveWorkoutStateToCache(); // Salvar estado atual
         break;
 
       case AppLifecycleState.resumed:
         // Voltando do Spotify
-        print('✅ App retornado - Restaurando estado');
+        debugPrint('✅ App retornado - Restaurando estado');
         _restoreWorkoutStateFromCache(); // Restaurar estado
         setState(() {}); // Atualizar UI
         break;
@@ -83,13 +83,13 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
 
       case AppLifecycleState.detached:
         // App sendo destruído
-        print('🔴 App sendo fechado - Salvando tudo');
+        debugPrint('🔴 App sendo fechado - Salvando tudo');
         _saveWorkoutStateToCache();
         break;
 
       case AppLifecycleState.hidden:
         // Android 15 - nova state
-        print('🔒 App hidden - Quick save');
+        debugPrint('🔒 App hidden - Quick save');
         _saveWorkoutStateToCache();
         break;
     }
@@ -115,9 +115,9 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
         await prefs.remove('rest_timer_remaining');
       }
 
-      print('💾 Estado do workout salvo - Exercício: $_currentExerciseIndex');
+      debugPrint('💾 Estado do workout salvo - Exercício: $_currentExerciseIndex');
     } catch (e) {
-      print('❌ Erro ao salvar estado: $e');
+      debugPrint('❌ Erro ao salvar estado: $e');
     }
   }
 
@@ -132,14 +132,14 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
         setState(() {
           _currentExerciseIndex = savedIndex;
         });
-        print('🔄 Exercício restaurado: $savedIndex');
+        debugPrint('🔄 Exercício restaurado: $savedIndex');
       }
 
       // Restaurar tempo de início
       final savedStartTime = prefs.getString('current_workout_start_time');
       if (savedStartTime != null) {
         _workoutStartTime = DateTime.parse(savedStartTime);
-        print('🔄 Tempo de início restaurado');
+        debugPrint('🔄 Tempo de início restaurado');
       }
 
       // Restaurar timer se estava rodando
@@ -150,41 +150,41 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           // Nota: O novo RestTimerWidget gerencia o tempo internamente
           // O usuário pode reselecionar o tempo preferido (60s, 75s, 90s)
         });
-        print('🔄 Timer restaurado - usuário pode reselecionar tempo');
+        debugPrint('🔄 Timer restaurado - usuário pode reselecionar tempo');
       }
     } catch (e) {
-      print('❌ Erro ao restaurar estado: $e');
+      debugPrint('❌ Erro ao restaurar estado: $e');
     }
   }
   
   Future<void> _debugShowAllCachedData() async {
     final prefs = await SharedPreferences.getInstance();
-    print('\n🔍 ===== DADOS SALVOS NO DISPOSITIVO =====');
+    debugPrint('\n🔍 ===== DADOS SALVOS NO DISPOSITIVO =====');
     
     final keys = prefs.getKeys();
     for (final key in keys) {
       if (key.startsWith('last_workout_')) {
         final data = prefs.getStringList(key);
-        print('📦 $key:');
+        debugPrint('📦 $key:');
         if (data != null) {
           for (final item in data) {
-            print('   → $item');
+            debugPrint('   → $item');
           }
         }
       } else if (key.startsWith('next_workout_day_')) {
         final value = prefs.getInt(key);
-        print('🎯 $key: $value');
+        debugPrint('🎯 $key: $value');
       } else if (key == 'last_workout_date') {
         final value = prefs.getString(key);
-        print('📅 Último treino: $value');
+        debugPrint('📅 Último treino: $value');
       } else if (key == 'last_workout_duration') {
         final value = prefs.getInt(key);
         if (value != null) {
-          print('⏱️ Duração: ${value ~/ 60}min ${value % 60}s');
+          debugPrint('⏱️ Duração: ${value ~/ 60}min ${value % 60}s');
         }
       }
     }
-    print('==========================================\n');
+    debugPrint('==========================================\n');
   }
 
   Future<void> _cleanOldCache() async {
@@ -193,7 +193,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     // Limpar cache de versões antigas (opcional - só executa uma vez)
     final hasCleanedCache = prefs.getBool('cache_cleaned_v2') ?? false;
     if (!hasCleanedCache) {
-      print('🧹 Limpando cache antigo...');
+      debugPrint('🧹 Limpando cache antigo...');
       
       // Limpar todas as chaves de cache antigas
       final keys = prefs.getKeys();
@@ -207,12 +207,12 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       }
       
       await prefs.setBool('cache_cleaned_v2', true);
-      print('✅ Cache limpo: $removedKeys chaves antigas removidas');
+      debugPrint('✅ Cache limpo: $removedKeys chaves antigas removidas');
     } else {
       // Mostrar estatísticas do cache atual
       final keys = prefs.getKeys();
       final cacheKeys = keys.where((k) => k.startsWith('last_workout_')).length;
-      print('📊 Cache atual: $cacheKeys exercícios salvos');
+      debugPrint('📊 Cache atual: $cacheKeys exercícios salvos');
     }
   }
 
@@ -280,14 +280,14 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
   Future<void> _loadLastWorkoutData() async {
     final prefs = await SharedPreferences.getInstance();
     
-    print('🔄 Carregando dados do último treino...');
+    debugPrint('🔄 Carregando dados do último treino...');
     
     for (final exercise in _exercises) {
       final cacheKey = 'last_workout_${widget.programId}_${widget.dayId}_${exercise.id}';
       final cachedData = prefs.getStringList(cacheKey);
       
       if (cachedData != null && cachedData.isNotEmpty) {
-        print('📊 Cache encontrado para ${exercise.name}: ${cachedData.length} sets');
+        debugPrint('📊 Cache encontrado para ${exercise.name}: ${cachedData.length} sets');
         
         // Criar lista de sets do cache
         List<WorkoutSet> cachedSets = [];
@@ -326,7 +326,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
             }
             
             if (originalDifficulty != difficulty) {
-              print('🔄 Traduzindo dificuldade: $originalDifficulty → $difficulty');
+              debugPrint('🔄 Traduzindo dificuldade: $originalDifficulty → $difficulty');
             }
             
             if (weight != null && reps != null) {
@@ -338,7 +338,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                 reps: reps,
                 difficulty: difficulty,
               ));
-              print('✅ Set carregado: Set $setNumber - ${weight}kg x ${reps}reps ($difficulty)');
+              debugPrint('✅ Set carregado: Set $setNumber - ${weight}kg x ${reps}reps ($difficulty)');
             }
           }
         }
@@ -352,7 +352,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
 
   Future<void> _loadAndMergeCloudData() async {
     try {
-      print('☁️ Carregando dados da nuvem para mesclar...');
+      debugPrint('☁️ Carregando dados da nuvem para mesclar...');
       
       final cloudData = await SupabaseService.instance.loadLastWorkoutData(
         widget.programId, 
@@ -360,7 +360,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       );
       
       if (cloudData.isNotEmpty) {
-        print('📊 Dados da nuvem encontrados: ${cloudData.length} exercícios');
+        debugPrint('📊 Dados da nuvem encontrados: ${cloudData.length} exercícios');
         
         // Mesclar dados da nuvem com dados locais
         // Prioridade: dados mais recentes (local vs nuvem)
@@ -371,25 +371,25 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           // Se não temos dados locais, usar os da nuvem
           if (!_completedSets.containsKey(exerciseId)) {
             _completedSets[exerciseId] = cloudSets;
-            print('📥 Usando dados da nuvem para exercício $exerciseId');
+            debugPrint('📥 Usando dados da nuvem para exercício $exerciseId');
           } else {
             // TODO: Implementar merge inteligente baseado em timestamps
             // Por enquanto, manter dados locais se existirem
-            print('🔄 Mantendo dados locais para exercício $exerciseId');
+            debugPrint('🔄 Mantendo dados locais para exercício $exerciseId');
           }
         }
       } else {
-        print('📭 Nenhum dado na nuvem encontrado');
+        debugPrint('📭 Nenhum dado na nuvem encontrado');
       }
     } catch (error) {
-      print('❌ Erro ao carregar dados da nuvem: $error');
+      debugPrint('❌ Erro ao carregar dados da nuvem: $error');
     }
   }
 
   Future<void> _saveSetData(int exerciseId, WorkoutSet setData) async {
     final prefs = await SharedPreferences.getInstance();
     
-    print('💾 Salvando set: Ex${exerciseId} - Set ${setData.setNumber} - ${setData.weightKg}kg x ${setData.reps}reps (${setData.difficulty})');
+    debugPrint('💾 Salvando set: Ex${exerciseId} - Set ${setData.setNumber} - ${setData.weightKg}kg x ${setData.reps}reps (${setData.difficulty})');
     
     // Garantir que dificuldade seja salva em português
     String difficulty = setData.difficulty ?? 'Perfeito';
@@ -448,7 +448,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
         .toList();
     
     await prefs.setStringList(cacheKey, setStrings);
-    print('✅ Cache local salvo com ${setStrings.length} sets para exercício $exerciseId');
+    debugPrint('✅ Cache local salvo com ${setStrings.length} sets para exercício $exerciseId');
     
     // Tentar salvar na nuvem se logado (sem bloquear se falhar)
     if (SupabaseService.instance.isLoggedIn) {
@@ -460,15 +460,15 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
         ).timeout(const Duration(seconds: 5));
         
         if (cloudSaved) {
-          print('☁️ Dados também salvos na nuvem');
+          debugPrint('☁️ Dados também salvos na nuvem');
         } else {
-          print('⚠️ Falha ao salvar na nuvem, mantidos localmente');
+          debugPrint('⚠️ Falha ao salvar na nuvem, mantidos localmente');
         }
       } catch (error) {
-        print('❌ Timeout/erro cloud sync: $error - dados mantidos localmente');
+        debugPrint('❌ Timeout/erro cloud sync: $error - dados mantidos localmente');
       }
     } else {
-      print('📱 Modo offline - dados salvos apenas localmente');
+      debugPrint('📱 Modo offline - dados salvos apenas localmente');
     }
     
     // Vibração de feedback
@@ -492,32 +492,32 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
   }
 
   void _nextExercise() {
-    print('🚀 _nextExercise chamado - índice atual: $_currentExerciseIndex, total exercícios: ${_exercises.length}');
+    debugPrint('🚀 _nextExercise chamado - índice atual: $_currentExerciseIndex, total exercícios: ${_exercises.length}');
 
     if (_currentExerciseIndex < _exercises.length - 1) {
       setState(() {
         // Lógica especial para Super Sets baseada no treino
         if (widget.dayId == 1) { // Full Body A
-          print('🏃 Navegação Full Body A - índice atual: $_currentExerciseIndex');
-          print('📋 Exercício atual: ${_exercises[_currentExerciseIndex].name}');
+          debugPrint('🏃 Navegação Full Body A - índice atual: $_currentExerciseIndex');
+          debugPrint('📋 Exercício atual: ${_exercises[_currentExerciseIndex].name}');
 
           if (_currentExerciseIndex == 4) {
-            print('✅ SuperSet A completo - indo para SuperSet B (índice 6)');
+            debugPrint('✅ SuperSet A completo - indo para SuperSet B (índice 6)');
             _currentExerciseIndex = 6; // Ir para Superset B após completar Superset A
-            print('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
+            debugPrint('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
           } else if (_currentExerciseIndex == 6) {
-            print('🏁 SuperSet B completo - finalizando treino');
+            debugPrint('🏁 SuperSet B completo - finalizando treino');
             _completeWorkout(); // Fim do treino após Superset B
             return;
           } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
             // Se estiver em exercício não principal do superset, voltar ao principal
-            print('⚠️ Exercício secundário de SuperSet - voltando ao principal');
+            debugPrint('⚠️ Exercício secundário de SuperSet - voltando ao principal');
             if (_currentExerciseIndex == 5) _currentExerciseIndex = 4;
             else _currentExerciseIndex = 6;
           } else {
-            print('➡️ Navegação normal - próximo exercício');
+            debugPrint('➡️ Navegação normal - próximo exercício');
             _currentExerciseIndex++; // Navegação normal
-            print('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
+            debugPrint('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
           }
         } else if (widget.dayId == 2) { // Full Body B
           if (_currentExerciseIndex == 3) {
@@ -592,12 +592,12 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           dayId: widget.dayId,
           durationSeconds: duration.inSeconds,
         ).timeout(const Duration(seconds: 5));
-        print('☁️ Sessão de treino salva na nuvem');
+        debugPrint('☁️ Sessão de treino salva na nuvem');
       } catch (error) {
-        print('⚠️ Erro ao salvar sessão na nuvem: $error - dados mantidos localmente');
+        debugPrint('⚠️ Erro ao salvar sessão na nuvem: $error - dados mantidos localmente');
       }
     } else {
-      print('📱 Modo offline - sessão salva apenas localmente');
+      debugPrint('📱 Modo offline - sessão salva apenas localmente');
     }
 
     setState(() {

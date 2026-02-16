@@ -104,7 +104,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
         _prefillFromCache();
       }
     } catch (e) {
-      print('⚠️ Erro ao carregar cache: $e');
+      debugPrint('⚠️ Erro ao carregar cache: $e');
     }
   }
 
@@ -118,7 +118,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
         (v) => v.id == savedVariationId,
         orElse: () => _variations.first,
       );
-      print('🔄 Variação restaurada: ${_selectedVariation?.variationName}');
+      debugPrint('🔄 Variação restaurada: ${_selectedVariation?.variationName}');
     }
 
     // 2. Pré-preencher dados do último treino (peso, reps, dificuldade)
@@ -133,7 +133,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
           _notesControllers[setNumber]!.text = lastSet3['notes']?.toString() ?? '';
         }
       }
-      print('🔄 Dados restaurados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+      debugPrint('🔄 Dados restaurados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
     }
 
     setState(() {}); // Atualizar UI
@@ -160,9 +160,9 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
       };
 
       await prefs.setString(cacheKey, jsonEncode(cacheData));
-      print('✅ Cache salvo para exercício ${widget.exercise.name}');
+      debugPrint('✅ Cache salvo para exercício ${widget.exercise.name}');
     } catch (e) {
-      print('⚠️ Erro ao salvar cache: $e');
+      debugPrint('⚠️ Erro ao salvar cache: $e');
     }
   }
 

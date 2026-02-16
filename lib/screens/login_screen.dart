@@ -106,11 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      print('🔵 [UI] Iniciando Google Sign-In...');
+      debugPrint('🔵 [UI] Iniciando Google Sign-In...');
       final user = await SupabaseService.instance.signInWithGoogle();
 
       if (user != null && mounted) {
-        print('✅ [UI] Login bem-sucedido, navegando para home...');
+        debugPrint('✅ [UI] Login bem-sucedido, navegando para home...');
         _showSuccessSnackBar('Bem-vindo, ${user.email}!');
 
         // Navigate to home after short delay to show success message
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (error) {
-      print('❌ [UI] Erro no Google Sign-In: $error');
+      debugPrint('❌ [UI] Erro no Google Sign-In: $error');
 
       String message = error.toString();
       if (message.contains('cancelado')) {

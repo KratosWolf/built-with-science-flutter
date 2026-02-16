@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,7 +14,7 @@ class BackupService {
   /// Export all workout data to JSON file
   Future<String?> exportData() async {
     try {
-      print('🔄 Iniciando export dos dados...');
+      debugPrint('🔄 Iniciando export dos dados...');
       
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys();
@@ -31,7 +32,7 @@ class BackupService {
       ).toList();
       
       if (workoutKeys.isEmpty) {
-        print('⚠️ Nenhum dado de treino encontrado');
+        debugPrint('⚠️ Nenhum dado de treino encontrado');
         return null;
       }
       
@@ -67,13 +68,13 @@ class BackupService {
       
       await file.writeAsString(jsonData);
       
-      print('✅ Export realizado com sucesso: ${file.path}');
-      print('📊 Total de ${workoutKeys.length} chaves exportadas');
+      debugPrint('✅ Export realizado com sucesso: ${file.path}');
+      debugPrint('📊 Total de ${workoutKeys.length} chaves exportadas');
       
       return file.path;
       
     } catch (error) {
-      print('❌ Erro no export: $error');
+      debugPrint('❌ Erro no export: $error');
       return null;
     }
   }
@@ -81,11 +82,11 @@ class BackupService {
   /// Import workout data from JSON file
   Future<bool> importData(String filePath) async {
     try {
-      print('🔄 Iniciando import dos dados...');
+      debugPrint('🔄 Iniciando import dos dados...');
       
       final file = File(filePath);
       if (!await file.exists()) {
-        print('❌ Arquivo não encontrado: $filePath');
+        debugPrint('❌ Arquivo não encontrado: $filePath');
         return false;
       }
       
@@ -96,12 +97,12 @@ class BackupService {
       if (!backupData.containsKey('version') || 
           !backupData.containsKey('data') ||
           !backupData.containsKey('app_name')) {
-        print('❌ Formato de backup inválido');
+        debugPrint('❌ Formato de backup inválido');
         return false;
       }
       
       if (backupData['app_name'] != 'Built With Science') {
-        print('❌ Backup não é do Built With Science app');
+        debugPrint('❌ Backup não é do Built With Science app');
         return false;
       }
       
@@ -132,14 +133,14 @@ class BackupService {
         }
       }
       
-      print('✅ Import realizado com sucesso');
-      print('📊 Total de $importedCount chaves importadas');
-      print('📅 Backup de: ${backupData['exported_at']}');
+      debugPrint('✅ Import realizado com sucesso');
+      debugPrint('📊 Total de $importedCount chaves importadas');
+      debugPrint('📅 Backup de: ${backupData['exported_at']}');
       
       return true;
       
     } catch (error) {
-      print('❌ Erro no import: $error');
+      debugPrint('❌ Erro no import: $error');
       return false;
     }
   }
@@ -189,7 +190,7 @@ class BackupService {
       };
       
     } catch (error) {
-      print('❌ Erro ao obter info do backup: $error');
+      debugPrint('❌ Erro ao obter info do backup: $error');
       return {
         'total_keys': 0,
         'workout_sessions': 0,
@@ -203,7 +204,7 @@ class BackupService {
   /// Clear all workout data (use with caution)
   Future<bool> clearAllData() async {
     try {
-      print('🔄 Limpando todos os dados de treino...');
+      debugPrint('🔄 Limpando todos os dados de treino...');
       
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys();
@@ -223,11 +224,11 @@ class BackupService {
         await prefs.remove(key);
       }
       
-      print('✅ ${workoutKeys.length} chaves de treino removidas');
+      debugPrint('✅ ${workoutKeys.length} chaves de treino removidas');
       return true;
       
     } catch (error) {
-      print('❌ Erro ao limpar dados: $error');
+      debugPrint('❌ Erro ao limpar dados: $error');
       return false;
     }
   }

@@ -34,21 +34,21 @@ void main() async {
   );
 
   // SUPABASE REATIVADO - Modo híbrido (online + offline)
-  print('🔄 Inicializando Supabase...');
+  debugPrint('🔄 Inicializando Supabase...');
 
   // Inicialização mais robusta com timeout
   try {
     await SupabaseService.initialize().timeout(
       const Duration(seconds: 10),
       onTimeout: () {
-        print('⏰ Timeout na inicialização do Supabase - continuando offline');
+        debugPrint('⏰ Timeout na inicialização do Supabase - continuando offline');
         return;
       },
     );
-    print('✅ Supabase initialized successfully');
+    debugPrint('✅ Supabase initialized successfully');
   } catch (error) {
-    print('❌ Error initializing Supabase: $error - continuando offline');
-    print('ℹ️  App funcionará em modo offline');
+    debugPrint('❌ Error initializing Supabase: $error - continuando offline');
+    debugPrint('ℹ️  App funcionará em modo offline');
   }
   
   runApp(

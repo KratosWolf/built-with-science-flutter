@@ -47,29 +47,29 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
     final prefs = await SharedPreferences.getInstance();
 
     // Debug: ver todas as keys disponíveis
-    print('🔍 DEBUG: Verificando programa selecionado...');
-    print('🔍 Keys disponíveis: ${prefs.getKeys()}');
+    debugPrint('🔍 DEBUG: Verificando programa selecionado...');
+    debugPrint('🔍 Keys disponíveis: ${prefs.getKeys()}');
 
     var programId = prefs.getInt('selected_program_id');
-    print('🔍 Program ID encontrado: $programId');
+    debugPrint('🔍 Program ID encontrado: $programId');
 
     // MIGRAÇÃO AUTOMÁTICA - detectar programa de dados antigos
     if (programId == null) {
-      print('🔄 Tentando migrar dados antigos...');
+      debugPrint('🔄 Tentando migrar dados antigos...');
 
       // Detectar programa dos dados de treino
       if (prefs.containsKey('next_workout_day_1')) {
-        print('✅ Encontrado next_workout_day_1 - Migrando para programa 1');
+        debugPrint('✅ Encontrado next_workout_day_1 - Migrando para programa 1');
         await prefs.setInt('selected_program_id', 1);
         await prefs.setString('selected_program_name', 'Full Body 3-Day');
         await prefs.setInt('selected_program_days', 3);
         programId = 1;
-        print('✅ Migração completa! Program ID agora: $programId');
+        debugPrint('✅ Migração completa! Program ID agora: $programId');
       }
     }
 
     if (programId == null) {
-      print('❌ Nenhum programa selecionado - navegando para seleção');
+      debugPrint('❌ Nenhum programa selecionado - navegando para seleção');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -87,9 +87,9 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
       final nextDay = prefs.getInt('next_workout_day_$programId') ?? 1;
       final programName = prefs.getString('selected_program_name') ?? '';
 
-      print('✅ Programa encontrado: ID=$programId, Nome=$programName');
-      print('🔍 Próximo dia: $nextDay');
-      print('🔍 Navegando para WorkoutTrackingScreen...');
+      debugPrint('✅ Programa encontrado: ID=$programId, Nome=$programName');
+      debugPrint('🔍 Próximo dia: $nextDay');
+      debugPrint('🔍 Navegando para WorkoutTrackingScreen...');
 
       if (!mounted) return;
       Navigator.push(

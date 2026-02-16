@@ -16,9 +16,9 @@ class BackgroundTimerService {
 
     try {
       _isInitialized = true;
-      print('✅ BackgroundTimerService inicializado (modo simplificado)');
+      debugPrint('✅ BackgroundTimerService inicializado (modo simplificado)');
     } catch (e) {
-      print('❌ Erro ao inicializar BackgroundTimerService: $e');
+      debugPrint('❌ Erro ao inicializar BackgroundTimerService: $e');
     }
   }
 
@@ -27,7 +27,7 @@ class BackgroundTimerService {
     _restTimer?.cancel();
     _remainingSeconds = seconds;
 
-    print('⏱️  Timer iniciado: $seconds segundos');
+    debugPrint('⏱️  Timer iniciado: $seconds segundos');
 
     // Timer isolado que sobrevive ao background
     _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -35,13 +35,13 @@ class BackgroundTimerService {
 
       // Log a cada 10 segundos para debug
       if (_remainingSeconds > 0 && _remainingSeconds % 10 == 0) {
-        print('⏱️  Timer: $_remainingSeconds segundos restantes');
+        debugPrint('⏱️  Timer: $_remainingSeconds segundos restantes');
       }
 
       // Timer completou!
       if (_remainingSeconds <= 0) {
         timer.cancel();
-        print('✅ Timer completado!');
+        debugPrint('✅ Timer completado!');
         _onTimerComplete();
         onComplete?.call();
       }
@@ -61,25 +61,25 @@ class BackgroundTimerService {
           pattern: [0, 400, 200, 400, 200, 400],
           intensities: [0, 255, 0, 255, 0, 255], // Intensidade máxima
         );
-        print('📳 Vibração ativada - Descanso completo!');
+        debugPrint('📳 Vibração ativada - Descanso completo!');
       } else {
-        print('⚠️  Dispositivo não tem vibrador');
+        debugPrint('⚠️  Dispositivo não tem vibrador');
       }
     } catch (e) {
-      print('❌ Erro na vibração: $e');
+      debugPrint('❌ Erro na vibração: $e');
     }
   }
 
   /// Pausar timer
   static void pauseTimer() {
     _restTimer?.cancel();
-    print('⏸️  Timer pausado');
+    debugPrint('⏸️  Timer pausado');
   }
 
   /// Retomar timer
   static void resumeTimer({VoidCallback? onComplete}) {
     if (_remainingSeconds > 0) {
-      print('▶️  Timer retomado: $_remainingSeconds segundos');
+      debugPrint('▶️  Timer retomado: $_remainingSeconds segundos');
       startRestTimer(_remainingSeconds, onComplete: onComplete);
     }
   }
@@ -88,7 +88,7 @@ class BackgroundTimerService {
   static void cancelTimer() {
     _restTimer?.cancel();
     _remainingSeconds = 0;
-    print('❌ Timer cancelado');
+    debugPrint('❌ Timer cancelado');
   }
 
   /// Getter para tempo restante
