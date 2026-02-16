@@ -1094,23 +1094,43 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       debugPrint('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
     }
 
-    // 3. Dados do exercício A
+    // 3. Dados do exercício A - preencher todos os campos com dados do último treino
     if (_lastWorkoutDataA != null && _lastWorkoutDataA!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataA!['lastSet3'];
       debugPrint('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
 
-      // Preencher campo de comentários do set 1 com dados do último treino
+      // Preencher peso, reps e dificuldade do set 1 com dados do último treino
+      if (lastSet3['weight'] != null) {
+        _weightControllers['A']![1]?.text = lastSet3['weight'].toString();
+      }
+      if (lastSet3['reps'] != null) {
+        _repsControllers['A']![1]?.text = lastSet3['reps'].toString();
+      }
+      if (lastSet3['difficulty'] != null) {
+        _difficulties['A']![1] = lastSet3['difficulty'].toString();
+      }
+      // Preencher campo de comentários
       if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
         _notesControllers['A']![1]?.text = lastSet3['notes'].toString();
       }
     }
 
-    // 4. Dados do exercício B
+    // 4. Dados do exercício B - preencher todos os campos com dados do último treino
     if (_lastWorkoutDataB != null && _lastWorkoutDataB!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataB!['lastSet3'];
       debugPrint('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
 
-      // Preencher campo de comentários do set 1 com dados do último treino
+      // Preencher peso, reps e dificuldade do set 1 com dados do último treino
+      if (lastSet3['weight'] != null) {
+        _weightControllers['B']![1]?.text = lastSet3['weight'].toString();
+      }
+      if (lastSet3['reps'] != null) {
+        _repsControllers['B']![1]?.text = lastSet3['reps'].toString();
+      }
+      if (lastSet3['difficulty'] != null) {
+        _difficulties['B']![1] = lastSet3['difficulty'].toString();
+      }
+      // Preencher campo de comentários
       if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
         _notesControllers['B']![1]?.text = lastSet3['notes'].toString();
       }
