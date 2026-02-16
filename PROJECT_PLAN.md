@@ -135,7 +135,7 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
 | 3.1 | Criar ThemeData dark centralizado | ✅ Concluído | Sistema completo em `lib/config/theme.dart` com paleta preto + laranja. Commit: `feat: criar sistema de tema dark centralizado (Fase 3.1)` |
-| 3.2 | Redesign da tela de login | 🔒 | Dark mode, botão Google laranja |
+| 3.2 | Redesign da tela de login | ✅ Concluído | Tema dark aplicado: background #1A1A1A, cards #2D2D2D, botões laranja #FF6B00, botão Google dark com borda laranja. Commit: `feat: redesign tela de login com tema dark (Fase 3.2)` |
 | 3.3 | Redesign do dashboard | 🔒 | Cards escuros, gráficos com laranja, texto branco |
 | 3.4 | Redesign das telas de treino | 🔒 | Exercícios, SuperSets, inputs, botões — tudo dark |
 | 3.5 | Redesign do timer | 🔒 | Visual dark com destaque laranja |
