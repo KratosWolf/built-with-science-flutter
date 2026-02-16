@@ -129,12 +129,12 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 
 ### FASE 3 — Redesign Visual (Dark Mode)
 **Objetivo:** Transformar o visual do app para tema dark premium com laranja como cor de destaque.
-**Status:** 🔒 Bloqueada — só inicia após Fase 2 completa e aprovada.
+**Status:** 🔄 Em andamento — iniciada em 16/02/2026
 **Prazo estimado:** 3-5 sessões de Claude Code
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
-| 3.1 | Criar ThemeData dark centralizado | 🔒 | Definir todas as cores, tipografia, shapes num único lugar (`lib/config/theme.dart`) |
+| 3.1 | Criar ThemeData dark centralizado | ✅ Concluído | Sistema completo em `lib/config/theme.dart` com paleta preto + laranja. Commit: `feat: criar sistema de tema dark centralizado (Fase 3.1)` |
 | 3.2 | Redesign da tela de login | 🔒 | Dark mode, botão Google laranja |
 | 3.3 | Redesign do dashboard | 🔒 | Cards escuros, gráficos com laranja, texto branco |
 | 3.4 | Redesign das telas de treino | 🔒 | Exercícios, SuperSets, inputs, botões — tudo dark |
@@ -283,7 +283,7 @@ Flutter-Mobile-Version/
 
 ### 🔮 Roadmap
 - **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA)
-- **Fase 3:** Redesign Visual Dark Mode (próxima)
+- **Fase 3:** 🔄 Redesign Visual Dark Mode (EM ANDAMENTO - 3.1 concluído)
 - **Fase 4:** iOS
 - Xcode não configurado (iOS bloqueado até Fase 4)
 
@@ -299,3 +299,4 @@ Flutter-Mobile-Version/
 | 16/02/2026 | Planejamento | CLAUDE.md e PROJECT_PLAN.md criados | Preparar para Claude Code |
 | 16/02/2026 | Fase 1 ✅ | Limpeza completa do projeto | Segurança (google-services.json removido), Git limpo, Flutter 3.41.1, dependências atualizadas, print() removidos, build funcional |
 | 16/02/2026 | Fase 2 ✅ | Correções SuperSet completas | Timer corrigido (só no final), campo de comentários adicionado, dados anteriores carregados automaticamente, som + vibração no timer. 5 commits: fix timer interno, feat comentários, feat dados anteriores, feat som timer, fix timer final |
+| 16/02/2026 | Fase 3 🔄 | Iniciado redesign dark mode (3.1) | Sistema de tema dark centralizado criado com paleta preto + laranja (#1A1A1A + #FF6B00). Todas cores, tipografia e componentes definidos em `lib/config/theme.dart`. Commit: feat tema centralizado |
