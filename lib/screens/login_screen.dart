@@ -10,8 +10,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _isLoginMode = true; // true = login, false = register
-  
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -80,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _showErrorSnackBar('Digite seu email primeiro');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
     });
@@ -94,6 +95,48 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isGoogleLoading = true;
+    });
+
+    try {
+      print('🔵 [UI] Iniciando Google Sign-In...');
+      final user = await SupabaseService.instance.signInWithGoogle();
+
+      if (user != null && mounted) {
+        print('✅ [UI] Login bem-sucedido, navegando para home...');
+        _showSuccessSnackBar('Bem-vindo, ${user.email}!');
+
+        // Navigate to home after short delay to show success message
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
+        });
+      }
+    } catch (error) {
+      print('❌ [UI] Erro no Google Sign-In: $error');
+
+      String message = error.toString();
+      if (message.contains('cancelado')) {
+        message = 'Login cancelado';
+      } else if (message.contains('network')) {
+        message = 'Erro de conexão. Verifique sua internet.';
+      } else {
+        message = 'Erro ao fazer login com Google. Tente novamente.';
+      }
+
+      _showErrorSnackBar(message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
         });
       }
     }
@@ -360,14 +403,67 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   
                   const SizedBox(height: 32),
-                  
+
+                  // Google Sign-In Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: (_isLoading || _isGoogleLoading) ? null : _handleGoogleSignIn,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: Colors.black12, width: 1),
+                        ),
+                      ),
+                      child: _isGoogleLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Google Icon
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: const BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                        'https://www.google.com/images/branding/googleg/1x/googleg_standard_color_128dp.png',
+                                      ),
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'CONTINUAR COM GOOGLE',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // Offline Mode Button
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.of(context).pushReplacementNamed('/program-selection');
+                        Navigator.of(context).pushReplacementNamed('/home');
                       },
                       icon: const Icon(Icons.phone_android, size: 28),
                       label: const Text(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/supabase_service.dart';
+import '../services/theme_service.dart';
 
 class SimpleProfileScreen extends StatelessWidget {
   const SimpleProfileScreen({super.key});
@@ -98,7 +100,69 @@ class SimpleProfileScreen extends StatelessWidget {
                     ),
                     
                     const SizedBox(height: 16),
-                    
+
+                    // Theme Toggle
+                    Consumer<ThemeService>(
+                      builder: (context, themeService, child) => Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  themeService.isDark ? Icons.dark_mode : Icons.light_mode,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Tema',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            SegmentedButton<ThemeMode>(
+                              segments: const [
+                                ButtonSegment(
+                                  value: ThemeMode.light,
+                                  label: Text('Light'),
+                                  icon: Icon(Icons.light_mode, size: 18),
+                                ),
+                                ButtonSegment(
+                                  value: ThemeMode.dark,
+                                  label: Text('Dark'),
+                                  icon: Icon(Icons.dark_mode, size: 18),
+                                ),
+                                ButtonSegment(
+                                  value: ThemeMode.system,
+                                  label: Text('Auto'),
+                                  icon: Icon(Icons.brightness_auto, size: 18),
+                                ),
+                              ],
+                              selected: {themeService.themeMode},
+                              onSelectionChanged: (Set<ThemeMode> newSelection) {
+                                themeService.setThemeMode(newSelection.first);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
                     // Show user status and logout if logged in
                     if (SupabaseService.instance.isLoggedIn) ...[
                       Container(

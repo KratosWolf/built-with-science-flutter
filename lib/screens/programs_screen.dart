@@ -177,7 +177,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                             Navigator.pushNamed(
                                               context,
                                               '/program-detail',
-                                              arguments: program.id,
+                                              arguments: {'program': program},
                                             );
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -186,9 +186,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                               borderRadius: BorderRadius.circular(12),
                                             ),
                                           ),
-                                          child: Text(
-                                            'Start ${program.name}',
-                                            style: const TextStyle(
+                                          child: const Text(
+                                            'View Program Details',
+                                            style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600,
                                             ),

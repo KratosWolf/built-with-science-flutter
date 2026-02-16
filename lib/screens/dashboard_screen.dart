@@ -1,6 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../services/supabase_service.dart';
+import '../models/user_stats.dart';
+import '../widgets/dashboard/volume_chart.dart';
+import '../widgets/dashboard/comparison_card.dart';
+import '../widgets/dashboard/personal_records_card.dart';
+import '../widgets/dashboard/weekly_goal_card.dart';
+
+enum TimePeriod {
+  week,
+  month,
+  quarter,
+  year,
+  allTime,
+}
+
+extension TimePeriodExtension on TimePeriod {
+  String get label {
+    switch (this) {
+      case TimePeriod.week:
+        return 'Semana';
+      case TimePeriod.month:
+        return 'Mês';
+      case TimePeriod.quarter:
+        return 'Trimestre';
+      case TimePeriod.year:
+        return 'Ano';
+      case TimePeriod.allTime:
+        return 'Total';
+    }
+  }
+
+  int? get days {
+    switch (this) {
+      case TimePeriod.week:
+        return 7;
+      case TimePeriod.month:
+        return 30;
+      case TimePeriod.quarter:
+        return 90;
+      case TimePeriod.year:
+        return 365;
+      case TimePeriod.allTime:
+        return null; // null = all time
+    }
+  }
+}
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -12,9 +58,18 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   List<WorkoutDay> _workoutDays = [];
+  UserStats? _stats;
   int _currentStreak = 0;
   int _monthTotal = 0;
   DateTime? _lastWorkout;
+  List<Map<String, dynamic>> _weeklyVolumes = [];
+  TimePeriod _selectedPeriod = TimePeriod.month;
+  Map<String, dynamic> _comparisonData = {};
+  bool _isLoadingComparison = false;
+  List<Map<String, dynamic>> _personalRecords = [];
+  bool _isLoadingPRs = false;
+  Map<String, dynamic> _weeklyProgress = {};
+  bool _isLoadingWeeklyGoal = false;
 
   @override
   void initState() {
@@ -23,6 +78,102 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadWorkoutData() async {
+    // Verificar se usuário está logado
+    if (!SupabaseService.instance.isLoggedIn) {
+      print('⚠️ Usuário não logado - carregando dados locais');
+      await _loadLocalData();
+      return;
+    }
+
+    try {
+      print('📊 Carregando estatísticas do Supabase...');
+
+      // Buscar stats do Supabase com filtro de período
+      final stats = await SupabaseService.instance.getUserStats(
+        filterDays: _selectedPeriod.days,
+      );
+
+      // Buscar dados de volume semanal para o gráfico
+      final weeklyVolumes = await SupabaseService.instance.getWeeklyVolumes(weeks: 8);
+
+      // Buscar dados de comparação (apenas se não for "Total")
+      Map<String, dynamic> comparisonData = {};
+      if (_selectedPeriod != TimePeriod.allTime) {
+        setState(() => _isLoadingComparison = true);
+        comparisonData = await SupabaseService.instance.compareWithPreviousPeriod(
+          days: _selectedPeriod.days!,
+        );
+        setState(() => _isLoadingComparison = false);
+      }
+
+      // Buscar Personal Records
+      setState(() => _isLoadingPRs = true);
+      final personalRecords = await SupabaseService.instance.getPersonalRecords();
+      setState(() => _isLoadingPRs = false);
+
+      // Buscar progresso semanal (meta) adaptado ao período
+      setState(() => _isLoadingWeeklyGoal = true);
+      final weeklyProgress = await SupabaseService.instance.getWeeklyProgress(
+        filterDays: _selectedPeriod.days,
+      );
+      setState(() => _isLoadingWeeklyGoal = false);
+
+      // Buscar dados de workout_sets para o calendar
+      final workoutSetsData = await SupabaseService.instance.client
+          .from('workout_sets')
+          .select()
+          .eq('user_id', SupabaseService.instance.currentUser!.id)
+          .order('created_at', ascending: true);
+
+      // Processar dados para o calendar
+      List<WorkoutDay> days = [];
+      Map<String, int> workoutsByDate = {};
+
+      for (var set in workoutSetsData) {
+        final createdAt = set['created_at'] as String;
+        final date = DateTime.parse(createdAt);
+        final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        workoutsByDate[dateKey] = (workoutsByDate[dateKey] ?? 0) + 1;
+      }
+
+      workoutsByDate.forEach((dateStr, count) {
+        try {
+          final parsedDate = DateTime.parse(dateStr);
+          days.add(WorkoutDay(date: parsedDate, workoutCount: count));
+        } catch (e) {
+          print('⚠️ Data inválida: $dateStr');
+        }
+      });
+
+      days.sort((a, b) => a.date.compareTo(b.date));
+
+      setState(() {
+        _stats = stats;
+        _workoutDays = days;
+        _weeklyVolumes = weeklyVolumes;
+        _comparisonData = comparisonData;
+        _personalRecords = personalRecords;
+        _weeklyProgress = weeklyProgress;
+        _currentStreak = stats.currentStreak;
+        _monthTotal = stats.totalWorkouts; // Aproximação
+        _lastWorkout = stats.lastWorkoutDate;
+        _isLoading = false;
+      });
+
+      print('✅ Dashboard carregado com ${days.length} dias de dados');
+      print('   - Streak: ${stats.currentStreak} dias');
+      print('   - Total workouts: ${stats.totalWorkouts}');
+      print('   - Volume: ${stats.formattedVolume}');
+
+    } catch (e) {
+      print('❌ Erro ao carregar dados do Supabase: $e');
+      print('   Tentando carregar dados locais...');
+      await _loadLocalData();
+    }
+  }
+
+  /// Fallback para carregar dados locais (offline mode)
+  Future<void> _loadLocalData() async {
     final prefs = await SharedPreferences.getInstance();
 
     // Ler histórico de treinos (workout_history é uma lista de JSON)
@@ -64,10 +215,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _isLoading = false;
         });
       } catch (e) {
-        print('Erro ao processar histórico: $e');
+        print('❌ Erro ao processar histórico local: $e');
         setState(() => _isLoading = false);
       }
     } else {
+      print('📭 Nenhum dado local encontrado');
       setState(() => _isLoading = false);
     }
   }
@@ -235,32 +387,117 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildMetricCard(String emoji, String title, String value, Color color) {
     return Card(
-      elevation: 2,
+      elevation: 3,
+      shadowColor: color.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              color.withOpacity(0.05),
+            ],
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               emoji,
-              style: TextStyle(fontSize: 32),
+              style: TextStyle(fontSize: 36),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 10),
             Text(
               value,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: color,
+                letterSpacing: 0.5,
               ),
             ),
-            SizedBox(height: 4),
+            SizedBox(height: 6),
             Text(
               title,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeriodSelector() {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.purple.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.calendar_today_outlined, size: 18, color: Colors.purple),
+                SizedBox(width: 8),
+                Text(
+                  'Período de Análise',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: TimePeriod.values.map((period) {
+                  final isSelected = _selectedPeriod == period;
+                  return Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(period.label),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _selectedPeriod = period;
+                            _isLoading = true;
+                          });
+                          _loadWorkoutData();
+                        }
+                      },
+                      selectedColor: const Color(0xFF8E24AA),
+                      backgroundColor: Colors.grey[100],
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.grey[700],
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 13,
+                        letterSpacing: 0.3,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ],
@@ -273,8 +510,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dashboard de Consistência'),
-        backgroundColor: Theme.of(context).primaryColor,
+        title: Row(
+          children: [
+            Icon(Icons.analytics_outlined, size: 24),
+            SizedBox(width: 10),
+            Text(
+              'Dashboard de Consistência',
+              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.3),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF8E24AA), // Purple matching home
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -282,6 +530,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Seletor de período
+                  _buildPeriodSelector(),
+
                   // Cards de métricas
                   Padding(
                     padding: EdgeInsets.all(16),
@@ -290,8 +541,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildMetricCard(
                             '🔥',
-                            'Dias seguidos',
-                            '$_currentStreak',
+                            'Streak atual',
+                            '${_stats?.currentStreak ?? _currentStreak}',
                             Colors.orange,
                           ),
                         ),
@@ -299,8 +550,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: _buildMetricCard(
                             '💪',
-                            'Treinos este mês',
-                            '$_monthTotal',
+                            'Total treinos',
+                            '${_stats?.totalWorkouts ?? _monthTotal}',
                             Colors.blue,
                           ),
                         ),
@@ -308,14 +559,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
 
+                  // Segunda linha de cards
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _buildMetricCard(
+                            '📊',
+                            'Volume total',
+                            _stats?.formattedVolume ?? '0kg',
+                            Colors.purple,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: _buildMetricCard(
+                            '📈',
+                            'Média semanal',
+                            '${_stats?.formattedWeeklyAverage ?? '0.0'}x',
+                            Colors.teal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 8),
+
                   // Card último treino
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: _buildMetricCard(
                       '📅',
                       'Último treino',
-                      _lastWorkout != null
-                          ? '${_lastWorkout!.day}/${_lastWorkout!.month}/${_lastWorkout!.year}'
+                      (_stats?.lastWorkoutDate ?? _lastWorkout) != null
+                          ? () {
+                              final date = _stats?.lastWorkoutDate ?? _lastWorkout!;
+                              return '${date.day}/${date.month}/${date.year}';
+                            }()
                           : 'Nenhum',
                       Colors.green,
                     ),
@@ -323,8 +605,47 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                   SizedBox(height: 8),
 
+                  // Meta adaptada ao período (não mostrar para "Total")
+                  if (_weeklyProgress['show_goal'] == true || _selectedPeriod != TimePeriod.allTime)
+                    WeeklyGoalCard(
+                      weeklyProgress: _weeklyProgress,
+                      filterDays: _selectedPeriod.days,
+                      periodName: _selectedPeriod.label,
+                      onGoalUpdated: () {
+                        // Recarregar dados após atualização da meta
+                        setState(() => _isLoadingWeeklyGoal = true);
+                        SupabaseService.instance.getWeeklyProgress(
+                          filterDays: _selectedPeriod.days,
+                        ).then((progress) {
+                          setState(() {
+                            _weeklyProgress = progress;
+                            _isLoadingWeeklyGoal = false;
+                          });
+                        });
+                      },
+                    ),
+
+                  // Comparação com período anterior (não mostrar para "Total")
+                  if (_selectedPeriod != TimePeriod.allTime)
+                    ComparisonCard(
+                      comparisonData: _comparisonData,
+                      isLoading: _isLoadingComparison,
+                    ),
+
                   // Calendário estilo GitHub
                   _buildGitHubCalendar(),
+
+                  // Gráfico de Volume Semanal
+                  VolumeChart(
+                    weeklyData: _weeklyVolumes,
+                    isLoading: _isLoading,
+                  ),
+
+                  // Personal Records
+                  PersonalRecordsCard(
+                    personalRecords: _personalRecords,
+                    isLoading: _isLoadingPRs,
+                  ),
 
                   // Mensagem motivacional
                   if (_workoutDays.isEmpty)

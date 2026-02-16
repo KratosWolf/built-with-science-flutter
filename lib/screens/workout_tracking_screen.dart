@@ -578,12 +578,28 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
 
   Future<void> _completeWorkout() async {
     final duration = DateTime.now().difference(_workoutStartTime!);
-    
+
     // Salvar estatísticas do treino
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('last_workout_date', DateTime.now().toIso8601String());
     await prefs.setInt('last_workout_duration', duration.inSeconds);
-    
+
+    // Salvar sessão de treino no Supabase (fire and forget)
+    if (SupabaseService.instance.isLoggedIn) {
+      try {
+        await SupabaseService.instance.saveWorkoutSession(
+          programId: widget.programId,
+          dayId: widget.dayId,
+          durationSeconds: duration.inSeconds,
+        ).timeout(const Duration(seconds: 5));
+        print('☁️ Sessão de treino salva na nuvem');
+      } catch (error) {
+        print('⚠️ Erro ao salvar sessão na nuvem: $error - dados mantidos localmente');
+      }
+    } else {
+      print('📱 Modo offline - sessão salva apenas localmente');
+    }
+
     setState(() {
       _isWorkoutComplete = true;
     });

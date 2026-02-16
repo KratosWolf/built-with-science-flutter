@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'services/supabase_service.dart';
+import 'services/theme_service.dart';
 import 'screens/program_selection_screen.dart';
 import 'screens/simple_home.dart';
+import 'screens/main_navigation.dart';
 import 'screens/programs_screen.dart';
 import 'screens/program_detail_screen.dart';
 import 'screens/workout_tracking_screen.dart';
-import 'screens/simple_profile_screen.dart';
+import 'screens/profile_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/backup_screen.dart';
 import 'widgets/page_transition.dart';
@@ -48,7 +51,12 @@ void main() async {
     print('ℹ️  App funcionará em modo offline');
   }
   
-  runApp(const BuiltWithScienceApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeService(),
+      child: const BuiltWithScienceApp(),
+    ),
+  );
 }
 
 class BuiltWithScienceApp extends StatelessWidget {
@@ -56,7 +64,8 @@ class BuiltWithScienceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return Consumer<ThemeService>(
+      builder: (context, themeService, child) => MaterialApp(
       title: 'Built With Science',
       debugShowCheckedModeBanner: false, // Remove debug banner
       theme: ThemeData(
@@ -89,35 +98,45 @@ class BuiltWithScienceApp extends StatelessWidget {
         ),
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6366F1),
-          brightness: Brightness.dark,
-        ).copyWith(
-          primary: const Color(0xFF818CF8), // Indigo 400
-          secondary: const Color(0xFF34D399), // Emerald 400
-          tertiary: const Color(0xFFF87171), // Red 400
-          surface: const Color(0xFF0F172A), // Slate 900
-          surfaceContainerHighest: const Color(0xFF1E293B), // Slate 800
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.dark(
+          primary: const Color(0xFF3B82F6), // Blue 500 - match web dashboard
+          secondary: const Color(0xFF22C55E), // Green 500 - match web dashboard
+          tertiary: const Color(0xFFEF4444), // Red 500 for intensity
+          surface: const Color(0xFF0A0A0A), // Very dark background - match web #0a0a0a
+          surfaceContainerHighest: const Color(0xFF1A1A1A), // Dark cards - match web #1a1a1a
+          onSurface: const Color(0xFFFFFFFF), // White text
+          onSurfaceVariant: const Color(0xFFA0A0A0), // Gray secondary text
         ),
+        scaffoldBackgroundColor: const Color(0xFF0A0A0A), // Match web background
+        cardColor: const Color(0xFF1A1A1A), // Match web cards
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           elevation: 0,
-          backgroundColor: Color(0xFF1E293B),
+          backgroundColor: Color(0xFF0A0A0A), // Very dark to match web
           foregroundColor: Colors.white,
         ),
         cardTheme: CardTheme(
+          color: const Color(0xFF1A1A1A), // Dark cards
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3B82F6), // Blue primary
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFFFFFFF)),
+          bodyMedium: TextStyle(color: Color(0xFFFFFFFF)),
+          bodySmall: TextStyle(color: Color(0xFFA0A0A0)),
+        ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: themeService.themeMode, // Use ThemeService to control theme
       showPerformanceOverlay: false, // Remove performance overlay
       debugShowMaterialGrid: false, // Remove material grid
       showSemanticsDebugger: false, // Remove semantics debugger
@@ -133,7 +152,7 @@ class BuiltWithScienceApp extends StatelessWidget {
           case '/program-selection':
             return FadePageRoute(child: const ProgramSelectionScreen(), settings: settings);
           case '/home':
-            return FadePageRoute(child: const SimpleHomeScreen(), settings: settings);
+            return FadePageRoute(child: const MainNavigation(), settings: settings);
           case '/programs':
             return SlidePageRoute(
               child: const ProgramsScreen(),
@@ -163,7 +182,7 @@ class BuiltWithScienceApp extends StatelessWidget {
             );
           case '/profile':
             return SlidePageRoute(
-              child: const SimpleProfileScreen(),
+              child: const ProfileScreen(),
               direction: SlideDirection.bottomToTop,
               settings: settings,
             );
@@ -177,6 +196,7 @@ class BuiltWithScienceApp extends StatelessWidget {
             return FadePageRoute(child: const SimpleHomeScreen(), settings: settings);
         }
       },
-    );
+      ), // Close MaterialApp
+    ); // Close Consumer
   }
 }

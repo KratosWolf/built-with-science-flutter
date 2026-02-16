@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/supabase_service.dart';
 import '../screens/login_screen.dart';
-import '../screens/program_selection_screen.dart';
+import '../screens/main_navigation.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -30,33 +30,44 @@ class _AuthWrapperState extends State<AuthWrapper> {
   
   Future<void> _initializeAuth() async {
     try {
-      // Check initial auth state
-      final isLoggedIn = SupabaseService.instance.isLoggedIn;
-      print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
-      
+      // SEGURANÇA: Verificar se Supabase foi inicializado com sucesso
+      bool isLoggedIn = false;
+
+      try {
+        isLoggedIn = SupabaseService.instance.isLoggedIn;
+        print('🔍 Auth status inicial: ${isLoggedIn ? 'Logado' : 'Não logado'}');
+      } catch (e) {
+        print('⚠️ Supabase não inicializado - continuando em modo offline');
+        isLoggedIn = false;
+      }
+
       setState(() {
         _showLoginScreen = !isLoggedIn;
         _isLoading = false;
       });
-      
-      // Listen for auth state changes (stub - won't emit any events in offline mode)
-      _authSubscription = SupabaseService.instance.authStateChanges.listen(
-        (authState) {
-          // In offline mode, this stream is empty and won't emit events
-          // But keep the listener for future Supabase re-activation
-          print('🔄 Auth state changed: Modo offline ativo');
 
-          if (mounted) {
-            setState(() {
-              _showLoginScreen = true; // Always show login in offline mode
-            });
-          }
-        },
-        onError: (error) {
-          print('❌ Erro no auth stream: $error');
-        },
-      );
-      
+      // Listen for auth state changes (apenas se Supabase estiver OK)
+      try {
+        _authSubscription = SupabaseService.instance.authStateChanges.listen(
+          (authState) {
+            print('🔄 Auth state changed');
+
+            if (mounted) {
+              final newIsLoggedIn = authState.session != null;
+              setState(() {
+                _showLoginScreen = !newIsLoggedIn;
+              });
+            }
+          },
+          onError: (error) {
+            print('❌ Erro no auth stream: $error');
+          },
+        );
+      } catch (e) {
+        print('⚠️ Não foi possível ouvir auth changes: $e');
+        // Continua sem o listener - não é crítico
+      }
+
     } catch (error) {
       print('❌ Erro na inicialização do auth: $error');
       if (mounted) {
@@ -106,8 +117,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
       print('🔐 Mostrando tela de login');
       return const LoginScreen();
     } else {
-      print('🏠 Indo direto para o app');
-      return const ProgramSelectionScreen();
+      print('🏠 Usuário logado - indo para MainNavigation');
+      // Usuário está logado, ir para MainNavigation (Home + Perfil)
+      // TODO: No futuro, verificar se usuário já escolheu programa no banco
+      return const MainNavigation();
     }
   }
 }

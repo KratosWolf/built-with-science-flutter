@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout_models.dart';
-// import "supabase_service.dart";
-import 'program_detail_screen.dart';
+import '../services/supabase_service.dart';
+import 'main_navigation.dart';
 import 'dashboard_screen.dart';
 
 /// Program Selection Screen - Choose a workout program
@@ -98,21 +99,53 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
     }
   }
 
-  void _selectProgram(Program program) {
+  void _selectProgram(Program program) async {
     HapticFeedback.lightImpact();
-    
-    setState(() {
-      _selectedProgram = program;
-    });
-    
-    // Navigate to program details after short delay
-    Future.delayed(const Duration(milliseconds: 200), () {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ProgramDetailScreen(program: program),
-        ),
-      );
-    });
+
+    // 1. SALVAR PROGRAMA LOCALMENTE (SharedPreferences)
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('selected_program_id', program.id);
+      await prefs.setString('selected_program_name', program.name);
+      await prefs.setInt('selected_program_days', program.daysPerWeek);
+
+      print('✅ Programa salvo localmente: ${program.name} (${program.daysPerWeek} dias)');
+
+      // 2. SYNC COM SUPABASE (opcional, não bloqueia se falhar)
+      if (SupabaseService.instance.isLoggedIn) {
+        try {
+          await SupabaseService.instance.saveUserSelectedProgram(
+            programId: program.id,
+            programName: program.name,
+            daysPerWeek: program.daysPerWeek,
+          ).timeout(const Duration(seconds: 5));
+          print('✅ Programa sincronizado com Supabase');
+        } catch (e) {
+          print('⚠️ Falhou sync Supabase (OK, salvo localmente): $e');
+        }
+      } else {
+        print('📱 Modo offline - programa salvo apenas localmente');
+      }
+
+      // 3. NAVEGAR PARA HOME (MainNavigation)
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainNavigation()),
+          (route) => false, // Remove todas as rotas anteriores
+        );
+      }
+    } catch (e) {
+      print('❌ Erro ao salvar programa: $e');
+      // Mostrar erro ao usuário
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao salvar programa: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Color _getProgramColor(int daysPerWeek) {
@@ -596,7 +629,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                         onPressed: () => _selectProgram(program),
                         icon: const Icon(Icons.arrow_forward, size: 18),
                         label: const Text(
-                          'View Program Details',
+                          '⭐️⭐️⭐️ CLIQUE AQUI v5.12 ⭐️⭐️⭐️',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
