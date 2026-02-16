@@ -85,20 +85,21 @@ permission_handler: 11.4.0
 
 ---
 
-### FASE 2 — Correções SuperSet
+### FASE 2 — Correções SuperSet ✅ CONCLUÍDA
 **Objetivo:** Corrigir 4 bugs/melhorias relacionados ao comportamento do SuperSet durante o treino.
-**Status:** 🔒 Bloqueada — só inicia após Fase 1 completa e aprovada pelo Tiago.
+**Status:** ✅ Concluída
 **Prazo estimado:** 2-3 sessões de Claude Code
+**Data de conclusão:** 16/02/2026
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
-| 2.1 | Remover timer entre exercícios dentro do SuperSet | 🔒 | O timer NÃO deve aparecer entre A1→A2 nem entre A2→A1. Timer só aparece quando o SuperSet inteiro termina (A1→A2→A1→A2→A1→A2 → TIMER → próximo exercício). Ver detalhes abaixo. |
-| 2.2 | Adicionar campo de comentário/notas no SuperSet | 🔒 | O exercício normal já tem campo de comentário. O SuperSet não tem. Adicionar campo de texto livre para o usuário anotar observações durante o treino. |
-| 2.3 | Carregar dados do treino anterior no SuperSet | 🔒 | CRÍTICO: Quando o usuário abre um SuperSet, os campos de peso, repetições e dificuldade vêm em branco. Deveriam carregar automaticamente os valores do último treino (como já funciona nos exercícios solo). Também deve manter a variação de exercício selecionada no dropdown. |
-| 2.4 | Adicionar alerta sonoro ao timer (funcionar com fone) | 🔒 | Atualmente o timer só vibra. Adicionar som audível que toque pelo fone Bluetooth/com fio. Usar package como `audioplayers` ou `just_audio`. O som deve tocar quando o timer zera. |
-| 2.5 | Testes de regressão dos SuperSets | 🔒 | Testar fluxo completo: iniciar treino → SuperSet → registrar dados → verificar persistência → próximo treino deve mostrar dados anteriores |
+| 2.1 | Remover timer entre exercícios dentro do SuperSet | ✅ Concluído | Timer agora só aparece NO FINAL de TODO o SuperSet (A1→A2→A1→A2→A1→A2→⏱️). Commits: `fix: remover timer entre exercícios dentro do SuperSet`, `fix: timer só aparece no final de TODO o SuperSet` |
+| 2.2 | Adicionar campo de comentário/notas no SuperSet | ✅ Concluído | Campo "Comentários (opcional)" adicionado com integração completa ao cache. Commit: `feat: adicionar campo de comentários no SuperSet` |
+| 2.3 | Carregar dados do treino anterior no SuperSet | ✅ Concluído | Peso, reps, dificuldade e comentários do último treino (set 3) agora preenchem automaticamente o set 1. Commit: `feat: carregar dados do treino anterior no SuperSet` |
+| 2.4 | Adicionar alerta sonoro ao timer | ✅ Concluído | Som de notificação + vibração 3x quando timer completa. Dependência `flutter_ringtone_player` adicionada. Commit: `feat: adicionar alerta sonoro ao timer de descanso` |
+| 2.5 | Testes de regressão dos SuperSets | ✅ Concluído | Testes validados pelo Tiago. Comportamento correto confirmado. |
 
-**Critério de conclusão:** SuperSets funcionam corretamente — sem timer interno, com comentários, dados anteriores carregados, som no timer.
+**Critério de conclusão:** ✅ SuperSets funcionam corretamente — timer só no final, campo de comentários funcional, dados anteriores carregados automaticamente, som + vibração no timer.
 
 #### Detalhamento: Timer no SuperSet (2.1)
 
@@ -276,16 +277,13 @@ Flutter-Mobile-Version/
 - **Flutter 3.41.1 atualizado** (Fase 1 ✅)
 - **Build APK funcional** (Fase 1 ✅)
 
-### ⚠️ Problemas Conhecidos (Fase 2)
-- Timer entre exercícios do SuperSet (comportamento incorreto)
-- SuperSet sem campo de comentário/notas
-- Dados anteriores não carregam no SuperSet
-- Timer sem alerta sonoro (apenas vibração)
+### ⚠️ Problemas Conhecidos
 - Arquivos >800 linhas precisam refatoração futura
+- Warnings de deprecated APIs (withOpacity, etc) - não bloqueantes
 
 ### 🔮 Roadmap
-- **Fase 2:** Correções SuperSet (próxima)
-- **Fase 3:** Redesign Visual Dark Mode
+- **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA)
+- **Fase 3:** Redesign Visual Dark Mode (próxima)
 - **Fase 4:** iOS
 - Xcode não configurado (iOS bloqueado até Fase 4)
 
@@ -300,3 +298,4 @@ Flutter-Mobile-Version/
 | 16/02/2026 | Planejamento | Auditoria completa + plano de melhoria | Retomar desenvolvimento ativo |
 | 16/02/2026 | Planejamento | CLAUDE.md e PROJECT_PLAN.md criados | Preparar para Claude Code |
 | 16/02/2026 | Fase 1 ✅ | Limpeza completa do projeto | Segurança (google-services.json removido), Git limpo, Flutter 3.41.1, dependências atualizadas, print() removidos, build funcional |
+| 16/02/2026 | Fase 2 ✅ | Correções SuperSet completas | Timer corrigido (só no final), campo de comentários adicionado, dados anteriores carregados automaticamente, som + vibração no timer. 5 commits: fix timer interno, feat comentários, feat dados anteriores, feat som timer, fix timer final |
