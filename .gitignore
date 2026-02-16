@@ -49,3 +49,9 @@ android/app/google-services.json
 .env
 .env.*
 !.env.example
+
+# Releases (APKs não versionados)
+releases/*.apk
+
+# Backups temporários
+*.old
