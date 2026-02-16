@@ -52,9 +52,10 @@ dependencies:
   # File picker and permissions for backup system
   permission_handler: ^12.0.1
 
-  # Background timer e vibração
+  # Background timer, vibração e som
   vibration: ^3.1.6
   wakelock_plus: ^1.1.4
+  flutter_ringtone_player: ^4.0.0+3
 
   # State management para theme
   provider: ^6.1.1

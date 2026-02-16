@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vibration/vibration.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 /// Background Timer Service - Mantém timer rodando mesmo quando app está em background
 /// Uso: Timer de descanso entre sets que continua funcionando ao trocar pro Spotify
@@ -48,14 +49,22 @@ class BackgroundTimerService {
     });
   }
 
-  /// Vibração ao completar (padrão Samsung Galaxy S21+)
+  /// Som + Vibração ao completar timer
   static Future<void> _onTimerComplete() async {
     try {
-      // Verificar se dispositivo tem vibrador
+      // 1. Tocar som de notificação
+      await FlutterRingtonePlayer().play(
+        android: AndroidSounds.notification,
+        ios: IosSounds.glass,
+        looping: false,
+        volume: 1.0,
+      );
+      debugPrint('🔔 Som tocado - Descanso completo!');
+
+      // 2. Vibração forte 3x (padrão Samsung)
       final hasVibrator = await Vibration.hasVibrator() ?? false;
 
       if (hasVibrator) {
-        // Vibração forte 3x (padrão Samsung)
         // Pattern: [espera, vibra, espera, vibra, espera, vibra]
         await Vibration.vibrate(
           pattern: [0, 400, 200, 400, 200, 400],
@@ -66,7 +75,7 @@ class BackgroundTimerService {
         debugPrint('⚠️  Dispositivo não tem vibrador');
       }
     } catch (e) {
-      debugPrint('❌ Erro na vibração: $e');
+      debugPrint('❌ Erro no alerta (som/vibração): $e');
     }
   }
 
