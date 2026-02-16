@@ -281,15 +281,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Color _getColorForCount(int count) {
-    if (count == 0) return Color(0xFFEBEDF0);
-    if (count == 1) return Color(0xFF9BE9A8);
-    if (count == 2) return Color(0xFF40C463);
-    if (count == 3) return Color(0xFF30A14E);
-    return Color(0xFF216E39); // 4+
+  Color _getColorForCount(int count, BuildContext context) {
+    final theme = Theme.of(context);
+    // Usar escala de laranja para dark mode
+    if (count == 0) return theme.colorScheme.surfaceContainerHighest;
+    if (count == 1) return theme.colorScheme.primary.withOpacity(0.3);
+    if (count == 2) return theme.colorScheme.primary.withOpacity(0.5);
+    if (count == 3) return theme.colorScheme.primary.withOpacity(0.7);
+    return theme.colorScheme.primary; // 4+
   }
 
-  Widget _buildGitHubCalendar() {
+  Widget _buildGitHubCalendar(BuildContext context) {
+    final theme = Theme.of(context);
     final now = DateTime.now();
     final startDate = now.subtract(Duration(days: 90));
 
@@ -310,7 +313,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       for (int day = 0; day < 7; day++) {
         final key = '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}';
         final count = workoutMap[key] ?? 0;
-        final color = _getColorForCount(count);
+        final color = _getColorForCount(count, context);
 
         days.add(
           Tooltip(
@@ -336,7 +339,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     return Card(
-      elevation: 2,
+      color: theme.colorScheme.surfaceContainer,
       margin: EdgeInsets.all(16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -345,10 +348,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Text(
               'Últimos 90 dias',
-              style: TextStyle(
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
               ),
             ),
             SizedBox(height: 16),
@@ -364,19 +365,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Menos', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text('Menos', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                 SizedBox(width: 8),
-                Container(width: 12, height: 12, color: Color(0xFFEBEDF0)),
+                Container(width: 12, height: 12, color: theme.colorScheme.surfaceContainerHighest),
                 SizedBox(width: 4),
-                Container(width: 12, height: 12, color: Color(0xFF9BE9A8)),
+                Container(width: 12, height: 12, color: theme.colorScheme.primary.withOpacity(0.3)),
                 SizedBox(width: 4),
-                Container(width: 12, height: 12, color: Color(0xFF40C463)),
+                Container(width: 12, height: 12, color: theme.colorScheme.primary.withOpacity(0.5)),
                 SizedBox(width: 4),
-                Container(width: 12, height: 12, color: Color(0xFF30A14E)),
+                Container(width: 12, height: 12, color: theme.colorScheme.primary.withOpacity(0.7)),
                 SizedBox(width: 4),
-                Container(width: 12, height: 12, color: Color(0xFF216E39)),
+                Container(width: 12, height: 12, color: theme.colorScheme.primary),
                 SizedBox(width: 8),
-                Text('Mais', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text('Mais', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),
           ],
@@ -385,24 +386,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildMetricCard(String emoji, String title, String value, Color color) {
+  Widget _buildMetricCard(String emoji, String title, String value, Color color, BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      elevation: 3,
-      shadowColor: color.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: theme.colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
       child: Container(
         padding: EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              color.withOpacity(0.05),
-            ],
-          ),
-        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -424,9 +421,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.3,
               ),
@@ -437,10 +433,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildPeriodSelector() {
+  Widget _buildPeriodSelector(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      elevation: 3,
-      shadowColor: Colors.purple.withOpacity(0.2),
+      color: theme.colorScheme.surfaceContainer,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
@@ -450,14 +447,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 18, color: Colors.purple),
+                Icon(Icons.calendar_today_outlined, size: 18, color: theme.colorScheme.primary),
                 SizedBox(width: 8),
                 Text(
                   'Período de Análise',
-                  style: TextStyle(
-                    fontSize: 15,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
                     letterSpacing: 0.3,
                   ),
                 ),
@@ -483,11 +478,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           _loadWorkoutData();
                         }
                       },
-                      selectedColor: const Color(0xFF8E24AA),
-                      backgroundColor: Colors.grey[100],
+                      selectedColor: theme.colorScheme.primary,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
                       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey[700],
+                        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                         fontSize: 13,
                         letterSpacing: 0.3,
@@ -508,6 +503,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -520,8 +517,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF8E24AA), // Purple matching home
-        foregroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
+        foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
       ),
       body: _isLoading
@@ -531,7 +528,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Seletor de período
-                  _buildPeriodSelector(),
+                  _buildPeriodSelector(context),
 
                   // Cards de métricas
                   Padding(
@@ -543,7 +540,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             '🔥',
                             'Streak atual',
                             '${_stats?.currentStreak ?? _currentStreak}',
-                            Colors.orange,
+                            theme.colorScheme.primary,
+                            context,
                           ),
                         ),
                         SizedBox(width: 8),
@@ -552,7 +550,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             '💪',
                             'Total treinos',
                             '${_stats?.totalWorkouts ?? _monthTotal}',
-                            Colors.blue,
+                            const Color(0xFF3B82F6), // Info blue
+                            context,
                           ),
                         ),
                       ],
@@ -569,7 +568,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             '📊',
                             'Volume total',
                             _stats?.formattedVolume ?? '0kg',
-                            Colors.purple,
+                            theme.colorScheme.primary,
+                            context,
                           ),
                         ),
                         SizedBox(width: 8),
@@ -578,7 +578,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             '📈',
                             'Média semanal',
                             '${_stats?.formattedWeeklyAverage ?? '0.0'}x',
-                            Colors.teal,
+                            const Color(0xFF14B8A6), // Teal
+                            context,
                           ),
                         ),
                       ],
@@ -599,7 +600,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               return '${date.day}/${date.month}/${date.year}';
                             }()
                           : 'Nenhum',
-                      Colors.green,
+                      const Color(0xFF22C55E), // Success green
+                      context,
                     ),
                   ),
 
@@ -633,7 +635,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
 
                   // Calendário estilo GitHub
-                  _buildGitHubCalendar(),
+                  _buildGitHubCalendar(context),
 
                   // Gráfico de Volume Semanal
                   VolumeChart(
@@ -653,22 +655,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       padding: EdgeInsets.all(32),
                       child: Column(
                         children: [
-                          Icon(Icons.fitness_center, size: 64, color: Colors.grey[400]),
+                          Icon(Icons.fitness_center, size: 64, color: theme.colorScheme.onSurfaceVariant),
                           SizedBox(height: 16),
                           Text(
                             'Comece seu primeiro treino!',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[600],
+                            style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Seus treinos aparecerão aqui',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],

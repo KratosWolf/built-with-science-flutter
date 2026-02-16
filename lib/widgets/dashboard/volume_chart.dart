@@ -13,8 +13,10 @@ class VolumeChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      elevation: 2,
+      color: theme.colorScheme.surfaceContainer,
       margin: EdgeInsets.all(16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -23,10 +25,8 @@ class VolumeChart extends StatelessWidget {
           children: [
             Text(
               'Volume Semanal (kg)',
-              style: TextStyle(
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
               ),
             ),
             SizedBox(height: 20),
@@ -34,7 +34,7 @@ class VolumeChart extends StatelessWidget {
                 ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(color: theme.colorScheme.primary),
                     ),
                   )
                 : weeklyData.isEmpty
@@ -43,13 +43,12 @@ class VolumeChart extends StatelessWidget {
                           padding: EdgeInsets.all(40),
                           child: Column(
                             children: [
-                              Icon(Icons.bar_chart, size: 48, color: Colors.grey[400]),
+                              Icon(Icons.bar_chart, size: 48, color: theme.colorScheme.onSurfaceVariant),
                               SizedBox(height: 8),
                               Text(
                                 'Sem dados suficientes',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -66,7 +65,7 @@ class VolumeChart extends StatelessWidget {
                               horizontalInterval: _calculateInterval(),
                               getDrawingHorizontalLine: (value) {
                                 return FlLine(
-                                  color: Colors.grey[300]!,
+                                  color: theme.colorScheme.outline.withOpacity(0.2),
                                   strokeWidth: 1,
                                 );
                               },
@@ -91,9 +90,8 @@ class VolumeChart extends StatelessWidget {
                                         padding: EdgeInsets.only(top: 8),
                                         child: Text(
                                           weeklyData[index]['week'],
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 12,
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            color: theme.colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       );
@@ -110,9 +108,8 @@ class VolumeChart extends StatelessWidget {
                                   getTitlesWidget: (double value, TitleMeta meta) {
                                     return Text(
                                       _formatVolume(value),
-                                      style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 12,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurfaceVariant,
                                       ),
                                     );
                                   },
@@ -122,8 +119,8 @@ class VolumeChart extends StatelessWidget {
                             borderData: FlBorderData(
                               show: true,
                               border: Border(
-                                bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-                                left: BorderSide(color: Colors.grey[300]!, width: 1),
+                                bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3), width: 1),
+                                left: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3), width: 1),
                               ),
                             ),
                             minX: 0,
@@ -135,7 +132,7 @@ class VolumeChart extends StatelessWidget {
                                 spots: _createSpots(),
                                 isCurved: true,
                                 curveSmoothness: 0.3,
-                                color: Colors.purple,
+                                color: theme.colorScheme.primary,
                                 barWidth: 3,
                                 isStrokeCapRound: true,
                                 dotData: FlDotData(
@@ -143,15 +140,15 @@ class VolumeChart extends StatelessWidget {
                                   getDotPainter: (spot, percent, barData, index) {
                                     return FlDotCirclePainter(
                                       radius: 4,
-                                      color: Colors.purple,
+                                      color: theme.colorScheme.primary,
                                       strokeWidth: 2,
-                                      strokeColor: Colors.white,
+                                      strokeColor: theme.colorScheme.surfaceContainer,
                                     );
                                   },
                                 ),
                                 belowBarData: BarAreaData(
                                   show: true,
-                                  color: Colors.purple.withOpacity(0.1),
+                                  color: theme.colorScheme.primary.withOpacity(0.2),
                                 ),
                               ),
                             ],

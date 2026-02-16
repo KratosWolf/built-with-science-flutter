@@ -12,8 +12,10 @@ class ComparisonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      elevation: 2,
+      color: theme.colorScheme.surfaceContainer,
       margin: EdgeInsets.all(16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -22,10 +24,8 @@ class ComparisonCard extends StatelessWidget {
           children: [
             Text(
               'Comparação com Período Anterior',
-              style: TextStyle(
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
               ),
             ),
             SizedBox(height: 16),
@@ -33,17 +33,18 @@ class ComparisonCard extends StatelessWidget {
                 ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(color: theme.colorScheme.primary),
                     ),
                   )
-                : _buildComparisonContent(),
+                : _buildComparisonContent(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildComparisonContent() {
+  Widget _buildComparisonContent(BuildContext context) {
+    final theme = Theme.of(context);
     final workoutsDiff = comparisonData['workoutsDiff'] as int;
     final workoutsPercent = comparisonData['workoutsPercent'] as double;
     final volumeDiff = comparisonData['volumeDiff'] as double;
@@ -59,13 +60,12 @@ class ComparisonCard extends StatelessWidget {
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(Icons.compare_arrows, size: 48, color: Colors.grey[400]),
+              Icon(Icons.compare_arrows, size: 48, color: theme.colorScheme.onSurfaceVariant),
               SizedBox(height: 8),
               Text(
                 'Sem dados para comparar',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -78,6 +78,7 @@ class ComparisonCard extends StatelessWidget {
       children: [
         // Workouts comparison
         _buildComparisonRow(
+          context: context,
           label: 'Treinos',
           diff: workoutsDiff,
           percent: workoutsPercent,
@@ -88,6 +89,7 @@ class ComparisonCard extends StatelessWidget {
         SizedBox(height: 12),
         // Volume comparison
         _buildComparisonRow(
+          context: context,
           label: 'Volume Total',
           diff: volumeDiff,
           percent: volumePercent,
@@ -98,13 +100,15 @@ class ComparisonCard extends StatelessWidget {
   }
 
   Widget _buildComparisonRow({
+    required BuildContext context,
     required String label,
     required num diff,
     required double percent,
     required bool isCount,
   }) {
+    final theme = Theme.of(context);
     final isPositive = diff >= 0;
-    final color = isPositive ? Colors.green : Colors.red;
+    final color = isPositive ? const Color(0xFF22C55E) : theme.colorScheme.error;
     final icon = isPositive ? Icons.trending_up : Icons.trending_down;
     final sign = isPositive ? '+' : '';
 
@@ -142,9 +146,8 @@ class ComparisonCard extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
