@@ -86,7 +86,7 @@ class BuiltWithScienceApp extends StatelessWidget {
           backgroundColor: Color(0xFF6366F1),
           foregroundColor: Colors.white,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
@@ -117,7 +117,7 @@ class BuiltWithScienceApp extends StatelessWidget {
           backgroundColor: Color(0xFF0A0A0A), // Very dark to match web
           foregroundColor: Colors.white,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: const Color(0xFF1A1A1A), // Dark cards
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
