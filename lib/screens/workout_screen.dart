@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
-import '../services/supabase_service.dart';
+// import '../services/supabase_service.dart'; // Supabase disabled
 // import '../widgets/exercise_selector.dart'; // Arquivo não existe
 import '../widgets/rest_timer.dart';
 import 'dart:async';
@@ -236,37 +236,58 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
   void _showWorkoutCompleteDialog() {
     final duration = Duration(seconds: workoutDurationSeconds);
     final formattedDuration = '${duration.inMinutes}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Row(
+        backgroundColor: Color(0xFF2D2D2D),
+        title: Row(
           children: [
-            Icon(Icons.celebration, color: Colors.orange),
+            Icon(Icons.celebration, color: Color(0xFFFF6B00)),
             SizedBox(width: 8),
-            Text('Workout Complete!'),
+            Text(
+              'Workout Complete!',
+              style: TextStyle(color: Color(0xFFFFFFFF)),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Great job completing ${widget.dayName ?? 'your workout'}!'),
+            Text(
+              'Great job completing ${widget.dayName ?? 'your workout'}!',
+              style: TextStyle(color: Color(0xFFFFFFFF)),
+            ),
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.timer, size: 16, color: Colors.grey),
+                const Icon(
+                  Icons.timer,
+                  size: 16,
+                  color: Color(0xFF9CA3AF),
+                ),
                 const SizedBox(width: 4),
-                Text('Duration: $formattedDuration'),
+                Text(
+                  'Duration: $formattedDuration',
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.fitness_center, size: 16, color: Colors.grey),
+                const Icon(
+                  Icons.fitness_center,
+                  size: 16,
+                  color: Color(0xFF9CA3AF),
+                ),
                 const SizedBox(width: 4),
-                Text('Exercises: ${completedExercises.length}/${exercises.length}'),
+                Text(
+                  'Exercises: ${completedExercises.length}/${exercises.length}',
+                  style: TextStyle(color: Color(0xFF9CA3AF)),
+                ),
               ],
             ),
           ],
@@ -277,6 +298,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
               Navigator.of(context).pop(); // Close dialog
               Navigator.of(context).pop(); // Close workout screen
             },
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFFFF6B00),
+            ),
             child: const Text('Continue'),
           ),
         ],
@@ -288,11 +312,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
+        backgroundColor: Color(0xFF2D2D2D),
+        title: const Text(
+          'Error',
+          style: TextStyle(color: Color(0xFFEF4444)),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: Color(0xFFFFFFFF)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFFFF6B00),
+            ),
             child: const Text('OK'),
           ),
         ],
@@ -319,11 +353,21 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
           final bool shouldPop = await showDialog(
             context: context,
             builder: (context) => AlertDialog(
-              title: const Text('Leave Workout?'),
-              content: const Text('Your progress will be saved, but you can continue this workout later.'),
+              backgroundColor: Color(0xFF2D2D2D),
+              title: const Text(
+                'Leave Workout?',
+                style: TextStyle(color: Color(0xFFFFFFFF)),
+              ),
+              content: const Text(
+                'Your progress will be saved, but you can continue this workout later.',
+                style: TextStyle(color: Color(0xFF9CA3AF)),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Color(0xFF9CA3AF),
+                  ),
                   child: const Text('Stay'),
                 ),
                 TextButton(
@@ -331,6 +375,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                     _saveWorkoutProgress();
                     Navigator.of(context).pop(true);
                   },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Color(0xFFFF6B00),
+                  ),
                   child: const Text('Leave'),
                 ),
               ],
@@ -373,7 +420,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                 children: [
                   const Text(
                     'Progress',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF9CA3AF),
+                    ),
                   ),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -390,7 +440,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                           padding: EdgeInsets.only(left: 8.0),
                           child: Icon(
                             Icons.check_circle,
-                            color: Colors.green,
+                            color: Color(0xFF22C55E),
                             size: 20,
                           ),
                         ),
@@ -415,9 +465,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                       children: [
                         LinearProgressIndicator(
                           value: exercises.isNotEmpty ? completedExercises.length / exercises.length : 0.0,
-                          backgroundColor: Colors.grey.shade300,
+                          backgroundColor: Color(0xFF3A3A3A),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            allExercisesCompleted ? Colors.green : Colors.blue.shade600,
+                            allExercisesCompleted ? Color(0xFF22C55E) : Color(0xFFFF6B00),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -425,7 +475,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                           '${exercises.isNotEmpty ? ((completedExercises.length / exercises.length) * 100).round() : 0}% complete',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey.shade600,
+                            color: Color(0xFF9CA3AF),
                           ),
                         ),
                       ],
@@ -439,7 +489,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircularProgressIndicator(),
+                            CircularProgressIndicator(
+                              color: Color(0xFFFF6B00),
+                            ),
                             SizedBox(height: 16),
                             Text('Loading workout...'),
                           ],
@@ -456,14 +508,14 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                           children: [
                             Icon(
                               Icons.error_outline,
-                              color: Colors.red.shade400,
+                              color: Color(0xFFEF4444),
                               size: 64,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               errorMessage!,
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.red.shade600),
+                              style: TextStyle(color: Color(0xFFEF4444)),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton(
@@ -481,15 +533,17 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                       margin: const EdgeInsets.all(16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        border: Border.all(color: Colors.green.shade200),
+                        color: Color(0xFF22C55E).withOpacity(0.15),
+                        border: Border.all(
+                          color: Color(0xFF22C55E).withOpacity(0.3),
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.celebration,
-                            color: Colors.green.shade600,
+                            color: Color(0xFF22C55E),
                             size: 32,
                           ),
                           const SizedBox(width: 12),
@@ -502,13 +556,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade800,
+                                    color: Color(0xFFFFFFFF),
                                   ),
                                 ),
                                 Text(
                                   'You completed all exercises in $formattedDuration.',
                                   style: TextStyle(
-                                    color: Colors.green.shade700,
+                                    color: Color(0xFF9CA3AF),
                                   ),
                                 ),
                               ],
@@ -534,13 +588,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               border: isCurrent ? Border.all(
-                                color: Colors.blue.shade500, 
+                                color: Color(0xFFFF6B00),
                                 width: 2,
                               ) : null,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: isCurrent ? [
                                 BoxShadow(
-                                  color: Colors.blue.shade200,
+                                  color: Color(0xFFFF6B00).withOpacity(0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -585,7 +639,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                                             decoration: BoxDecoration(
-                                              color: Colors.green.shade100,
+                                              color: Color(0xFF22C55E).withOpacity(0.15),
                                               borderRadius: BorderRadius.circular(16),
                                             ),
                                             child: Row(
@@ -594,7 +648,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                                                 Icon(
                                                   Icons.check_circle,
                                                   size: 16,
-                                                  color: Colors.green.shade700,
+                                                  color: Color(0xFF22C55E),
                                                 ),
                                                 const SizedBox(width: 4),
                                                 Text(
@@ -602,7 +656,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w500,
-                                                    color: Colors.green.shade800,
+                                                    color: Color(0xFFFFFFFF),
                                                   ),
                                                 ),
                                               ],
@@ -636,8 +690,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                             icon: const Icon(Icons.arrow_back, size: 18),
                             label: const Text('Previous'),
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.grey.shade700,
-                              backgroundColor: Colors.grey.shade100,
+                              foregroundColor: Color(0xFF9CA3AF),
+                              backgroundColor: Color(0xFF3A3A3A),
                             ),
                           ),
                           
@@ -665,7 +719,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                         icon: const Icon(Icons.celebration),
                         label: const Text('Finish Workout'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Color(0xFF22C55E),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -679,12 +733,13 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
             // Rest Timer Overlay
             if (showRestTimer)
               Container(
-                color: Colors.black.withOpacity(0.5),
+                color: Color(0xFF1A1A1A).withOpacity(0.85),
                 child: Center(
                   child: Container(
                     margin: const EdgeInsets.all(32),
                     constraints: const BoxConstraints(maxWidth: 400),
                     child: Card(
+                      color: Color(0xFF2D2D2D),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -694,7 +749,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> with WidgetsBindingObserv
                               children: [
                                 Icon(
                                   Icons.timer,
-                                  color: Colors.blue.shade600,
+                                  color: Color(0xFFFF6B00),
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),

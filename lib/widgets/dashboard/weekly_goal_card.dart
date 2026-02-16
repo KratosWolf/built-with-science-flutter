@@ -24,6 +24,8 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     // Usar period_goal se disponível, senão usar weekly_goal (fallback)
     final periodGoal = widget.weeklyProgress['period_goal'] as int? ??
                       widget.weeklyProgress['weekly_goal'] as int? ??
@@ -33,19 +35,20 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
     final progress = widget.weeklyProgress['progress'] as double? ?? 0.0;
     final remaining = widget.weeklyProgress['remaining'] as int? ?? periodGoal;
 
-    // Determine color based on progress
+    // Determine color based on progress (dark theme colors)
     Color progressColor;
     if (progress >= 100) {
-      progressColor = Colors.green;
+      progressColor = Color(0xFF22C55E); // Success green
     } else if (progress >= 75) {
-      progressColor = Colors.orange;
+      progressColor = Color(0xFFFF6B00); // Orange
     } else {
-      progressColor = Colors.grey;
+      progressColor = Color(0xFF6B7280); // Disabled grey
     }
 
     return Card(
       elevation: 2,
       margin: EdgeInsets.all(16),
+      color: theme.cardColor,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -63,16 +66,18 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
                     SizedBox(width: 8),
                     Text(
                       'Meta ${widget.periodName == 'Semana' ? 'Semanal' : 'do ${widget.periodName}'}',
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
                       ),
                     ),
                   ],
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings, size: 20),
+                  icon: Icon(
+                    Icons.settings,
+                    size: 20,
+                    color: Color(0xFF9CA3AF),
+                  ),
                   onPressed: () => _showGoalDialog(context, weeklyGoal),
                   tooltip: 'Definir Meta Semanal',
                 ),
@@ -96,7 +101,7 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
                   : 'Meta atingida! 🎉',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: Color(0xFF9CA3AF),
               ),
             ),
             SizedBox(height: 12),
@@ -107,7 +112,7 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
               child: LinearProgressIndicator(
                 value: progress / 100,
                 minHeight: 12,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Color(0xFF3A3A3A),
                 valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               ),
             ),
@@ -119,7 +124,7 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: progressColor.withOpacity(0.1),
+                  color: progressColor.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -139,6 +144,7 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
   }
 
   void _showGoalDialog(BuildContext context, int currentGoal) {
+    final theme = Theme.of(context);
     int selectedGoal = currentGoal;
 
     showDialog(
@@ -147,13 +153,20 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Definir Meta Semanal'),
+              backgroundColor: Color(0xFF2D2D2D),
+              title: Text(
+                'Definir Meta Semanal',
+                style: TextStyle(color: Color(0xFFFFFFFF)),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Quantos treinos por semana?',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF9CA3AF),
+                    ),
                   ),
                   SizedBox(height: 16),
                   Text(
@@ -161,28 +174,44 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Colors.purple,
+                      color: Color(0xFFFF6B00),
                     ),
                   ),
                   SizedBox(height: 16),
-                  Slider(
-                    value: selectedGoal.toDouble(),
-                    min: 1,
-                    max: 7,
-                    divisions: 6,
-                    label: selectedGoal.toString(),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedGoal = value.toInt();
-                      });
-                    },
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Color(0xFFFF6B00),
+                      inactiveTrackColor: Color(0xFF3A3A3A),
+                      thumbColor: Color(0xFFFF6B00),
+                      overlayColor: Color(0xFFFF6B00).withOpacity(0.2),
+                      valueIndicatorColor: Color(0xFFFF6B00),
+                      valueIndicatorTextStyle: TextStyle(color: Colors.white),
+                    ),
+                    child: Slider(
+                      value: selectedGoal.toDouble(),
+                      min: 1,
+                      max: 7,
+                      divisions: 6,
+                      label: selectedGoal.toString(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedGoal = value.toInt();
+                        });
+                      },
+                    ),
                   ),
                   SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('1', style: TextStyle(color: Colors.grey)),
-                      Text('7', style: TextStyle(color: Colors.grey)),
+                      Text(
+                        '1',
+                        style: TextStyle(color: Color(0xFF9CA3AF)),
+                      ),
+                      Text(
+                        '7',
+                        style: TextStyle(color: Color(0xFF9CA3AF)),
+                      ),
                     ],
                   ),
                 ],
@@ -190,9 +219,16 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancelar'),
+                  child: Text(
+                    'Cancelar',
+                    style: TextStyle(color: Color(0xFF9CA3AF)),
+                  ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFFF6B00),
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: () async {
                     final success = await _supabaseService.setWeeklyGoal(selectedGoal);
 
@@ -203,14 +239,14 @@ class _WeeklyGoalCardState extends State<WeeklyGoalCard> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Meta salva: $selectedGoal treinos/semana'),
-                          backgroundColor: Colors.green,
+                          backgroundColor: Color(0xFF22C55E),
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('Erro ao salvar meta'),
-                          backgroundColor: Colors.red,
+                          backgroundColor: Color(0xFFEF4444),
                         ),
                       );
                     }

@@ -12,9 +12,12 @@ class PersonalRecordsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
       elevation: 2,
       margin: EdgeInsets.all(16),
+      color: theme.cardColor,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -29,10 +32,8 @@ class PersonalRecordsCard extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   'Personal Records',
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
                   ),
                 ),
               ],
@@ -42,7 +43,9 @@ class PersonalRecordsCard extends StatelessWidget {
                 ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   )
                 : _buildRecordsList(),
@@ -59,14 +62,18 @@ class PersonalRecordsCard extends StatelessWidget {
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(Icons.emoji_events, size: 48, color: Colors.grey[400]),
+              Icon(
+                Icons.emoji_events,
+                size: 48,
+                color: Color(0xFF6B7280),
+              ),
               SizedBox(height: 8),
               Text(
                 'Complete treinos para ver seus recordes',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Color(0xFF9CA3AF),
                 ),
               ),
             ],
@@ -99,28 +106,35 @@ class PersonalRecordsCard extends StatelessWidget {
       formattedDate = 'N/A';
     }
 
-    // Medal colors for top 3
+    // Medal colors for top 3 (adjusted for dark theme)
     Color? medalColor;
     String? medal;
+    Color? textColor;
+
     if (index == 0) {
       medalColor = Color(0xFFFFD700); // Gold
       medal = '🥇';
+      textColor = Color(0xFFFFD700);
     } else if (index == 1) {
       medalColor = Color(0xFFC0C0C0); // Silver
       medal = '🥈';
+      textColor = Color(0xFFC0C0C0);
     } else if (index == 2) {
       medalColor = Color(0xFFCD7F32); // Bronze
       medal = '🥉';
+      textColor = Color(0xFFCD7F32);
     }
 
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: medalColor != null ? medalColor.withOpacity(0.1) : Colors.grey[50],
+        color: medalColor != null
+            ? medalColor.withOpacity(0.08)
+            : Color(0xFF3A3A3A),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: medalColor ?? Colors.grey.shade200,
+          color: medalColor?.withOpacity(0.3) ?? Color(0xFF4A4A4A),
           width: 1,
         ),
       ),
@@ -131,7 +145,9 @@ class PersonalRecordsCard extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: medalColor != null ? medalColor.withOpacity(0.2) : Colors.grey[200],
+              color: medalColor != null
+                  ? medalColor.withOpacity(0.15)
+                  : Color(0xFF2D2D2D),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -140,7 +156,7 @@ class PersonalRecordsCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: medal != null ? 20 : 16,
                   fontWeight: FontWeight.bold,
-                  color: medalColor != null ? Colors.grey[800] : Colors.grey[600],
+                  color: textColor ?? Color(0xFF9CA3AF),
                 ),
               ),
             ),
@@ -156,7 +172,7 @@ class PersonalRecordsCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: Color(0xFFFFFFFF),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -168,7 +184,7 @@ class PersonalRecordsCard extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.1),
+                        color: Color(0xFFFF6B00).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -176,7 +192,7 @@ class PersonalRecordsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Colors.purple,
+                          color: Color(0xFFFF6B00),
                         ),
                       ),
                     ),
@@ -185,7 +201,7 @@ class PersonalRecordsCard extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Color(0xFF22C55E).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -193,7 +209,7 @@ class PersonalRecordsCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          color: Color(0xFF22C55E),
                         ),
                       ),
                     ),
@@ -206,13 +222,17 @@ class PersonalRecordsCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
+              Icon(
+                Icons.calendar_today,
+                size: 14,
+                color: Color(0xFF9CA3AF),
+              ),
               SizedBox(height: 2),
               Text(
                 formattedDate,
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.grey[600],
+                  color: Color(0xFF9CA3AF),
                 ),
               ),
             ],

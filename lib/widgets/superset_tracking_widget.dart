@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
+import '../config/theme.dart';
 
 class SupersetTrackingWidget extends StatefulWidget {
   final Exercise exerciseA;
@@ -196,9 +197,13 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
 
     if (weight == null || reps == null || reps <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, insira peso e repetições válidos'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Por favor, insira peso e repetições válidos'),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
         ),
       );
       return;
@@ -284,13 +289,17 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
               },
               child: const Text(
                 'PRÓXIMO SUPERSET',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
               ),
             ),
           ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
+        backgroundColor: AppTheme.success,
         duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        ),
       ),
     );
   }
@@ -314,19 +323,40 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         } else {
           debugPrint('❌ canLaunchUrl retornou false');
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Não foi possível abrir: ${variation.youtubeUrl}')),
+            SnackBar(
+              content: Text('Não foi possível abrir: ${variation.youtubeUrl}'),
+              backgroundColor: AppTheme.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
+            ),
           );
         }
       } else {
         debugPrint('❌ URL não encontrada para $exerciseName');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Vídeo não disponível para $exerciseName')),
+          SnackBar(
+            content: Text('Vídeo não disponível para $exerciseName'),
+            backgroundColor: AppTheme.warning,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            ),
+          ),
         );
       }
     } catch (e) {
       debugPrint('❌ Erro ao abrir YouTube: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao abrir YouTube: $e')),
+        SnackBar(
+          content: Text('Erro ao abrir YouTube: $e'),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+        ),
       );
     }
   }
@@ -375,36 +405,35 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade400, Colors.orange.shade600],
-              ),
-              borderRadius: BorderRadius.circular(16),
+              color: AppTheme.primaryOrange,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+              border: Border.all(color: AppTheme.primaryOrangeHover, width: 2),
             ),
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.flash_on, color: Colors.white, size: 24),
+                    const Icon(Icons.flash_on, color: AppTheme.textPrimary, size: 24),
                     const SizedBox(width: 8),
                     const Text(
                       'SUPER SET',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Icon(Icons.flash_on, color: Colors.white, size: 24),
+                    const Icon(Icons.flash_on, color: AppTheme.textPrimary, size: 24),
                   ],
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Alternância: ${_getExerciseName(true)} ↔ ${_getExerciseName(false)}',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                  style: const TextStyle(
+                    color: AppTheme.textPrimary,
                     fontSize: 12,
                   ),
                   textAlign: TextAlign.center,
@@ -420,10 +449,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(12),
+              color: AppTheme.backgroundCard,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               border: Border.all(
-                color: _isExerciseA ? Colors.blue.shade300 : Colors.blue.shade100,
+                color: _isExerciseA ? AppTheme.primaryOrange : AppTheme.borderColor,
                 width: _isExerciseA ? 2 : 1,
               ),
             ),
@@ -435,14 +464,14 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade700,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppTheme.info,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
-                      child: Text(
-                        _getCurrentSetLabel(true),
-                        style: const TextStyle(
+                      child: const Text(
+                        'A1',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 12,
                         ),
                       ),
@@ -451,10 +480,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Expanded(
                       child: Text(
                         _getExerciseName(true),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.blue.shade800,
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                     ),
@@ -462,15 +491,16 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade600,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppTheme.primaryOrange.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                        border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.5), width: 1),
                       ),
                       child: Text(
                         '${widget.exerciseA.sets} sets x ${widget.exerciseA.repsTarget} reps',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppTheme.primaryOrange,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -482,12 +512,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppTheme.error,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                         ),
                         child: const Icon(
                           Icons.play_arrow,
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           size: 18,
                         ),
                       ),
@@ -499,21 +529,21 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppTheme.backgroundElevated,
                       border: Border.all(
-                        color: Colors.blue.shade300,
+                        color: AppTheme.borderColor,
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: DropdownButton<ExerciseVariation>(
                       value: _selectedVariationA,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      dropdownColor: Colors.white,
+                      dropdownColor: AppTheme.backgroundElevated,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppTheme.textPrimary,
                       ),
                       items: _variationsA.map((variation) =>
                         DropdownMenuItem(
@@ -522,13 +552,13 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: AppTheme.backgroundElevated,
                             ),
                             child: Text(
                               variation.variationName,
                               style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.black,
+                                color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -547,14 +577,14 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppTheme.info.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: Text(
                       'Variação: ${_selectedVariationA!.variationName}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.blue.shade800,
+                        color: AppTheme.info,
                         fontWeight: FontWeight.w500,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -573,10 +603,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12),
+              color: AppTheme.backgroundCard,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               border: Border.all(
-                color: !_isExerciseA ? Colors.green.shade300 : Colors.green.shade100,
+                color: !_isExerciseA ? AppTheme.primaryOrange : AppTheme.borderColor,
                 width: !_isExerciseA ? 2 : 1,
               ),
             ),
@@ -588,14 +618,14 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade700,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppTheme.success,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
-                      child: Text(
-                        _getCurrentSetLabel(false),
-                        style: const TextStyle(
+                      child: const Text(
+                        'A2',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontSize: 12,
                         ),
                       ),
@@ -604,10 +634,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Expanded(
                       child: Text(
                         _getExerciseName(false),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.green.shade800,
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                     ),
@@ -615,15 +645,16 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade600,
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppTheme.primaryOrange.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                        border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.5), width: 1),
                       ),
                       child: Text(
                         '${widget.exerciseB.sets} sets x ${widget.exerciseB.repsTarget} reps',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppTheme.primaryOrange,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -635,12 +666,12 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppTheme.error,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                         ),
                         child: const Icon(
                           Icons.play_arrow,
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           size: 18,
                         ),
                       ),
@@ -652,21 +683,21 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppTheme.backgroundElevated,
                       border: Border.all(
-                        color: Colors.green.shade300,
+                        color: AppTheme.borderColor,
                       ),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: DropdownButton<ExerciseVariation>(
                       value: _selectedVariationB,
                       isExpanded: true,
                       underline: const SizedBox(),
-                      dropdownColor: Colors.white,
+                      dropdownColor: AppTheme.backgroundElevated,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppTheme.textPrimary,
                       ),
                       items: _variationsB.map((variation) =>
                         DropdownMenuItem(
@@ -675,13 +706,13 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: AppTheme.backgroundElevated,
                             ),
                             child: Text(
                               variation.variationName,
                               style: const TextStyle(
                                 fontSize: 16,
-                                color: Colors.black,
+                                color: AppTheme.textPrimary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -700,14 +731,14 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppTheme.success.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                     ),
                     child: Text(
                       'Variação: ${_selectedVariationB!.variationName}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.green.shade800,
+                        color: AppTheme.success,
                         fontWeight: FontWeight.w500,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -725,19 +756,21 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
+              color: AppTheme.backgroundCard,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                color: AppTheme.borderColor,
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Sequência do Super Set:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -767,10 +800,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(16),
+              color: AppTheme.primaryOrange.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary,
+                color: AppTheme.primaryOrange,
                 width: 2,
               ),
             ),
@@ -782,13 +815,13 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.primaryOrange,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         'AGORA: ${_isExerciseA ? "A1" : "A2"}',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -797,8 +830,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     Expanded(
                       child: Text(
                         _getCurrentExerciseName(),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: AppTheme.textPrimary,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
@@ -809,7 +844,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                 const SizedBox(height: 8),
                 Text(
                   'Set $_currentSetNumber de 3',
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 
                 const SizedBox(height: 20),
@@ -911,10 +949,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                       maxLines: 1,
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppTheme.primaryOrange,
+                      foregroundColor: AppTheme.textPrimary,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
                     ),
                   ),
@@ -930,31 +968,36 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
+                color: AppTheme.backgroundCard,
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: AppTheme.borderColor,
                 ),
               ),
               child: Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: AppTheme.textSecondary,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Próximo:',
-                          style: Theme.of(context).textTheme.labelMedium,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
                         Text(
                           !_isExerciseA ? '${_getExerciseName(true)} - Set ${_currentSetNumber + 1}' : '${_getExerciseName(false)} - Set $_currentSetNumber',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: const TextStyle(
+                            fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
                           ),
                         ),
                       ],
@@ -979,9 +1022,9 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   icon: const Icon(Icons.skip_next),
                   label: const Text('Pular SuperSet'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
+                    foregroundColor: AppTheme.textSecondary,
+                    side: const BorderSide(
+                      color: AppTheme.borderColor,
                     ),
                   ),
                 ),
@@ -999,9 +1042,9 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                   icon: Icon(_isExerciseA ? Icons.arrow_forward : Icons.arrow_back),
                   label: Text('Ir para ${_isExerciseA ? "A2" : "A1"}'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.secondary,
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: AppTheme.textSecondary,
+                    side: const BorderSide(
+                      color: AppTheme.borderColor,
                     ),
                   ),
                 ),
@@ -1024,18 +1067,26 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: completed 
-            ? Colors.green 
-            : isActive 
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey.shade300,
+        color: completed
+            ? AppTheme.success
+            : isActive
+                ? AppTheme.primaryOrange
+                : AppTheme.backgroundElevated,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: completed
+              ? AppTheme.success
+              : isActive
+                  ? AppTheme.primaryOrange
+                  : AppTheme.borderColor,
+          width: 2,
+        ),
       ),
       child: Center(
         child: Text(
           label,
           style: TextStyle(
-            color: completed || isActive ? Colors.white : Colors.black54,
+            color: completed || isActive ? AppTheme.textPrimary : AppTheme.textSecondary,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -1045,10 +1096,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   }
 
   Widget _buildArrow() {
-    return Icon(
+    return const Icon(
       Icons.arrow_forward,
       size: 16,
-      color: Colors.grey.shade400,
+      color: AppTheme.textSecondary,
     );
   }
 
@@ -1173,15 +1224,17 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   Color _getDifficultyColor(String? difficulty) {
     switch (difficulty) {
       case 'Perfeito':
-        return Colors.green;
+        return AppTheme.success;
       case 'Fácil':
-        return Colors.blue;
+      case 'Muito Fácil':
+        return AppTheme.info;
       case 'Difícil':
-        return Colors.orange;
       case 'Muito Difícil':
-        return Colors.red;
+        return AppTheme.error;
+      case 'Falhei':
+        return AppTheme.error;
       default:
-        return Colors.grey;
+        return AppTheme.textSecondary;
     }
   }
 

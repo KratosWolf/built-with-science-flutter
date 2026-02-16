@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
+import '../config/theme.dart';
 
 class ExerciseTrackingWidget extends StatefulWidget {
   final Exercise exercise;
@@ -169,15 +170,17 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
   Color _getDifficultyColor(String? difficulty) {
     switch (difficulty) {
       case 'Perfeito':
-        return Colors.green;
+        return AppTheme.success;
       case 'Fácil':
-        return Colors.blue;
+      case 'Muito Fácil':
+        return AppTheme.info;
       case 'Difícil':
-        return Colors.orange;
       case 'Muito Difícil':
-        return Colors.red;
+        return AppTheme.error;
+      case 'Falhei':
+        return AppTheme.error;
       default:
-        return Colors.grey;
+        return AppTheme.textSecondary;
     }
   }
 
@@ -220,9 +223,13 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     
     if (weight == null || reps == null || reps <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, insira peso e repetições válidos'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: const Text('Por favor, insira peso e repetições válidos'),
+          backgroundColor: AppTheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
         ),
       );
       return;
@@ -266,8 +273,12 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('✅ Set completo! Timer iniciado: ${restSeconds}s'),
-        backgroundColor: Theme.of(context).colorScheme.secondary,
+        backgroundColor: AppTheme.success,
         duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        ),
       ),
     );
 
@@ -305,13 +316,27 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao abrir vídeo: $e')),
+            SnackBar(
+              content: Text('Erro ao abrir vídeo: $e'),
+              backgroundColor: AppTheme.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+              ),
+            ),
           );
         }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vídeo não disponível para esta variação')),
+        SnackBar(
+          content: const Text('Vídeo não disponível para esta variação'),
+          backgroundColor: AppTheme.warning,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+        ),
       );
     }
   }
@@ -328,15 +353,9 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              color: AppTheme.backgroundCard,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+              border: Border.all(color: AppTheme.borderColor, width: 1),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +370,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                             widget.exercise.name,
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: AppTheme.primaryOrange,
                             ),
                           ),
                           if (_selectedVariation != null && _selectedVariation!.variationName != "See Tutorial Video") ...[
@@ -360,7 +379,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                               _selectedVariation!.variationName,
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.secondary,
+                                color: AppTheme.textSecondary,
                               ),
                             ),
                           ],
@@ -369,14 +388,15 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer,
+                              color: AppTheme.primaryOrange.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppTheme.primaryOrange.withOpacity(0.3), width: 1),
                             ),
                             child: Text(
                               '📊 Sugestão: ${widget.exercise.sets} sets x ${widget.exercise.repsTarget} reps',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                color: AppTheme.primaryOrange,
                                 fontSize: 12,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -387,7 +407,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                           Text(
                             _getExerciseDescription(widget.exercise.name),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                         ],
@@ -414,10 +434,10 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
+                color: AppTheme.backgroundCard,
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  color: AppTheme.borderColor,
                 ),
               ),
               child: Column(
@@ -427,6 +447,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                     'Variação do Exercício',
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -465,6 +486,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
             'Sets',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
           ),
           
@@ -484,18 +506,18 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isCompleted 
-                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+                  color: isCompleted
+                      ? AppTheme.success.withOpacity(0.1)
                       : isCurrent
-                          ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                          : Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12),
+                          ? AppTheme.primaryOrange.withOpacity(0.1)
+                          : AppTheme.backgroundCard,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                   border: Border.all(
                     color: isCompleted
-                        ? Theme.of(context).colorScheme.secondary
+                        ? AppTheme.success
                         : isCurrent
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                            ? AppTheme.primaryOrange
+                            : AppTheme.borderColor,
                     width: isCompleted || isCurrent ? 2 : 1,
                   ),
                 ),
@@ -509,19 +531,19 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                           height: 32,
                           decoration: BoxDecoration(
                             color: isCompleted
-                                ? Theme.of(context).colorScheme.secondary
+                                ? AppTheme.success
                                 : isCurrent
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                                    ? AppTheme.primaryOrange
+                                    : AppTheme.backgroundElevated,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
                             child: isCompleted
-                                ? const Icon(Icons.check, color: Colors.white, size: 18)
+                                ? const Icon(Icons.check, color: AppTheme.textPrimary, size: 18)
                                 : Text(
                                     setNumber.toString(),
                                     style: TextStyle(
-                                      color: isCurrent ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                                      color: isCurrent ? AppTheme.textPrimary : AppTheme.textSecondary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -533,6 +555,7 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                             'Set $setNumber',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
                             ),
                           ),
                         ),
@@ -561,13 +584,13 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: AppTheme.success,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
                               'Completo',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppTheme.textPrimary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -665,8 +688,9 @@ class _ExerciseTrackingWidgetState extends State<ExerciseTrackingWidget> {
                           icon: const Icon(Icons.check),
                           label: const Text('Completar Set'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
+                            backgroundColor: AppTheme.primaryOrange,
+                            foregroundColor: AppTheme.textPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                         ),
                       ),

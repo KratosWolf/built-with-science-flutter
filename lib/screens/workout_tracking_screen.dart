@@ -8,6 +8,7 @@ import '../widgets/superset_tracking_widget.dart';
 import '../widgets/rest_timer_widget.dart';
 import '../services/supabase_service.dart';
 import '../services/background_timer_service.dart';
+import '../config/theme.dart';
 
 class WorkoutTrackingScreen extends StatefulWidget {
   final int programId;
@@ -618,12 +619,17 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppTheme.backgroundCard,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLarge)),
       ),
       builder: (context) {
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundCard,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLarge)),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -631,6 +637,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                 'Selecione um exercício',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -645,71 +652,88 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                     final exercise = _exercises[index];
                     final completedSets = _completedSets[exercise.id]?.length ?? 0;
                     final isSuperset = index > 3; // Exercícios 5-8 são supersets
-                    
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: index == _currentExerciseIndex 
-                            ? Theme.of(context).colorScheme.primary
-                            : completedSets > 0 
-                                ? Colors.green 
-                                : Colors.grey.shade300,
-                        child: Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            color: index == _currentExerciseIndex || completedSets > 0 
-                                ? Colors.white 
-                                : Colors.black54,
-                            fontWeight: FontWeight.bold,
+
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: index == _currentExerciseIndex
+                            ? AppTheme.primaryOrange.withOpacity(0.1)
+                            : AppTheme.backgroundElevated,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                        border: Border.all(
+                          color: index == _currentExerciseIndex
+                              ? AppTheme.primaryOrange
+                              : AppTheme.borderColor,
+                          width: index == _currentExerciseIndex ? 2 : 1,
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: index == _currentExerciseIndex
+                              ? AppTheme.primaryOrange
+                              : completedSets > 0
+                                  ? AppTheme.success
+                                  : AppTheme.backgroundCard,
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: index == _currentExerciseIndex || completedSets > 0
+                                  ? AppTheme.textPrimary
+                                  : AppTheme.textSecondary,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      title: Text(
-                        exercise.name,
-                        style: TextStyle(
-                          fontWeight: index == _currentExerciseIndex 
-                              ? FontWeight.bold 
-                              : FontWeight.normal,
+                        title: Text(
+                          exercise.name,
+                          style: TextStyle(
+                            fontWeight: index == _currentExerciseIndex
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
-                      ),
-                      subtitle: Row(
-                        children: [
-                          if (isSuperset) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'SUPER',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange.shade800,
+                        subtitle: Row(
+                          children: [
+                            if (isSuperset) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primaryOrange.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(color: AppTheme.primaryOrange, width: 1),
+                                ),
+                                child: const Text(
+                                  'SUPER',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.primaryOrange,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                            ],
+                            Text(
+                              completedSets > 0
+                                  ? '✅ $completedSets/3 sets'
+                                  : 'Não iniciado',
+                              style: TextStyle(
+                                color: completedSets > 0 ? AppTheme.success : AppTheme.textSecondary,
+                              ),
                             ),
-                            const SizedBox(width: 8),
                           ],
-                          Text(
-                            completedSets > 0 
-                                ? '✅ $completedSets/3 sets' 
-                                : 'Não iniciado',
-                            style: TextStyle(
-                              color: completedSets > 0 ? Colors.green : Colors.grey,
-                            ),
-                          ),
-                        ],
+                        ),
+                        trailing: index == _currentExerciseIndex
+                            ? const Icon(Icons.radio_button_checked, color: AppTheme.primaryOrange)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _currentExerciseIndex = index;
+                          });
+                          Navigator.pop(context);
+                        },
                       ),
-                      trailing: index == _currentExerciseIndex 
-                          ? Icon(Icons.radio_button_checked, color: Theme.of(context).colorScheme.primary)
-                          : null,
-                      onTap: () {
-                        setState(() {
-                          _currentExerciseIndex = index;
-                        });
-                        Navigator.pop(context);
-                      },
                     );
                   },
                 ),
@@ -806,31 +830,65 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: AppTheme.backgroundCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          side: BorderSide(color: AppTheme.borderColor, width: 1),
+        ),
         title: Row(
           children: [
-            Icon(Icons.celebration, color: Theme.of(context).colorScheme.primary),
+            const Icon(Icons.celebration, color: AppTheme.primaryOrange, size: 28),
             const SizedBox(width: 12),
-            const Text('Treino Completo!'),
+            Text(
+              'Treino Completo!',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('🎉 Parabéns! Você completou o treino ${widget.dayName}'),
-            const SizedBox(height: 12),
-            Text('⏱️ Duração: ${duration.inMinutes}m ${duration.inSeconds % 60}s'),
-            Text('💪 Exercícios: ${_exercises.length}'),
-            Text('📊 Sets completados: ${_completedSets.values.fold(0, (sum, sets) => sum + sets.length)}'),
+            Text(
+              '🎉 Parabéns! Você completou o treino ${widget.dayName}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '⏱️ Duração: ${duration.inMinutes}m ${duration.inSeconds % 60}s',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            Text(
+              '💪 Exercícios: ${_exercises.length}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            Text(
+              '📊 Sets completados: ${_completedSets.values.fold(0, (sum, sets) => sum + sets.length)}',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+            ),
           ],
         ),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // Fechar dialog
               Navigator.of(context).pop(); // Voltar para lista
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryOrange,
+              foregroundColor: AppTheme.textPrimary,
+            ),
             child: const Text('Finalizar'),
           ),
         ],
@@ -842,26 +900,29 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
+        backgroundColor: AppTheme.backgroundPrimary,
         appBar: AppBar(
-          title: Text('Carregando...'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
+          title: const Text('Carregando...'),
         ),
         body: const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: AppTheme.primaryOrange),
         ),
       );
     }
 
     if (_exercises.isEmpty) {
       return Scaffold(
+        backgroundColor: AppTheme.backgroundPrimary,
         appBar: AppBar(
-          title: Text('Erro'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
+          title: const Text('Erro'),
         ),
-        body: const Center(
-          child: Text('Nenhum exercício encontrado para este treino.'),
+        body: Center(
+          child: Text(
+            'Nenhum exercício encontrado para este treino.',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textSecondary,
+            ),
+          ),
         ),
       );
     }
@@ -872,6 +933,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
 
 
     return Scaffold(
+      backgroundColor: AppTheme.backgroundPrimary,
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
@@ -894,9 +956,6 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
             ],
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
         actions: [
           // Indicador de sincronização
           if (SupabaseService.instance.isLoggedIn)
@@ -906,7 +965,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                 message: 'Logado - Sincronizando na nuvem',
                 child: Icon(
                   Icons.cloud_done,
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppTheme.success.withOpacity(0.9),
                   size: 20,
                 ),
               ),
@@ -918,12 +977,12 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                 message: 'Apenas local - Faça login para sincronizar',
                 child: Icon(
                   Icons.cloud_off,
-                  color: Colors.white.withOpacity(0.6),
+                  color: AppTheme.textSecondary,
                   size: 20,
                 ),
               ),
             ),
-          
+
           if (_workoutStartTime != null)
             Padding(
               padding: const EdgeInsets.only(right: 16),
@@ -934,7 +993,10 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                     final elapsed = DateTime.now().difference(_workoutStartTime!);
                     return Text(
                       '${elapsed.inMinutes}:${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
                     );
                   },
                 ),
@@ -945,13 +1007,13 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                  Theme.of(context).colorScheme.surface,
+                  AppTheme.backgroundPrimary,
+                  AppTheme.backgroundCard,
                 ],
               ),
             ),
@@ -965,10 +1027,8 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                     child: LinearProgressIndicator(
                       value: (_currentExerciseIndex + 1) / _exercises.length,
                       minHeight: 8,
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      valueColor: AlwaysStoppedAnimation(
-                        Theme.of(context).colorScheme.secondary,
-                      ),
+                      backgroundColor: AppTheme.backgroundElevated,
+                      valueColor: const AlwaysStoppedAnimation(AppTheme.primaryOrange),
                     ),
                   ),
                 ),
@@ -999,8 +1059,12 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Text('🎉 SuperSet A completo! Iniciando SuperSet B...'),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppTheme.success,
                                   duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                                  ),
                                 ),
                               );
                               return;
@@ -1035,6 +1099,12 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                 // Botões de navegação
                 Container(
                   padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundCard,
+                    border: Border(
+                      top: BorderSide(color: AppTheme.borderColor, width: 1),
+                    ),
+                  ),
                   child: Row(
                     children: [
                       if (_currentExerciseIndex > 0)
@@ -1044,28 +1114,30 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                             icon: const Icon(Icons.arrow_back),
                             label: const Text('Anterior'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.surface,
-                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                              backgroundColor: AppTheme.backgroundElevated,
+                              foregroundColor: AppTheme.textPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
                           ),
                         ),
                       if (_currentExerciseIndex > 0) const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _currentExerciseIndex == _exercises.length - 1 
-                              ? _completeWorkout 
+                          onPressed: _currentExerciseIndex == _exercises.length - 1
+                              ? _completeWorkout
                               : _nextExercise,
-                          icon: Icon(_currentExerciseIndex == _exercises.length - 1 
-                              ? Icons.check_circle 
+                          icon: Icon(_currentExerciseIndex == _exercises.length - 1
+                              ? Icons.check_circle
                               : Icons.arrow_forward),
-                          label: Text(_currentExerciseIndex == _exercises.length - 1 
-                              ? 'Finalizar' 
+                          label: Text(_currentExerciseIndex == _exercises.length - 1
+                              ? 'Finalizar'
                               : 'Próximo'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _currentExerciseIndex == _exercises.length - 1 
-                                ? Theme.of(context).colorScheme.secondary 
-                                : Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
+                            backgroundColor: _currentExerciseIndex == _exercises.length - 1
+                                ? AppTheme.success
+                                : AppTheme.primaryOrange,
+                            foregroundColor: AppTheme.textPrimary,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                         ),
                       ),
