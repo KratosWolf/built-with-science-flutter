@@ -221,24 +221,25 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       _saveToCache(setData, _isExerciseA);
     }
 
-    // CORREÇÃO: Timer só deve aparecer após completar uma rodada inteira do SuperSet
-    // ou quando o SuperSet inteiro terminar.
+    // CORREÇÃO FINAL: Timer só deve aparecer NO FINAL de TODO o SuperSet
+    // Fluxo correto: A1→A2→A1→A2→A1→A2→⏱️
     //
-    // Regra: Timer aparece apenas quando acabamos de fazer B (A2) e vamos incrementar
-    // o set number (ou seja, completamos uma rodada A1→A2).
+    // Timer aparece APENAS quando:
+    // 1. Acabamos de completar B (A2) - !_isExerciseA
+    // 2. E é o último set (set 3) - _currentSetNumber == 3
     //
-    // Não deve aparecer timer entre A1→A2 dentro da mesma rodada.
-    final shouldShowTimer = !_isExerciseA; // Se acabamos de fazer B (A2), mostrar timer
+    // Isso significa que o timer SÓ toca após completar o ÚLTIMO A2 do SuperSet inteiro.
+    final shouldShowTimer = !_isExerciseA && _currentSetNumber == 3;
 
     // Determinar próximo exercício na sequência
     _moveToNext();
 
-    // Iniciar timer apenas se completou uma rodada (acabou de fazer B/A2)
+    // Iniciar timer APENAS se completou TODO o SuperSet (último A2 do set 3)
     if (shouldShowTimer) {
-      widget.onRestNeeded(90); // 90 segundos após completar rodada
-      debugPrint('⏱️ Timer iniciado: completou rodada A1→A2');
+      widget.onRestNeeded(90); // 90 segundos após completar SuperSet completo
+      debugPrint('⏱️ Timer iniciado: SuperSet completo (A1→A2→A1→A2→A1→A2)');
     } else {
-      debugPrint('⏭️ Sem timer: alternando de A1 para A2 dentro da rodada');
+      debugPrint('⏭️ Sem timer: continuando SuperSet');
     }
   }
 
