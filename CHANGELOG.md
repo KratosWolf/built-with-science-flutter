@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.0] - 2025-11-16
+
+### Added
+- **Native Google Sign-In** implementation with `google_sign_in` package
+- In-app Google authentication (no browser redirect)
+- "Continuar com Google" button on login screen
+- Detailed debug logging for Google Sign-In flow (6-step process)
+- Success/error messages for better user feedback
+
+### Changed
+- **BREAKING**: Google OAuth now uses Native Sign-In instead of redirect flow
+- SupabaseService.signInWithGoogle() completely rewritten
+- Login screen UI updated with Google button between divider and offline mode
+- Better loading states during Google authentication
+
+### Technical
+- Uses `google_sign_in: ^6.1.5` already in dependencies
+- Web Client ID: 1056439056041-dc8j1ifqtri0u899s0l6kqnhqg2sle24.apps.googleusercontent.com
+- Authentication flow: GoogleSignIn → get tokens → Supabase.signInWithIdToken()
+- Same Google Cloud project as Next.js dashboard
+- Maintains compatibility with existing Email/Password login
+- Debug APK compiles successfully without errors (33.5s build time)
+
+### UX Improvements
+- Google Sign-In stays in-app (better experience vs browser)
+- Loading indicator while authenticating
+- User-friendly error messages for cancellation/network issues
+- Smooth navigation to home after successful login
+- Success snackbar shows user email on login
+
+## [5.1.0] - 2025-11-11
+
+### Fixed
+- **CRITICAL**: Navigation bug fixed in AuthWrapper
+- App no longer crashes when Supabase initialization fails
+- Program selection buttons now working correctly
+- Improved error handling for offline mode
+
+### Changed
+- AuthWrapper now handles Supabase errors gracefully
+- Better try-catch blocks around Supabase calls
+- More defensive initialization code
+
+### Technical
+- Added safety checks for SupabaseService.instance access
+- Separated authStateChanges listener with try-catch
+- Improved logging for debugging authentication issues
+- APK size: 23.9MB (same as v5.0)
+
 ## [5.0.0] - 2025-11-10
 
 ### Added
@@ -183,7 +232,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### APK Releases
 All APK files are available in the `releases/` directory:
-- v5.0: `BuiltWithScience_v5.0_SUPABASE_REACTIVATED.apk` (23.9MB) ⭐ **LATEST**
+- v5.1: `BuiltWithScience_v5.1_NAVIGATION_FIX.apk` (23.9MB) ⭐ **LATEST**
+- v5.0: `BuiltWithScience_v5.0_SUPABASE_REACTIVATED.apk` (23.9MB) - navigation bug
 - v4.4.1: `BuiltWithScience_v4.4.1_DASHBOARD_FIXED.apk` (21MB)
 - v4.4: `BuiltWithScience_v4.4_DASHBOARD.apk` (21MB) - deprecated
 - v4.3: `BuiltWithScience_v4.3_TIMER_OPTIONS.apk`
@@ -203,4 +253,4 @@ All APK files are available in the `releases/` directory:
 
 ---
 
-*Last updated: November 10, 2025*
+*Last updated: November 11, 2025*

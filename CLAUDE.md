@@ -1,479 +1,205 @@
-# Built With Science - Comprehensive Project Context & Development Log
+# CLAUDE.md — Instruções para o Claude Code
 
-## 📊 Project Overview
-Built With Science é uma aplicação de tracking de exercícios baseada em ciência, com dois projetos em desenvolvimento paralelo:
-
-### 🌐 **Next.js Web Version**
-- **Localização**: `/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/NextJS-Web-Version`
-- **GitHub**: https://github.com/KratosWolf/Built-With-Science
-- **Branch**: `develop`
-- **Status**: ✅ Completo e funcional
-
-### 📱 **Flutter Mobile Version** (Projeto Principal)
-- **Localização**: `/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version`
-- **GitHub**: https://github.com/KratosWolf/built-with-science-flutter
-- **Branch Ativa**: `feature/backup-system`
-- **Status**: ✅ Totalmente funcional com 3-day program
+> ⚠️ Este arquivo é lido automaticamente pelo Claude Code a cada interação.
+> Todas as regras aqui DEVEM ser seguidas em TODAS as respostas.
 
 ---
 
-## 🚨 DECISÃO ESTRATÉGICA
-**Flutter é o projeto principal** - App será usado principalmente no celular para tracking durante treinos.
+## 🧠 IDENTIDADE DO PROJETO
+
+- **Nome do Projeto:** Built With Science
+- **Descrição:** App de workout tracking baseado nos programas do Built With Science (Jeremy Ethier). Permite acompanhar treinos com SuperSets, registrar peso/repetições/dificuldade, ver progressão e manter consistência.
+- **Tipo:** mobile-app
+- **Tech Stack Principal:** Flutter 3.24.5 + Dart 3.5.4 + Supabase + SQLite local
+- **Repositório:** https://github.com/KratosWolf/built-with-science-flutter
+- **Dono do Projeto:** Tiago (empreendedor, perfil estratégico, não-técnico)
 
 ---
 
-## 🎯 ESTADO ATUAL (16 Jan 2025 - 21:45)
+## 🚨 REGRAS FUNDAMENTAIS (NUNCA VIOLAR)
 
-### ✅ **MARCO CRÍTICO ATINGIDO - PERSISTÊNCIA COMPLETA**
-- **APK Atual**: ✅ v4.0_COMPLETE_PERSISTENCE.apk (16 Jan 2025)
-- **Status**: ✅ Sistema de persistência local funcionando 100%
-- **Overflow Issues**: ✅ Todos resolvidos (v3.7)
-- **SuperSet Navigation**: ✅ Funcionando perfeitamente
+### Regra 1: Faseamento Obrigatório
+- O projeto é dividido em FASES com escopo definido no PROJECT_PLAN.md.
+- **NUNCA** avance para a próxima fase sem aprovação explícita do Tiago.
+- **NUNCA** implemente funcionalidades que não pertencem à fase atual.
+- Se algo da fase atual depende de uma fase futura, AVISE e PERGUNTE antes.
+- Ao concluir cada item da fase, marque como ✅ no PROJECT_PLAN.md.
 
-### 🎯 **FUNCIONALIDADES CRÍTICAS IMPLEMENTADAS (v4.0)**
-- **✅ Persistência de Variações**: Salva e restaura exercício exato escolhido
-- **✅ Persistência de Peso/Reps**: Mantém dados do último treino
-- **✅ Persistência de Dificuldade**: Restaura nível de dificuldade
-- **✅ Sistema de Anotações**: Salva e restaura notas por exercício
-- **✅ Cache Inteligente**: Dados salvos automaticamente no set 3
+### Regra 2: Checkpoints Obrigatórios
+Antes de avançar para o próximo item, SEMPRE verifique:
+- [ ] O app compila sem erros? (`flutter analyze` limpo)
+- [ ] A funcionalidade implementada funciona como esperado?
+- [ ] O código foi testado (pelo menos teste manual)?
+- [ ] Foi feito commit com mensagem descritiva?
+- [ ] O PROJECT_PLAN.md foi atualizado?
 
----
+Só prossiga quando TODOS os itens estiverem ✅.
 
-## 📚 LOG DETALHADO DE PROBLEMAS E SOLUÇÕES
+### Regra 3: Comunicação Clara
+- Explique decisões técnicas em linguagem simples e direta.
+- Antes de executar qualquer comando destrutivo (deletar, resetar, alterar estrutura), PERGUNTE.
+- Quando houver mais de uma abordagem, apresente opções com prós e contras ANTES de implementar.
+- Use analogias do dia a dia quando explicar conceitos técnicos.
+- No início de cada interação, diga: "Estamos na Fase X, trabalhando em [item]."
 
-### 🔧 **PROBLEMA 1: SuperSet Layout e Dropdowns**
-**Data**: 28 Aug 2025
-**Problema**: 
-- Layout confuso nos SuperSets
-- Dropdowns não apareciam para exercício B
-- Dropdowns apareciam em todos os sets (A2/B2/A3/B3)
+### Regra 4: Qualidade de Código
+- Código limpo, organizado e com comentários explicativos nos trechos importantes.
+- Siga os padrões Dart/Flutter (lowerCamelCase para variáveis, UpperCamelCase para classes).
+- Remova código comentado que não esteja em uso — nada de "lixo".
+- Remova `print()` statements de debug — usar `debugPrint()` ou logger adequado.
+- Trate erros adequadamente — nunca ignore exceções silenciosamente.
+- Separe responsabilidades: um arquivo não deve fazer "tudo".
+- Arquivos com mais de 500 linhas devem ser avaliados para refatoração.
 
-**Causa Raiz**:
-- Exercício "Banded Push-Ups" (ID: 5) não tinha variações no mock_data
-- Lógica de display não verificava número do set
-
-**Solução Implementada**:
-```dart
-// Adicionado no mock_data.dart - 6 variações para Banded Push-Ups
-ExerciseVariation(id: 92, exerciseId: 5, variationIndex: 1, variationName: "Banded Push-Ups", youtubeUrl: "https://youtu.be/dI7LVElfMOg", isPrimary: true),
-// ... mais 5 variações
-
-// Adicionado no superset_tracking_widget.dart - display condicional
-if (_variationsA.isNotEmpty && _currentSetNumber == 1) ...[
-  // Show dropdown only on first set
-]
-```
-
-**Arquivos Modificados**:
-- `lib/data/mock_data.dart`
-- `lib/widgets/superset_tracking_widget.dart`
-
-**Como Evitar**:
-1. ✅ Sempre verificar se todos os exercícios têm variações
-2. ✅ Testar dropdowns em todos os sets de SuperSets
-3. ✅ Verificar lógica condicional para display de UI
+### Regra 5: Git e Versionamento
+- Commits frequentes com mensagens descritivas em português.
+- Padrão: `tipo: descrição curta`
+  - `feat:` nova funcionalidade | `fix:` correção | `docs:` documentação
+  - `refactor:` refatoração | `style:` formatação | `test:` testes | `chore:` manutenção
+  - `security:` correção de segurança
+  - Exemplo: `fix: remove timer entre exercícios do SuperSet`
+- Branches: `main` (produção) → `develop` (desenvolvimento) → `feature/nome`
+- NUNCA faça push direto na `main` após a Fase 1.
 
 ---
 
-### 🔧 **PROBLEMA 2: Links YouTube Não Funcionando**
-**Data**: 28 Aug 2025
-**Problema**: 
-- Links do YouTube não abriam
-- Erro: "Não foi possível abrir: https://youtu.be/iDiVxqvHGVY"
+## 📋 FASES DO PROJETO (resumo)
 
-**Causa Raiz**:
-- Android 11+ requer queries explícitas no AndroidManifest.xml para url_launcher
+> Detalhamento completo em PROJECT_PLAN.md
+> ⚠️ ESTE É UM PROJETO EXISTENTE EM MELHORIA, NÃO UM PROJETO NOVO.
 
-**Solução Implementada**:
-```xml
-<!-- Adicionado em android/app/src/main/AndroidManifest.xml -->
-<queries>
-  <intent>
-    <action android:name="android.intent.action.VIEW"/>
-    <data android:scheme="https"/>
-  </intent>
-  <intent>
-    <action android:name="android.intent.action.VIEW"/>
-    <data android:scheme="http"/>
-  </intent>
-</queries>
-```
+### FASE 1 — Arrumar a Casa ⬅️ FASE ATUAL
+**Objetivo:** Resolver segurança, limpar Git, atualizar dependências.
+- [ ] 1.1 Remover google-services.json do Git + .gitignore
+- [ ] 1.2 Commit das alterações pendentes (14 arquivos)
+- [ ] 1.3 Criar branch develop a partir da main limpa
+- [ ] 1.4 Atualizar dependências Flutter
+- [ ] 1.5 Remover print() de produção
+- [ ] 1.6 Limpar arquivos backup e APKs antigos
+- [ ] 1.7 Verificar build funcional
 
-**Como Evitar**:
-1. ✅ Sempre testar URL launching após cada build
-2. ✅ Verificar AndroidManifest quando url_launcher não funciona
-3. ✅ Considerar Android 11+ restrictions em novos features
+**NÃO inclui:** Mudanças de funcionalidade, redesign, iOS.
+
+### FASE 2 — Correções SuperSet | 🔒 Bloqueada
+### FASE 3 — Redesign Visual (Dark Mode) | 🔒 Bloqueada
+### FASE 4 — iOS | 🔒 Bloqueada
 
 ---
 
-### 🔧 **PROBLEMA 3: Sets e Reps Hardcoded (PRINCIPAL)**
-**Data**: 28 Aug 2025
-**Problema**: 
-- Todos exercícios mostravam "8-12 reps" genérico
-- Não seguiam os valores específicos do CSV
-- SuperSets mostravam valores errados
+## 🗂️ ESTRUTURA DO PROJETO
 
-**Causa Raiz**:
-- Valores hardcoded nos widgets: `'3 sets x 8-12 reps'`
-- Modelo Exercise não tinha propriedades sets/repsTarget
-- Widgets não usavam dados dos exercícios
-
-**Solução Implementada**:
-```dart
-// 1. Atualizado workout_models.dart
-class Exercise {
-  final int sets;
-  final String repsTarget;
-  // ... 
-}
-
-// 2. Atualizado todos exercícios no mock_data.dart
-Exercise(id: 5, name: "Banded Push-Ups", sets: 3, repsTarget: "10+ to failure"),
-Exercise(id: 46, name: "Side Plank", sets: 3, repsTarget: "30-60s hold"),
-
-// 3. Atualizado widgets para usar valores dinâmicos
-Text('📊 Sugestão: ${widget.exercise.sets} sets x ${widget.exercise.repsTarget} reps'),
 ```
-
-**Exercícios com Valores Específicos**:
-- **Banded Push-Ups**: 10+ to failure
-- **Side Plank**: 30-60s hold  
-- **Face Pulls**: 10 reps
-- **Pull-ups**: 6-12 reps
-- **Lateral Raise**: 15-20 reps
-- **Overhead Press**: 6-8 reps
-
-**Arquivos Modificados**:
-- `lib/models/workout_models.dart`
-- `lib/data/mock_data.dart` (50+ exercícios atualizados)
-- `lib/widgets/exercise_tracking_widget.dart`
-- `lib/widgets/superset_tracking_widget.dart`
-
-**Como Evitar**:
-1. ✅ **NUNCA hardcode valores** - sempre usar propriedades do modelo
-2. ✅ **Verificar CSV** antes de definir qualquer exercício
-3. ✅ **Testar todos os treinos** A, B e C após mudanças
-4. ✅ **Script de verificação** criado: `scripts/update_exercises_reps.dart`
-
----
-
-## 🗂️ ESTRUTURA DE PASTAS ATUAL
-
-### **Projetos Principais**
-```
-~/Desktop/VIBE/Built-With-Science-Projects/NextJS-Web-Version/     # Next.js (Web Version)
-├── src/app/programs/[id]/days/[dayId]/     # Workout tracking pages
-├── src/components/ui/                      # UI components
-└── src/lib/mock-data/                      # Integrated CSV data
-
-~/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version/ # Flutter (Mobile - PRINCIPAL)  
-├── lib/screens/                            # App screens
-├── lib/widgets/                            # UI widgets
-├── lib/data/mock_data.dart                 # Exercícios com sets/reps corretos
-├── lib/models/workout_models.dart          # Modelos com sets/repsTarget
-├── data/full_body_workouts_master.csv     # CSV original do usuário
-└── scripts/                               # Scripts utilitários
-```
-
-### **Backup e Releases**
-```
-~/Desktop/Built-With-Science-BACKUP-20250828/  # Backup completo (28 Aug 2025)
-├── NextJS-Web-Version/                         # Projeto Next.js completo
-├── Flutter-Mobile-Version/                    # Projeto Flutter completo  
-└── APK-Releases/                               # APKs gerados
-    ├── BuiltWithScience_v2.12_YouTube_Fix.apk
-    └── BuiltWithScience_v2.13_CustomSetsReps.apk
+Flutter-Mobile-Version/
+├── CLAUDE.md              ← Este arquivo (lido automaticamente)
+├── PROJECT_PLAN.md        ← Plano detalhado com fases
+├── README.md              ← Documentação pública
+├── .gitignore
+├── pubspec.yaml           ← Dependências Flutter
+├── lib/
+│   ├── main.dart          ← Entry point
+│   ├── screens/           ← 19 telas principais
+│   ├── widgets/           ← Widgets reutilizáveis
+│   │   └── dashboard/     ← Dashboard widgets
+│   ├── models/            ← Modelos de dados
+│   ├── services/          ← Serviços (Supabase, backup, timer)
+│   ├── data/              ← Mock data / CSVs integrados
+│   └── utils/             ← Utilidades
+├── android/
+│   └── app/
+│       └── google-services.json  ← ⚠️ REMOVER DO GIT (Fase 1.1)
+├── data/                  ← CSVs originais dos programas
+└── releases/              ← APKs gerados (não versionados)
 ```
 
 ---
 
-## 📋 FEATURES IMPLEMENTADAS
+## 🔧 PADRÕES TÉCNICOS
 
-### ✅ **Workout System Completo**
-- **3 Treinos**: Full Body A, B, C totalmente funcionais
-- **8 Exercícios por treino** com progressão inteligente
-- **SuperSets**: Alternância A1/B1/A2/B2/A3/B3 funcional
-- **Variações**: Dropdowns com 4-6 opções por exercício
-- **YouTube**: Links funcionando perfeitamente
-- **Rest Timer**: Timer funcional entre sets
-- **Progressão**: Sugestões baseadas no último treino
+### Banco de Dados
+- **Supabase (remoto):** Autenticação + backup de dados. RLS habilitado.
+- **SQLite local (sqflite):** Persistência principal dos treinos no dispositivo.
+- **SharedPreferences:** Configurações do usuário, estado do app.
+- Toda alteração no schema deve ser documentada no PROJECT_PLAN.md.
 
-### ✅ **Sistema de Dados Dinâmico**
-- **Sets/Reps Específicos**: Cada exercício tem seus valores do CSV
-- **Exercícios Únicos**: 
-  - Banded Push-Ups: "10+ to failure"
-  - Side Plank: "30-60s hold"
-  - Face Pulls: "10 reps"
-- **Variações Completas**: Todos exercícios têm suas variações corretas
-- **Cache**: Sistema de cache das últimas séries
+### Autenticação
+- **Supabase Auth** com Google OAuth (google_sign_in 6.2.2).
+- Verificar sessão no startup. Tokens em variáveis de ambiente.
+- google-services.json NÃO pode estar no Git.
 
-### ✅ **UI/UX Otimizada**
-- **SuperSet Layout**: Cards separados para A1 e B1
-- **Dropdowns Inteligentes**: Só aparecem no primeiro set
-- **Progression Tracking**: Input de peso/reps intuitivo
-- **Mobile First**: Interface otimizada para celular
+### Segurança
+- Validar TODOS os inputs do usuário.
+- Credenciais e secrets APENAS em variáveis de ambiente (NUNCA commitar).
+- `google-services.json` e `.env*` devem estar no `.gitignore`.
+- Rodar `flutter analyze` antes de cada commit.
 
 ---
 
-## 🚀 PRÓXIMOS PASSOS (ROADMAP)
+## 📝 DECISÕES TÉCNICAS REGISTRADAS
 
-### 🎯 **FASE 1: EXPANSÃO PROGRAMAS (IMEDIATO)**
-**Objetivo**: Adicionar treinos de 4 e 5 dias seguindo estrutura do 3-day
-
-**Tarefas**:
-1. ✅ **Analisar CSV** para exercícios dos programas 4/5-day
-2. ✅ **Expandir mock_data.dart** com novos exercícios  
-3. ✅ **Atualizar workout_tracking_screen.dart** com novos dayIds
-4. ✅ **Testar todos programas** 3/4/5-day
-5. ✅ **Build APK v2.14** com todos programas
-
-**Exercícios a Adicionar** (baseado no CSV):
-- **Upper 1/2**: Exercícios de peito, costas, ombros, braços
-- **Lower 1/2**: Exercícios de pernas, glúteos, panturrilha
-- **Push/Pull**: Separação por movimento
-
-### 🎯 **FASE 2: FORK FEMININO (MÉDIO PRAZO)**
-**Objetivo**: Criar versão especializada para treino feminino
-
-**Estratégia**:
-1. ✅ **Criar branch**: `feature/female-version`
-2. ✅ **Analisar necessidades**: Exercícios específicos femininos
-3. ✅ **Duplicar estrutura**: Programas 3/4/5-day femininos
-4. ✅ **UI Personalizada**: Cores, exercícios, progressão feminina
-5. ✅ **APK Separado**: BuiltWithScience_Female_vX.X.apk
-
-### 🎯 **FASE 3: OTIMIZAÇÕES AVANÇADAS (LONGO PRAZO)**
-**Melhorias Técnicas**:
-- **Supabase**: Migração completa para cloud database
-- **Offline Mode**: Sync completo offline/online
-- **Export Data**: PDF, CSV export de treinos
-- **Analytics**: Gráficos de progresso
-- **Social**: Compartilhamento de treinos
+| Data | Decisão | Motivo |
+|------|---------|--------|
+| 2024 | Provider para estado | Simplicidade para o escopo do app |
+| 2024 | SQLite + SharedPreferences | Persistência local robusta, offline-first |
+| 2024 | Supabase (não Firebase) | Auth + DB integrado, PostgreSQL, free tier |
+| 16/02/2026 | Dark mode only (sem light) | Preferência do Tiago, referência visual premium |
+| 16/02/2026 | Paleta: preto + laranja | Referência: app Coach Sandow, estilo fitness premium |
+| 16/02/2026 | SuperSet sem timer interno | Conceito correto: sem descanso entre A1↔A2, só após completar rodada |
 
 ---
 
-## 🛠️ COMANDOS DE DESENVOLVIMENTO
+## 🎨 DESIGN SYSTEM (a partir da Fase 3)
 
-### **Build e Deploy**
-```bash
-# Navigate to Flutter project
-cd "/Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version"
+> Referência visual: estilo dark premium fitness (Coach Sandow)
 
-# Build APK
-flutter build apk --release
-
-# Copy to Desktop with version
-cp build/app/outputs/flutter-apk/app-release.apk ~/Desktop/BuiltWithScience_vX.XX_Description.apk
-
-# Git workflow
-git add .
-git commit -m "feat: description"
-git push origin feature/backup-system
 ```
+Cores:
+- Background principal: #1A1A1A
+- Background card: #2D2D2D
+- Background elevado: #3A3A3A
+- Destaque primário (CTA, botões): #FF6B00 (laranja)
+- Destaque hover/active: #FF8C00
+- Texto principal: #FFFFFF
+- Texto secundário: #9CA3AF
+- Sucesso: #22C55E
+- Erro: #EF4444
+- Warning: #F59E0B
 
-### **Verificação de Dados**
-```bash
-# Verificar exercícios no CSV
-dart scripts/verify_data.dart
+Tipografia:
+- Manter fonte padrão do Flutter (Roboto) ou avaliar Inter/Poppins
+- Títulos: bold, texto corpo: regular
 
-# Verificar sets/reps
-dart scripts/update_exercises_reps.dart
-
-# Testar app
-flutter run
-```
-
-### **Backup**
-```bash
-# Criar backup completo
-BACKUP_DIR="Built-With-Science-BACKUP-$(date +%Y%m%d)"
-mkdir -p ~/Desktop/$BACKUP_DIR
-cp -r /Users/tiagofernandes/Desktop/VIBE/Built-With-Science ~/Desktop/$BACKUP_DIR/NextJS-Web-Version
-cp -r /Users/tiagofernandes/built_with_science_app ~/Desktop/$BACKUP_DIR/Flutter-Mobile-Version
+Componentes:
+- Cards com fundo #2D2D2D, border-radius 12-16px, sombra sutil
+- Botões primários: fundo laranja #FF6B00, texto branco, border-radius 12px
+- Inputs: fundo #3A3A3A, borda sutil, texto branco
+- Ícones: brancos ou laranja conforme contexto
 ```
 
 ---
 
-## 📝 CHECKLIST PARA NOVOS EXERCÍCIOS
+## 🆘 QUANDO ALGO DER ERRADO
 
-### **Antes de Adicionar Exercício**:
-- [ ] ✅ Verificar nome exato no CSV
-- [ ] ✅ Confirmar sets e reps específicos
-- [ ] ✅ Coletar variações (4-6 opções)
-- [ ] ✅ Validar URLs do YouTube
-- [ ] ✅ Definir ID único no mock_data
-
-### **Após Adicionar**:
-- [ ] ✅ Testar dropdown de variações
-- [ ] ✅ Testar links do YouTube
-- [ ] ✅ Verificar sets/reps na UI
-- [ ] ✅ Testar em SuperSets (se aplicável)
-- [ ] ✅ Build e test no dispositivo
-
-### **Para SuperSets**:
-- [ ] ✅ Verificar ambos exercícios A e B
-- [ ] ✅ Testar alternância A1/B1/A2/B2/A3/B3
-- [ ] ✅ Confirmar dropdowns só no set 1
-- [ ] ✅ Validar sets/reps específicos para cada
+1. **NÃO** tente resolver silenciosamente refazendo tudo.
+2. **PARE** e explique o problema em linguagem simples.
+3. **MOSTRE** o erro exato e o que significa.
+4. **PROPONHA** 1-2 soluções com prós e contras.
+5. **AGUARDE** aprovação antes de implementar.
 
 ---
 
-## 🎯 ORGANIZAÇÃO DE PASTAS (RECOMENDAÇÃO)
+## Comandos Úteis
+- `flutter run` — rodar em dev (dispositivo/emulador conectado)
+- `flutter analyze` — verificar erros e warnings
+- `flutter build apk --release` — build de produção Android
+- `flutter build ios --release` — build de produção iOS (futuro)
+- `flutter pub upgrade --major-versions` — atualizar dependências
+- `flutter test` — rodar testes (quando houver)
 
-### **Estrutura Proposta**:
-```
-~/Documents/Built-With-Science-Projects/
-├── 1-NextJS-Web-Version/               # Mover de ~/Desktop/VIBE/
-├── 2-Flutter-Mobile-Version/          # Mover de ~/built_with_science_app/
-├── 3-Backups/
-│   ├── 2025-08-28-Complete/
-│   └── 2025-XX-XX-Version/
-├── 4-APK-Releases/
-│   ├── Current/                        # Versões mais recentes
-│   └── Archive/                        # Versões anteriores
-└── 5-Documentation/
-    ├── CSV-Data/
-    ├── Screenshots/
-    └── Development-Logs/
-```
-
-### **Comandos para Reorganização**:
-```bash
-# Criar estrutura
-mkdir -p ~/Documents/Built-With-Science-Projects/{1-NextJS-Web-Version,2-Flutter-Mobile-Version,3-Backups,4-APK-Releases/{Current,Archive},5-Documentation/{CSV-Data,Screenshots,Development-Logs}}
-
-# Mover projetos (OPCIONAL - só se quiser organizar)
-# mv /Users/tiagofernandes/Desktop/VIBE/Built-With-Science ~/Documents/Built-With-Science-Projects/1-NextJS-Web-Version
-# mv /Users/tiagofernandes/built_with_science_app ~/Documents/Built-With-Science-Projects/2-Flutter-Mobile-Version
-```
-
----
-
-## 📊 ESTATÍSTICAS DO PROJETO
-
-**Total de Development Sessions**: 15+
-**Total de Commits**: 30+
-**Total de Exercícios**: 50+
-**Total de Variações**: 300+
-**Treinos Funcionais**: 3 (A, B, C)
-**APKs Geradas**: 13 versões
-**Linhas de Código**: 15,000+
-
-**Tempo Total Investido**: ~40 horas
-**Features Principais**: ✅ Todas implementadas
-**Bugs Críticos**: ✅ Todos resolvidos
-**Performance**: ✅ Otimizada
-
----
-
-## 🔥 COMMIT RECENTES
-
-### **v2.13 - Sets/Reps Dinâmicos (28 Aug 2025)**
-```
-feat: implement dynamic sets/reps from CSV data for all exercises
-
-BREAKING CHANGES:
-- Updated Exercise model to include sets and repsTarget properties
-- All exercises now show correct sets/reps from CSV instead of default 8-12
-- SuperSet widgets now display exercise-specific sets/reps for A and B exercises
-- Fixed Banded Push-Ups to show "10+ to failure" in SuperSet B
-- Fixed Side Plank to show "30-60s hold" timing
-
-SPECIFIC FIXES:
-- Barbell Bench Press: 8-10 reps
-- Pull-ups: 6-12 reps  
-- Dumbbell Lateral Raise: 15-20 reps
-- Standing Face Pulls: 10 reps
-- Banded Push-Ups (SuperSet): 10+ to failure
-- Side Plank: 30-60s hold
-
-All workouts A, B, and C now display accurate sets/reps from CSV.
-```
-
----
-
-## 🚀 ESTRATÉGIA HÍBRIDA - LOCAL + CLOUD (PRÓXIMA FASE)
-
-### 🎯 **ARQUITETURA HÍBRIDA PLANEJADA**
-
-**PERSISTÊNCIA ATUAL (v4.0)**:
-- ✅ `SharedPreferences` para dados imediatos
-- ✅ Funciona offline 100%
-- ✅ Performance instantânea (<1ms)
-- ✅ Backup local automático
-
-**PRÓXIMA IMPLEMENTAÇÃO**:
-- 🔄 **Write-Through Strategy**: Local + Supabase automático
-- 🔄 **Background Sync**: Não bloqueia UI
-- 🔄 **Conflict Resolution**: Local sempre ganha
-- 🔄 **Auto-retry**: Sincroniza quando volta conexão
-
-### 📈 **FLUXO DE DADOS HÍBRIDO**
-
-```
-[TREINO COMPLETO]
-      ↓
-[SALVA LOCAL] ← Instantâneo (0ms)
-      ↓
-[SYNC SUPABASE] ← Background (não bloqueia)
-      ↓
-[BACKUP CONFIRMADO] ← Indicador visual
-```
-
-### 🎯 **BENEFÍCIOS DA ABORDAGEM**
-
-**✅ Performance**: Zero latência para usuário
-**✅ Offline-First**: App funciona sem internet
-**✅ Backup Automático**: Dados seguros na nuvem
-**✅ Multi-Device**: Sync entre dispositivos
-**✅ Recuperação**: Dados nunca perdidos
-
-### 📊 **INDICADORES VISUAIS PLANEJADOS**
-- 🟢 **Verde**: Sincronizado com cloud
-- 🟡 **Amarelo**: Pendente sync
-- 🔴 **Vermelho**: Erro de sync
-- 📱 **Cinza**: Apenas local
-
----
-
-## 🎯 ESTADO ATUAL E PRÓXIMOS PASSOS
-
-### ✅ **COMPLETADO (16 Jan 2025)**
-1. **Persistência Local Completa**: Variações, peso, reps, dificuldade, notas
-2. **Overflow Issues**: Todos os problemas de UI resolvidos
-3. **SuperSet Navigation**: Funcionando perfeitamente
-4. **Sistema de Cache**: Automático e inteligente
-
-### 🔄 **PRÓXIMA MILESTONE**
-**Aguardando**: Teste na vida real pelo usuário
-**Depois**: Implementação da estratégia híbrida com Supabase
-
-### 📱 **APK RELEASES**
-- **v4.0_COMPLETE_PERSISTENCE.apk**: Versão atual com persistência completa
-- **Localização**: `releases/BuiltWithScience_v4.0_COMPLETE_PERSISTENCE.apk`
-
----
-
-## 🎯 ROADMAP ATUALIZADO
-
-### **FASE 1: VALIDAÇÃO** (Atual)
-- ✅ Teste da persistência na vida real
-- ✅ Coleta de feedback do usuário
-- ✅ Ajustes baseados no uso real
-
-### **FASE 2: CLOUD INTEGRATION** (Próxima)
-- 🔄 Implementação Supabase híbrida
-- 🔄 Sistema de sync background
-- 🔄 Indicadores visuais de status
-- 🔄 Auto-retry e conflict resolution
-
-### **FASE 3: EXPANSÃO** (Futura)
-- 🔄 Programas 4-day e 5-day
-- 🔄 Versão feminina
-- 🔄 Features avançadas
-
----
-
-*Last updated: January 16, 2025 - 21:45*
-*Development phase: Persistence Complete - Ready for Cloud Integration*
-*Quality: Production-ready with complete local persistence*
+## Workflow por Sessão
+1. Ler `PROJECT_PLAN.md` → identificar próxima tarefa
+2. **Plan Mode** (Shift+Tab 2x) → planejar antes de codar
+3. Implementar a tarefa
+4. Testar (`flutter analyze` + teste manual)
+5. Commit → push para develop
+6. Atualizar status no `PROJECT_PLAN.md`
+7. Se contexto ficar grande → `/clear` e retomar
