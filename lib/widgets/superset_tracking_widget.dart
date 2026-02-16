@@ -52,6 +52,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     'A': {},
     'B': {},
   };
+  final Map<String, Map<int, TextEditingController>> _notesControllers = {
+    'A': {},
+    'B': {},
+  };
   final Map<String, Map<int, String>> _difficulties = {
     'A': {},
     'B': {},
@@ -118,14 +122,16 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       // Para exercício A
       _weightControllers['A']![i] = TextEditingController();
       _repsControllers['A']![i] = TextEditingController();
+      _notesControllers['A']![i] = TextEditingController();
       _difficulties['A']![i] = 'Perfeito';
-      
+
       // Para exercício B
       _weightControllers['B']![i] = TextEditingController();
       _repsControllers['B']![i] = TextEditingController();
+      _notesControllers['B']![i] = TextEditingController();
       _difficulties['B']![i] = 'Perfeito';
     }
-    
+
     // Carregar dados já completados
     _loadCompletedData();
   }
@@ -209,6 +215,11 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
 
     widget.onSetCompleted(setData);
     HapticFeedback.mediumImpact();
+
+    // Salvar no cache quando completar o set 3 (último set)
+    if (_currentSetNumber == 3) {
+      _saveToCache(setData, _isExerciseA);
+    }
 
     // CORREÇÃO: Timer só deve aparecer após completar uma rodada inteira do SuperSet
     // ou quando o SuperSet inteiro terminar.
@@ -335,6 +346,11 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       }
     }
     for (final map in _repsControllers.values) {
+      for (final controller in map.values) {
+        controller.dispose();
+      }
+    }
+    for (final map in _notesControllers.values) {
       for (final controller in map.values) {
         controller.dispose();
       }
@@ -854,9 +870,25 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
                     });
                   },
                 ),
-                
+
+                const SizedBox(height: 16),
+
+                // Campo de comentários
+                TextField(
+                  controller: _notesControllers[prefix]![_currentSetNumber],
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    labelText: 'Comentários (opcional)',
+                    hintText: 'Ex: Forma ruim, muito pesado...',
+                    prefixIcon: const Icon(Icons.note_alt_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 20),
-                
+
                 // Botão de completar
                 SizedBox(
                   width: double.infinity,
@@ -1062,16 +1094,26 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       debugPrint('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
     }
 
-    // 3. Dados do exercício A (apenas log por enquanto)
+    // 3. Dados do exercício A
     if (_lastWorkoutDataA != null && _lastWorkoutDataA!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataA!['lastSet3'];
-      debugPrint('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+      debugPrint('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
+
+      // Preencher campo de comentários do set 1 com dados do último treino
+      if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
+        _notesControllers['A']![1]?.text = lastSet3['notes'].toString();
+      }
     }
 
-    // 4. Dados do exercício B (apenas log por enquanto)
+    // 4. Dados do exercício B
     if (_lastWorkoutDataB != null && _lastWorkoutDataB!['lastSet3'] != null) {
       final lastSet3 = _lastWorkoutDataB!['lastSet3'];
-      debugPrint('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}');
+      debugPrint('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
+
+      // Preencher campo de comentários do set 1 com dados do último treino
+      if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
+        _notesControllers['B']![1]?.text = lastSet3['notes'].toString();
+      }
     }
 
     setState(() {}); // Atualizar UI
@@ -1082,6 +1124,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       final prefs = await SharedPreferences.getInstance();
       final exercise = isExerciseA ? widget.exerciseA : widget.exerciseB;
       final selectedVariation = isExerciseA ? _selectedVariationA : _selectedVariationB;
+      final prefix = isExerciseA ? 'A' : 'B';
       final cacheKey = 'lastWorkout_${exercise.id}';
 
       // Dados do último set (set 3) para usar no próximo treino
@@ -1092,6 +1135,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
           'weight': lastSet.weightKg,
           'reps': lastSet.reps,
           'difficulty': lastSet.difficulty,
+          'notes': _notesControllers[prefix]![3]?.text ?? '',
           'date': DateTime.now().toIso8601String(),
         },
         'variationId': selectedVariation?.id,
