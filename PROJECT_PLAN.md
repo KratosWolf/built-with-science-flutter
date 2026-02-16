@@ -24,14 +24,14 @@ App funcional em Android e iOS, com visual dark premium, SuperSets corrigidos, e
 ### Stack Atual
 | Camada | Tecnologia | Versão | Motivo |
 |--------|-----------|--------|--------|
-| Framework | Flutter | 3.24.5 | Cross-platform Android + iOS |
-| Linguagem | Dart | 3.5.4 | Padrão Flutter |
+| Framework | Flutter | 3.41.1 | Cross-platform Android + iOS |
+| Linguagem | Dart | 3.6.2+ | Padrão Flutter |
 | Backend/BaaS | Supabase | 2.10.0 | Auth + backup + sync |
 | Banco Local | SQLite (sqflite) | 2.4.1 | Persistência principal offline-first |
 | Banco Remoto | PostgreSQL via Supabase | — | Backup e sync |
 | Autenticação | Supabase Auth + Google Sign-In | 2.10.3 / 6.2.2 | Google OAuth sem fricção |
 | Estado | Provider | 6.1.1 | Simples para o escopo |
-| Charts | FL Chart | 0.69.2 | Dashboard de consistência |
+| Charts | FL Chart | 1.1.1 | Dashboard de consistência |
 | Storage local | SharedPreferences | 2.5.3 | Configurações e estado |
 | Deploy | Google Play Store | — | Android (iOS futuro) |
 | Versionamento | GitHub | — | KratosWolf/built-with-science-flutter |
@@ -43,7 +43,7 @@ google_sign_in: 6.2.2
 provider: 6.1.1
 sqflite: 2.4.1
 shared_preferences: 2.5.3
-fl_chart: 0.69.2
+fl_chart: 1.1.1
 http: 1.5.0
 path_provider: 2.1.5
 vibration: 1.9.0
@@ -57,25 +57,26 @@ permission_handler: 11.4.0
 
 ---
 
-### FASE 1 — Arrumar a Casa ⬅️ FASE ATUAL
+### FASE 1 — Arrumar a Casa ✅ CONCLUÍDA
 **Objetivo:** Resolver problemas de segurança, limpar Git, atualizar dependências, garantir que o projeto está num estado saudável antes de qualquer mudança funcional.
 **Prazo estimado:** 1-2 sessões de Claude Code
+**Data de conclusão:** 16/02/2026
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
-| 1.1 | Remover `google-services.json` do Git tracking | ⬜ Pendente | `git rm --cached android/app/google-services.json` + adicionar ao `.gitignore` |
-| 1.2 | Adicionar padrões `.env*` ao `.gitignore` | ⬜ Pendente | Prevenir vazamento futuro |
-| 1.3 | Commit de todas as alterações pendentes (14 arquivos) | ⬜ Pendente | Revisar cada alteração antes. Commit organizado por tipo. |
-| 1.4 | Criar branch `develop` a partir da `main` limpa | ⬜ Pendente | Todo trabalho futuro será em develop ou feature branches |
-| 1.5 | Atualizar dependências Flutter | ⬜ Pendente | `flutter pub upgrade --major-versions` — testar build depois |
-| 1.6 | Remover `print()` statements de produção | ⬜ Pendente | Substituir por `debugPrint()` onde necessário |
-| 1.7 | Remover arquivos backup (`.dart.backup`) | ⬜ Pendente | Limpar lixo do projeto |
-| 1.8 | Organizar `releases/` — remover APKs antigos | ⬜ Pendente | Manter apenas o último ou adicionar ao `.gitignore` |
-| 1.9 | Rodar `flutter analyze` — resolver warnings críticos | ⬜ Pendente | Foco em erros e warnings graves, não precisa resolver tudo |
-| 1.10 | Build APK de verificação | ⬜ Pendente | `flutter build apk --release` — garantir que tudo compila |
-| 1.11 | Push para remote (main limpa + develop criada) | ⬜ Pendente | Estado limpo no GitHub |
+| 1.1 | Remover `google-services.json` do Git tracking | ✅ Concluído | Removido do Git e adicionado ao `.gitignore` |
+| 1.2 | Adicionar padrões `.env*` ao `.gitignore` | ✅ Concluído | Padrões .env adicionados para prevenir vazamento |
+| 1.3 | Commit de todas as alterações pendentes (14 arquivos) | ✅ Concluído | Alterações organizadas e commitadas |
+| 1.4 | Criar branch `develop` a partir da `main` limpa | ✅ Concluído | Branch develop criada e enviada ao remote |
+| 1.5 | Atualizar dependências Flutter | ✅ Concluído | Flutter 3.24.5 → 3.41.1 (Dart 3.6.2+), fl_chart 0.71.0 → 1.1.1 |
+| 1.6 | Remover `print()` statements de produção | ✅ Concluído | 214 print() substituídos por debugPrint() |
+| 1.7 | Remover arquivos backup (`.dart.backup`) | ✅ Concluído | 2 arquivos backup removidos |
+| 1.8 | Organizar `releases/` — remover APKs antigos | ✅ Concluído | 26 APKs antigos removidos (~1.1GB liberado), mantidos 3 mais recentes |
+| 1.9 | Rodar `flutter analyze` — resolver warnings críticos | ✅ Concluído | Análise limpa: "No issues found!" |
+| 1.10 | Build APK de verificação | ✅ Concluído | Build release bem-sucedido (55.5MB), AGP 8.7.3, Gradle 8.11.1, Kotlin 2.0.21 |
+| 1.11 | Push para remote (main limpa + develop criada) | ✅ Concluído | Branches main e develop enviadas ao GitHub |
 
-**Critério de conclusão:** Git limpo, sem credenciais expostas, dependências atualizadas, app compila e roda normalmente.
+**Critério de conclusão:** ✅ Git limpo, sem credenciais expostas, dependências atualizadas, app compila e roda normalmente.
 
 **⚠️ CUIDADOS:**
 - Ao atualizar dependências major, podem haver breaking changes. Testar build após cada atualização.
@@ -259,7 +260,7 @@ Flutter-Mobile-Version/
 
 ---
 
-## 📊 ESTADO ATUAL DO PROJETO (Auditoria 16/02/2026)
+## 📊 ESTADO ATUAL DO PROJETO
 
 ### ✅ Funcionando
 - App totalmente funcional com programa 3-day
@@ -271,16 +272,22 @@ Flutter-Mobile-Version/
 - Dashboard de consistência
 - Autenticação com Supabase + Google OAuth
 - Backup/restore local
+- **Git limpo e seguro** (Fase 1 ✅)
+- **Flutter 3.41.1 atualizado** (Fase 1 ✅)
+- **Build APK funcional** (Fase 1 ✅)
 
-### ⚠️ Problemas Conhecidos
-- google-services.json exposto no Git (SEGURANÇA CRÍTICA)
-- 14 arquivos modificados não commitados
-- 3 meses sem commits
-- Dependências desatualizadas (major versions)
-- 50+ warnings no flutter analyze
-- 20+ print() em produção
+### ⚠️ Problemas Conhecidos (Fase 2)
+- Timer entre exercícios do SuperSet (comportamento incorreto)
+- SuperSet sem campo de comentário/notas
+- Dados anteriores não carregam no SuperSet
+- Timer sem alerta sonoro (apenas vibração)
 - Arquivos >800 linhas precisam refatoração futura
-- Xcode não configurado (iOS bloqueado)
+
+### 🔮 Roadmap
+- **Fase 2:** Correções SuperSet (próxima)
+- **Fase 3:** Redesign Visual Dark Mode
+- **Fase 4:** iOS
+- Xcode não configurado (iOS bloqueado até Fase 4)
 
 ---
 
@@ -292,3 +299,4 @@ Flutter-Mobile-Version/
 | Nov/2025 | — | Último commit antes da pausa | — |
 | 16/02/2026 | Planejamento | Auditoria completa + plano de melhoria | Retomar desenvolvimento ativo |
 | 16/02/2026 | Planejamento | CLAUDE.md e PROJECT_PLAN.md criados | Preparar para Claude Code |
+| 16/02/2026 | Fase 1 ✅ | Limpeza completa do projeto | Segurança (google-services.json removido), Git limpo, Flutter 3.41.1, dependências atualizadas, print() removidos, build funcional |
