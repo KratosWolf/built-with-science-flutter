@@ -184,10 +184,10 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
   void _completeCurrentSet() {
     final exercise = _isExerciseA ? widget.exerciseA : widget.exerciseB;
     final prefix = _isExerciseA ? 'A' : 'B';
-    
+
     final weight = double.tryParse(_weightControllers[prefix]![_currentSetNumber]!.text);
     final reps = int.tryParse(_repsControllers[prefix]![_currentSetNumber]!.text);
-    
+
     if (weight == null || reps == null || reps <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -197,7 +197,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       );
       return;
     }
-    
+
     final setData = WorkoutSet(
       sessionId: 1,
       exerciseId: exercise.id,
@@ -206,15 +206,29 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       reps: reps,
       difficulty: _difficulties[prefix]![_currentSetNumber],
     );
-    
+
     widget.onSetCompleted(setData);
     HapticFeedback.mediumImpact();
-    
+
+    // CORREÇÃO: Timer só deve aparecer após completar uma rodada inteira do SuperSet
+    // ou quando o SuperSet inteiro terminar.
+    //
+    // Regra: Timer aparece apenas quando acabamos de fazer B (A2) e vamos incrementar
+    // o set number (ou seja, completamos uma rodada A1→A2).
+    //
+    // Não deve aparecer timer entre A1→A2 dentro da mesma rodada.
+    final shouldShowTimer = !_isExerciseA; // Se acabamos de fazer B (A2), mostrar timer
+
     // Determinar próximo exercício na sequência
     _moveToNext();
-    
-    // Iniciar timer de descanso - sempre 1:30 (90 segundos)
-    widget.onRestNeeded(90); // Sempre 90 segundos entre sets
+
+    // Iniciar timer apenas se completou uma rodada (acabou de fazer B/A2)
+    if (shouldShowTimer) {
+      widget.onRestNeeded(90); // 90 segundos após completar rodada
+      debugPrint('⏱️ Timer iniciado: completou rodada A1→A2');
+    } else {
+      debugPrint('⏭️ Sem timer: alternando de A1 para A2 dentro da rodada');
+    }
   }
 
   void _moveToNext() {
