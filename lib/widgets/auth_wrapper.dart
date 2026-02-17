@@ -3,6 +3,7 @@ import 'dart:async';
 import '../services/supabase_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/main_navigation.dart';
+import '../config/theme.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
@@ -84,25 +85,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Mostrar loading durante verificação inicial (mais rápido)
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: AppTheme.backgroundPrimary,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.fitness_center,
                 size: 80,
-                color: Colors.white,
+                color: AppTheme.primaryOrange,
               ),
               const SizedBox(height: 24),
-              CircularProgressIndicator(
-                color: Colors.white,
+              const CircularProgressIndicator(
+                color: AppTheme.primaryOrange,
               ),
               const SizedBox(height: 16),
               Text(
                 'Built With Science',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),

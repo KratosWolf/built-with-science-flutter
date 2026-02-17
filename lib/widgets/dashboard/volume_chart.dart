@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../config/theme.dart';
 
 class VolumeChart extends StatelessWidget {
   final List<Map<String, dynamic>> weeklyData;
@@ -16,7 +17,7 @@ class VolumeChart extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      color: theme.colorScheme.surfaceContainer,
+      color: AppTheme.backgroundCard,
       margin: EdgeInsets.all(16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -34,7 +35,7 @@ class VolumeChart extends StatelessWidget {
                 ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(40),
-                      child: CircularProgressIndicator(color: theme.colorScheme.primary),
+                      child: CircularProgressIndicator(color: AppTheme.primaryOrange),
                     ),
                   )
                 : weeklyData.isEmpty
@@ -43,12 +44,12 @@ class VolumeChart extends StatelessWidget {
                           padding: EdgeInsets.all(40),
                           child: Column(
                             children: [
-                              Icon(Icons.bar_chart, size: 48, color: theme.colorScheme.onSurfaceVariant),
+                              Icon(Icons.bar_chart, size: 48, color: AppTheme.textSecondary),
                               SizedBox(height: 8),
                               Text(
                                 'Sem dados suficientes',
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                  color: AppTheme.textSecondary,
                                 ),
                               ),
                             ],
@@ -65,7 +66,7 @@ class VolumeChart extends StatelessWidget {
                               horizontalInterval: _calculateInterval(),
                               getDrawingHorizontalLine: (value) {
                                 return FlLine(
-                                  color: theme.colorScheme.outline.withOpacity(0.2),
+                                  color: AppTheme.borderColor.withOpacity(0.3),
                                   strokeWidth: 1,
                                 );
                               },
@@ -91,7 +92,7 @@ class VolumeChart extends StatelessWidget {
                                         child: Text(
                                           weeklyData[index]['week'],
                                           style: theme.textTheme.bodySmall?.copyWith(
-                                            color: theme.colorScheme.onSurfaceVariant,
+                                            color: AppTheme.textSecondary,
                                           ),
                                         ),
                                       );
@@ -109,7 +110,7 @@ class VolumeChart extends StatelessWidget {
                                     return Text(
                                       _formatVolume(value),
                                       style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
+                                        color: AppTheme.textSecondary,
                                       ),
                                     );
                                   },
@@ -119,8 +120,8 @@ class VolumeChart extends StatelessWidget {
                             borderData: FlBorderData(
                               show: true,
                               border: Border(
-                                bottom: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3), width: 1),
-                                left: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3), width: 1),
+                                bottom: BorderSide(color: AppTheme.borderColor, width: 1),
+                                left: BorderSide(color: AppTheme.borderColor, width: 1),
                               ),
                             ),
                             minX: 0,
@@ -132,7 +133,7 @@ class VolumeChart extends StatelessWidget {
                                 spots: _createSpots(),
                                 isCurved: true,
                                 curveSmoothness: 0.3,
-                                color: theme.colorScheme.primary,
+                                color: AppTheme.primaryOrange,
                                 barWidth: 3,
                                 isStrokeCapRound: true,
                                 dotData: FlDotData(
@@ -140,15 +141,15 @@ class VolumeChart extends StatelessWidget {
                                   getDotPainter: (spot, percent, barData, index) {
                                     return FlDotCirclePainter(
                                       radius: 4,
-                                      color: theme.colorScheme.primary,
+                                      color: AppTheme.primaryOrange,
                                       strokeWidth: 2,
-                                      strokeColor: theme.colorScheme.surfaceContainer,
+                                      strokeColor: AppTheme.backgroundCard,
                                     );
                                   },
                                 ),
                                 belowBarData: BarAreaData(
                                   show: true,
-                                  color: theme.colorScheme.primary.withOpacity(0.2),
+                                  color: AppTheme.primaryOrange.withOpacity(0.2),
                                 ),
                               ),
                             ],

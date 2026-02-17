@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'simple_home.dart';
 import 'profile_screen.dart';
+import '../config/theme.dart';
 
 /// Main navigation wrapper with bottom navigation bar
 class MainNavigation extends StatefulWidget {
@@ -34,10 +35,10 @@ class _MainNavigationState extends State<MainNavigation> {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-        elevation: 8,
+        backgroundColor: AppTheme.backgroundCard,
+        selectedItemColor: AppTheme.primaryOrange,
+        unselectedItemColor: AppTheme.textSecondary,
+        elevation: 0,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

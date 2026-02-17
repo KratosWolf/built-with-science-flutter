@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dashboard_screen.dart';
 import 'workout_tracking_screen.dart';
 import 'program_selection_screen.dart';
+import '../config/theme.dart';
 
 class SimpleHomeScreen extends StatefulWidget {
   const SimpleHomeScreen({super.key});
@@ -110,8 +111,8 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: const Text('🏋️ Built With Science'),
-        backgroundColor: const Color(0xFF6A1B9A), // Deep Purple
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.primaryOrange,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
       ),
       body: SafeArea(
@@ -129,11 +130,10 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
+                      gradient: LinearGradient(
                         colors: [
-                          Color(0xFF6A1B9A), // Deep Purple
-                          Color(0xFF8E24AA), // Purple
-                          Color(0xFFAB47BC), // Light Purple
+                          AppTheme.primaryOrange,
+                          AppTheme.primaryOrangeHover,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -141,7 +141,7 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6A1B9A).withOpacity(0.3),
+                          color: AppTheme.primaryOrange.withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -155,7 +155,7 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppTheme.textPrimary,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -164,7 +164,7 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                           'Ready for your next workout?',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.white70,
+                            color: AppTheme.textPrimary,
                             letterSpacing: 0.3,
                           ),
                         ),
@@ -198,21 +198,21 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                           context,
                           'Start Workout',
                           Icons.play_circle_outline,
-                          const Color(0xFFFB8C00), // Orange
+                          AppTheme.primaryOrange,
                           _startWorkout,
                         ),
                         _buildActionCard(
                           context,
                           'Programs',
                           Icons.fitness_center_outlined,
-                          const Color(0xFF43A047), // Green
+                          AppTheme.success,
                           () => Navigator.pushNamed(context, '/programs'),
                         ),
                         _buildActionCard(
                           context,
                           'Dashboard',
                           Icons.bar_chart_outlined,
-                          const Color(0xFF8E24AA), // Purple
+                          AppTheme.info,
                           () => Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -231,16 +231,16 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: AppTheme.success.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.green.shade100),
+                        border: Border.all(color: AppTheme.success.withOpacity(0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.cloud_done_outlined,
-                            color: Colors.green.shade600,
+                            color: AppTheme.success,
                             size: 16,
                           ),
                           const SizedBox(width: 6),
@@ -248,7 +248,7 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
                             'Cloud Synced',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.green.shade700,
+                              color: AppTheme.success,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -273,11 +273,12 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
     VoidCallback onTap,
   ) {
     return Card(
-      elevation: 4,
-      shadowColor: color.withOpacity(0.3),
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withOpacity(0.3), width: 1),
       ),
+      color: color.withOpacity(0.1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -285,14 +286,6 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                color.withOpacity(0.05),
-              ],
-            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -313,10 +306,11 @@ class _SimpleHomeScreenState extends State<SimpleHomeScreen> with SingleTickerPr
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,
+                  color: color,
                 ),
               ),
             ],

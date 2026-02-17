@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user_stats.dart';
+import '../config/theme.dart';
 
 /// Profile header widget showing user photo, name and email
 class ProfileHeader extends StatelessWidget {
@@ -20,14 +21,14 @@ class ProfileHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            AppTheme.primaryOrange,
+            AppTheme.primaryOrangeHover,
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            color: AppTheme.primaryOrange.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -40,7 +41,7 @@ class ProfileHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: AppTheme.textPrimary.withOpacity(0.2),
                 child: profile.photoUrl != null
                     ? ClipOval(
                         child: Image.network(
@@ -61,14 +62,14 @@ class ProfileHeader extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
+                    color: AppTheme.backgroundCard,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: AppTheme.textPrimary, width: 2),
                   ),
                   child: const Icon(
                     Icons.edit,
                     size: 16,
-                    color: Colors.white,
+                    color: AppTheme.primaryOrange,
                   ),
                 ),
               ),
@@ -83,7 +84,7 @@ class ProfileHeader extends StatelessWidget {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.textPrimary,
             ),
           ),
 
@@ -94,7 +95,7 @@ class ProfileHeader extends StatelessWidget {
             profile.email ?? 'email@exemplo.com',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.9),
+              color: AppTheme.textPrimary.withOpacity(0.9),
             ),
           ),
 
@@ -108,14 +109,14 @@ class ProfileHeader extends StatelessWidget {
                 Icon(
                   Icons.calendar_today,
                   size: 14,
-                  color: Colors.white.withOpacity(0.8),
+                  color: AppTheme.textPrimary.withOpacity(0.8),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Membro desde ${_formatMemberSince(profile.createdAt!)}',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.8),
+                    color: AppTheme.textPrimary.withOpacity(0.8),
                   ),
                 ),
               ],
@@ -132,7 +133,7 @@ class ProfileHeader extends StatelessWidget {
       style: const TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
+        color: AppTheme.textPrimary,
       ),
     );
   }
@@ -160,33 +161,27 @@ class StatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppTheme.backgroundCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTheme.borderColor, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.bar_chart,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppTheme.primaryOrange,
                 size: 24,
               ),
               const SizedBox(width: 12),
-              Text(
+              const Text(
                 'Estatísticas',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppTheme.textPrimary,
                 ),
               ),
             ],
@@ -207,42 +202,42 @@ class StatsCard extends StatelessWidget {
                 icon: Icons.fitness_center,
                 value: stats.totalWorkouts.toString(),
                 label: 'Treinos',
-                color: Theme.of(context).colorScheme.primary,
+                color: AppTheme.primaryOrange,
               ),
               _buildStatItem(
                 context,
                 icon: Icons.local_fire_department,
                 value: stats.currentStreak.toString(),
                 label: 'Sequência',
-                color: Colors.orange,
+                color: AppTheme.warning,
               ),
               _buildStatItem(
                 context,
                 icon: Icons.trending_up,
                 value: stats.formattedVolume,
                 label: 'Volume Total',
-                color: Theme.of(context).colorScheme.secondary,
+                color: AppTheme.success,
               ),
               _buildStatItem(
                 context,
                 icon: Icons.calendar_today,
                 value: '${stats.formattedWeeklyAverage}/sem',
                 label: 'Média Semanal',
-                color: Colors.blue,
+                color: AppTheme.info,
               ),
               _buildStatItem(
                 context,
                 icon: Icons.emoji_events,
                 value: stats.bestStreak.toString(),
                 label: 'Melhor Sequência',
-                color: Colors.amber,
+                color: AppTheme.warning,
               ),
               _buildStatItem(
                 context,
                 icon: Icons.schedule,
                 value: _formatLastWorkout(stats.lastWorkoutDate),
                 label: 'Último Treino',
-                color: Colors.purple,
+                color: AppTheme.info,
               ),
             ],
           ),
@@ -284,9 +279,9 @@ class StatsCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              color: AppTheme.textSecondary,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -329,33 +324,27 @@ class SettingsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppTheme.backgroundCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTheme.borderColor, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.settings,
-                color: Theme.of(context).colorScheme.primary,
+                color: AppTheme.primaryOrange,
                 size: 24,
               ),
               const SizedBox(width: 12),
-              Text(
+              const Text(
                 'Configurações',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppTheme.textPrimary,
                 ),
               ),
             ],
@@ -400,16 +389,19 @@ class SettingsSection extends StatelessWidget {
   }) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(
+      leading: Icon(icon, color: AppTheme.primaryOrange),
+      title: const Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: AppTheme.textPrimary,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 12,
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          color: AppTheme.textSecondary,
         ),
       ),
       trailing: trailing,
@@ -434,15 +426,9 @@ class ActionsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppTheme.backgroundCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppTheme.borderColor, width: 1),
       ),
       child: Column(
         children: [
@@ -455,8 +441,8 @@ class ActionsSection extends StatelessWidget {
                 icon: const Icon(Icons.logout),
                 label: const Text('Fazer Logout'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade500,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.error,
+                  foregroundColor: AppTheme.textPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
@@ -473,8 +459,8 @@ class ActionsSection extends StatelessWidget {
                 icon: const Icon(Icons.delete_forever),
                 label: const Text('Excluir Conta'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red.shade700,
-                  side: BorderSide(color: Colors.red.shade700),
+                  foregroundColor: AppTheme.error,
+                  side: const BorderSide(color: AppTheme.error),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),

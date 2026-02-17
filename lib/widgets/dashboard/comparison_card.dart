@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/theme.dart';
 
 class ComparisonCard extends StatelessWidget {
   final Map<String, dynamic> comparisonData;
@@ -15,7 +16,7 @@ class ComparisonCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      color: theme.colorScheme.surfaceContainer,
+      color: AppTheme.backgroundCard,
       margin: EdgeInsets.all(16),
       child: Padding(
         padding: EdgeInsets.all(16),
@@ -33,7 +34,7 @@ class ComparisonCard extends StatelessWidget {
                 ? Center(
                     child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: CircularProgressIndicator(color: theme.colorScheme.primary),
+                      child: CircularProgressIndicator(color: AppTheme.primaryOrange),
                     ),
                   )
                 : _buildComparisonContent(context),
@@ -60,12 +61,12 @@ class ComparisonCard extends StatelessWidget {
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
-              Icon(Icons.compare_arrows, size: 48, color: theme.colorScheme.onSurfaceVariant),
+              Icon(Icons.compare_arrows, size: 48, color: AppTheme.textSecondary),
               SizedBox(height: 8),
               Text(
                 'Sem dados para comparar',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AppTheme.textSecondary,
                 ),
               ),
             ],
@@ -108,7 +109,7 @@ class ComparisonCard extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final isPositive = diff >= 0;
-    final color = isPositive ? const Color(0xFF22C55E) : theme.colorScheme.error;
+    final color = isPositive ? AppTheme.success : AppTheme.error;
     final icon = isPositive ? Icons.trending_up : Icons.trending_down;
     final sign = isPositive ? '+' : '';
 
@@ -147,7 +148,7 @@ class ComparisonCard extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AppTheme.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),

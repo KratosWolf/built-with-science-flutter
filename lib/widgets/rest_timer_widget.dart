@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/background_timer_service.dart';
+import '../config/theme.dart';
 
 class RestTimerWidget extends StatefulWidget {
   final VoidCallback? onTimerComplete;
@@ -110,12 +111,12 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // TÍTULO
-            Text(
+            const Text(
               'REST TIMER',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[600],
+                color: AppTheme.textSecondary,
               ),
             ),
             SizedBox(height: 8),
@@ -133,11 +134,11 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                         _timeLabels[seconds]!,
                         style: TextStyle(
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: isSelected ? Colors.white : Colors.black87,
+                          color: isSelected ? AppTheme.textPrimary : AppTheme.textPrimary,
                         ),
                       ),
                       selected: isSelected,
-                      selectedColor: Theme.of(context).primaryColor,
+                      selectedColor: AppTheme.primaryOrange,
                       onSelected: (selected) {
                         if (selected && !_isRunning) {
                           setState(() {
@@ -162,8 +163,8 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: _isRunning
-                    ? (_currentSeconds <= 10 ? Colors.red : Theme.of(context).primaryColor)
-                    : Colors.grey[300]!,
+                    ? (_currentSeconds <= 10 ? AppTheme.error : AppTheme.primaryOrange)
+                    : AppTheme.borderColor,
                   width: 4,
                 ),
               ),
@@ -174,8 +175,8 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
                     color: _isRunning
-                      ? (_currentSeconds <= 10 ? Colors.red : Colors.black87)
-                      : Colors.grey[600],
+                      ? (_currentSeconds <= 10 ? AppTheme.error : AppTheme.textPrimary)
+                      : AppTheme.textSecondary,
                   ),
                 ),
               ),
@@ -192,8 +193,8 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
                   icon: Icon(_isRunning ? Icons.stop : Icons.play_arrow),
                   label: Text(_isRunning ? 'PARAR' : 'INICIAR'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isRunning ? Colors.red : Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _isRunning ? AppTheme.error : AppTheme.primaryOrange,
+                    foregroundColor: AppTheme.textPrimary,
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                 ),
@@ -218,11 +219,11 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
             // DICA
             if (!_isRunning) ...[
               SizedBox(height: 12),
-              Text(
+              const Text(
                 'Escolha o tempo de descanso acima',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[500],
+                  color: AppTheme.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -233,14 +234,14 @@ class _RestTimerWidgetState extends State<RestTimerWidget> {
               SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.info_outline, size: 14, color: Colors.blue),
+                children: const [
+                  Icon(Icons.info_outline, size: 14, color: AppTheme.info),
                   SizedBox(width: 4),
                   Text(
                     'Timer continua no background',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.blue,
+                      color: AppTheme.info,
                     ),
                   ),
                 ],
