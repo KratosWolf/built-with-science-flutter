@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import '../config/theme.dart';
 
 class RestTimer extends StatefulWidget {
   final int initialSeconds;
@@ -92,8 +93,8 @@ class _RestTimerState extends State<RestTimer>
       vsync: this,
     );
     _colorAnimation = ColorTween(
-      begin: Colors.green,
-      end: Colors.red,
+      begin: AppColors.primaryOrange,
+      end: AppColors.error,
     ).animate(_colorAnimationController);
   }
 
@@ -281,10 +282,10 @@ class _RestTimerState extends State<RestTimer>
 
   Color _getTimerColor() {
     final percentage = timeLeft / originalTime;
-    if (percentage > 0.6) return Colors.green;
-    if (percentage > 0.3) return Colors.orange;
-    if (percentage > 0.1) return Colors.deepOrange;
-    return Colors.red;
+    if (percentage > 0.6) return AppColors.success;
+    if (percentage > 0.3) return AppColors.primaryOrange;
+    if (percentage > 0.1) return AppColors.warning;
+    return AppColors.error;
   }
 
   String _getStatusText() {
@@ -347,6 +348,7 @@ class _RestTimerState extends State<RestTimer>
             ),
             child: Card(
               elevation: 0,
+              color: AppColors.cardBackground,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(
@@ -363,7 +365,7 @@ class _RestTimerState extends State<RestTimer>
                     colors: [
                       timerColor.withOpacity(0.1),
                       timerColor.withOpacity(0.05),
-                      Colors.white.withOpacity(0.9),
+                      AppColors.cardBackground,
                     ],
                   ),
                 ),
@@ -406,10 +408,10 @@ class _RestTimerState extends State<RestTimer>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: AppColors.backgroundElevated,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: timerColor.withOpacity(0.3),
+                            color: timerColor.withOpacity(0.5),
                             width: 2,
                           ),
                         ),
@@ -440,7 +442,7 @@ class _RestTimerState extends State<RestTimer>
                                 strokeWidth: 8,
                                 backgroundColor: Colors.transparent,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.grey.shade300,
+                                  AppColors.backgroundElevated,
                                 ),
                               ),
                             ),
@@ -474,7 +476,7 @@ class _RestTimerState extends State<RestTimer>
                                     'complete',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.grey.shade600,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -514,7 +516,7 @@ class _RestTimerState extends State<RestTimer>
                             icon: Icons.remove,
                             label: '-15s',
                             onPressed: timeLeft >= 15 ? () => _subtractTime(15) : null,
-                            color: Colors.red.shade400,
+                            color: AppColors.error,
                           ),
                           _buildTimeButton(
                             icon: isPaused ? Icons.play_arrow : Icons.pause,
@@ -527,7 +529,7 @@ class _RestTimerState extends State<RestTimer>
                             icon: Icons.add,
                             label: '+30s',
                             onPressed: () => _addTime(30),
-                            color: Colors.green.shade400,
+                            color: AppColors.success,
                           ),
                         ],
                       ),
@@ -543,30 +545,30 @@ class _RestTimerState extends State<RestTimer>
                               icon: const Icon(Icons.check_circle, size: 20),
                               label: const Text('Ready for Next Set'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
+                                backgroundColor: AppColors.primaryOrange,
+                                foregroundColor: AppColors.textPrimary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                elevation: 2,
+                                elevation: 0,
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(width: 12),
-                          
+
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: widget.onSkip,
-                              icon: const Icon(Icons.skip_next, size: 20),
-                              label: const Text('Skip Rest'),
+                              icon: const Icon(Icons.skip_next, size: 20, color: AppColors.textSecondary),
+                              label: const Text('Skip Rest', style: TextStyle(color: AppColors.textSecondary)),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                side: BorderSide(color: Colors.grey.shade400),
+                                side: BorderSide(color: AppColors.textSecondary.withOpacity(0.3)),
                               ),
                             ),
                           ),
@@ -579,16 +581,16 @@ class _RestTimerState extends State<RestTimer>
                           margin: const EdgeInsets.only(top: 12),
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
+                            color: AppColors.info.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue.shade200),
+                            border: Border.all(color: AppColors.info.withOpacity(0.5)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.refresh,
-                                color: Colors.blue.shade600,
+                                color: AppColors.info,
                                 size: 16,
                               ),
                               const SizedBox(width: 4),
@@ -596,7 +598,7 @@ class _RestTimerState extends State<RestTimer>
                                 'Timer continues in background',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.blue.shade700,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ],
@@ -624,10 +626,10 @@ class _RestTimerState extends State<RestTimer>
       children: [
         Container(
           decoration: BoxDecoration(
-            color: onPressed != null ? color.withOpacity(0.1) : Colors.grey.shade100,
+            color: onPressed != null ? color.withOpacity(0.1) : AppColors.backgroundElevated,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: onPressed != null ? color.withOpacity(0.3) : Colors.grey.shade300,
+              color: onPressed != null ? color.withOpacity(0.3) : AppColors.textSecondary.withOpacity(0.3),
               width: isMainAction ? 2 : 1,
             ),
           ),
@@ -640,7 +642,7 @@ class _RestTimerState extends State<RestTimer>
                 padding: const EdgeInsets.all(16),
                 child: Icon(
                   icon,
-                  color: onPressed != null ? color : Colors.grey.shade400,
+                  color: onPressed != null ? color : AppColors.textDisabled,
                   size: isMainAction ? 28 : 24,
                 ),
               ),
@@ -653,7 +655,7 @@ class _RestTimerState extends State<RestTimer>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: onPressed != null ? color : Colors.grey.shade400,
+            color: onPressed != null ? color : AppColors.textDisabled,
           ),
         ),
       ],

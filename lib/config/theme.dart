@@ -3,6 +3,34 @@ import 'package:flutter/material.dart';
 /// Sistema de Design Centralizado - Built With Science
 /// Referência: estilo dark premium fitness (Coach Sandow)
 /// Paleta: Preto + Laranja vibrante
+
+/// Classe de acesso rápido às cores do app
+class AppColors {
+  // Backgrounds
+  static const Color backgroundPrimary = Color(0xFF1A1A1A);
+  static const Color cardBackground = Color(0xFF2D2D2D);
+  static const Color backgroundElevated = Color(0xFF3A3A3A);
+
+  // Cor de destaque (Brand)
+  static const Color primaryOrange = Color(0xFFFF6B00);
+  static const Color primaryOrangeHover = Color(0xFFFF8C00);
+
+  // Textos
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF9CA3AF);
+  static const Color textDisabled = Color(0xFF6B7280);
+
+  // Status e Feedback
+  static const Color success = Color(0xFF22C55E);
+  static const Color error = Color(0xFFEF4444);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color info = Color(0xFF3B82F6);
+
+  // Bordas e Divisores
+  static const Color borderColor = Color(0xFF4A4A4A);
+  static const Color dividerColor = Color(0xFF333333);
+}
+
 class AppTheme {
   // ========================================
   // 🎨 PALETA DE CORES
