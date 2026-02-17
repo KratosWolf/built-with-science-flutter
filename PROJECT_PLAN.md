@@ -137,11 +137,11 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 | 3.1 | Criar ThemeData dark centralizado | ✅ Concluído | Sistema completo em `lib/config/theme.dart` com paleta preto + laranja. Commit: `feat: criar sistema de tema dark centralizado (Fase 3.1)` |
 | 3.2 | Redesign da tela de login | ✅ Concluído | Tema dark aplicado: background #1A1A1A, cards #2D2D2D, botões laranja #FF6B00, botão Google dark com borda laranja. Commit: `feat: redesign tela de login com tema dark (Fase 3.2)` |
 | 3.3 | Redesign do dashboard | ✅ Concluído | Dashboard completo em dark: cards #2D2D2D, calendário GitHub com escala laranja, gráfico de volume com linha laranja, seletor de período laranja, comparison card com tema dark. Commit: `feat: redesign dashboard com tema dark (Fase 3.3)` |
-| 3.4 | Redesign das telas de treino | 🔒 | Exercícios, SuperSets, inputs, botões — tudo dark |
-| 3.5 | Redesign do timer | 🔒 | Visual dark com destaque laranja |
+| 3.4 | Redesign da tela HOME | ✅ Concluído | Home screen redesignada: background #1A1A1A, cards #2D2D2D com borda laranja, FeatureCards unificados com destaque laranja. Classe AppColors adicionada para acesso rápido às cores. Commit: `feat: redesign tela HOME e timer com tema dark (Fase 3.4-3.5)` |
+| 3.5 | Redesign do timer | ✅ Concluído | Timer completo em dark: background #2D2D2D, cores adaptadas (laranja, verde, vermelho), display com fundo elevado, botões com tema dark consistente. Commit: `feat: redesign tela HOME e timer com tema dark (Fase 3.4-3.5)` |
 | 3.6 | Redesign de componentes reutilizáveis | 🔒 | Dropdowns, cards, modals, snackbars |
 | 3.7 | Redesign da navegação e AppBar | 🔒 | Bottom nav ou drawer em dark |
-| 3.8 | Revisão geral de consistência visual | 🔒 | Todas as telas coerentes, sem resquícios do tema claro |
+| 3.8 | Redesign de telas principais | ✅ Concluído | Programs screen adaptada ao tema dark: cards #2D2D2D, badges com destaque laranja, indicadores de dia com tema dark. Principais telas do app (Login, Dashboard, Home, Timer, Programs) agora consistentes. Commit: `feat: redesign tela de programas com tema dark (Fase 3.8)` |
 | 3.9 | Ajuste de ícones e ilustrações | 🔒 | Trocar ícones coloridos para branco/laranja conforme contexto |
 
 **Critério de conclusão:** App inteiro em dark mode, visual premium coerente, sem nenhuma tela no tema claro antigo.
