@@ -390,9 +390,9 @@ class SettingsSection extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: AppTheme.primaryOrange),
-      title: const Text(
+      title: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontWeight: FontWeight.w500,
           color: AppTheme.textPrimary,
         ),

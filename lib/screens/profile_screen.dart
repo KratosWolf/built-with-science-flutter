@@ -116,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Consumer<ThemeService>(
                       builder: (context, themeService, child) => Container(
                         width: double.infinity,
-                        padding: const EdgeIntml:parameter>
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppTheme.backgroundCard,
                           borderRadius: BorderRadius.circular(16),
