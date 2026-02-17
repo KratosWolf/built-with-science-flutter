@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/workout_models.dart';
 import '../data/mock_data.dart';
+import '../config/theme.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -33,10 +34,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundPrimary,
       appBar: AppBar(
         title: const Text('Choose Your Program'),
+        backgroundColor: AppColors.cardBackground,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -50,7 +53,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                 'Select a science-based workout program that fits your schedule and goals.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -71,9 +74,14 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 16),
-                                elevation: 3,
+                                color: AppColors.cardBackground,
+                                elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: AppColors.primaryOrange.withOpacity(0.3),
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(20),
@@ -88,6 +96,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                             style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary,
                                             ),
                                           ),
                                           Container(
@@ -96,13 +105,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                               vertical: 6,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.blue.shade100,
+                                              color: AppColors.primaryOrange.withOpacity(0.2),
                                               borderRadius: BorderRadius.circular(20),
                                             ),
                                             child: Text(
                                               '${programDays.length} days',
-                                              style: TextStyle(
-                                                color: Colors.blue.shade800,
+                                              style: const TextStyle(
+                                                color: AppColors.primaryOrange,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 12,
                                               ),
@@ -115,8 +124,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                       
                                       Text(
                                         program.description ?? _getProgramDescription(program.id),
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
+                                        style: const TextStyle(
+                                          color: AppColors.textSecondary,
                                           fontSize: 14,
                                         ),
                                       ),
@@ -133,7 +142,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                                 width: 24,
                                                 height: 24,
                                                 decoration: BoxDecoration(
-                                                  color: Colors.grey.shade200,
+                                                  color: AppColors.primaryOrange.withOpacity(0.2),
                                                   borderRadius: BorderRadius.circular(12),
                                                 ),
                                                 child: Center(
@@ -142,6 +151,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                                     style: const TextStyle(
                                                       fontSize: 12,
                                                       fontWeight: FontWeight.bold,
+                                                      color: AppColors.primaryOrange,
                                                     ),
                                                   ),
                                                 ),
@@ -150,9 +160,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                               Expanded(
                                                 child: Text(
                                                   day.dayName,
-                                                  style: TextStyle(
+                                                  style: const TextStyle(
                                                     fontSize: 14,
-                                                    color: Colors.grey.shade700,
+                                                    color: AppColors.textSecondary,
                                                   ),
                                                 ),
                                               ),
@@ -207,9 +217,14 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               
               // Bottom info card
               Card(
-                elevation: 2,
+                color: AppColors.cardBackground,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: AppColors.primaryOrange.withOpacity(0.3),
+                    width: 1,
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
@@ -220,15 +235,16 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      const Text(
                         'All programs are designed based on scientific research for optimal muscle growth, strength development, and recovery. Each exercise includes multiple variations with video tutorials.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
