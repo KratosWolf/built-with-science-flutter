@@ -129,22 +129,29 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 
 ### FASE 3 — Redesign Visual (Dark Mode)
 **Objetivo:** Transformar o visual do app para tema dark premium com laranja como cor de destaque.
-**Status:** 🔄 Em andamento — iniciada em 16/02/2026
+**Status:** 🔄 Em andamento — iniciada em 16/02/2026 | Versão estável: commit 9039540
 **Prazo estimado:** 3-5 sessões de Claude Code
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
 | 3.1 | Criar ThemeData dark centralizado | ✅ Concluído | Sistema completo em `lib/config/theme.dart` com paleta preto + laranja. Commit: `feat: criar sistema de tema dark centralizado (Fase 3.1)` |
 | 3.2 | Redesign da tela de login | ✅ Concluído | Tema dark aplicado: background #1A1A1A, cards #2D2D2D, botões laranja #FF6B00, botão Google dark com borda laranja. Commit: `feat: redesign tela de login com tema dark (Fase 3.2)` |
-| 3.3 | Redesign do dashboard | ✅ Concluído | Dashboard completo em dark: cards #2D2D2D, calendário GitHub com escala laranja, gráfico de volume com linha laranja, seletor de período laranja, comparison card com tema dark. Commit: `feat: redesign dashboard com tema dark (Fase 3.3)` |
-| 3.4 | Redesign da tela HOME | ✅ Concluído | Home screen redesignada: background #1A1A1A, cards #2D2D2D com borda laranja, FeatureCards unificados com destaque laranja. Classe AppColors adicionada para acesso rápido às cores. Commit: `feat: redesign tela HOME e timer com tema dark (Fase 3.4-3.5)` |
-| 3.5 | Redesign do timer | ✅ Concluído | Timer completo em dark: background #2D2D2D, cores adaptadas (laranja, verde, vermelho), display com fundo elevado, botões com tema dark consistente. Commit: `feat: redesign tela HOME e timer com tema dark (Fase 3.4-3.5)` |
-| 3.6 | Redesign de componentes reutilizáveis | 🔒 | Dropdowns, cards, modals, snackbars |
-| 3.7 | Redesign da navegação e AppBar | 🔒 | Bottom nav ou drawer em dark |
-| 3.8 | Redesign de telas principais | ✅ Concluído | Programs screen adaptada ao tema dark: cards #2D2D2D, badges com destaque laranja, indicadores de dia com tema dark. Principais telas do app (Login, Dashboard, Home, Timer, Programs) agora consistentes. Commit: `feat: redesign tela de programas com tema dark (Fase 3.8)` |
-| 3.9 | Ajuste de ícones e ilustrações | 🔒 | Trocar ícones coloridos para branco/laranja conforme contexto |
+| 3.3 | Redesign do dashboard | ✅ Concluído | Dashboard completo em dark: cards #2D2D2D, calendário GitHub com escala laranja, gráfico de volume com linha laranja, seletor de período laranja, comparison card com tema dark. Widgets: `personal_records_card.dart`, `weekly_goal_card.dart` convertidos. Commit: `feat: redesign dashboard com tema dark (Fase 3.3)` |
+| 3.4 | Redesign de telas de treino | ✅ PARCIAL | **CONCLUÍDO:** `workout_screen.dart`, `workout_tracking_screen.dart`, `exercise_tracking_widget.dart`, `superset_tracking_widget.dart` — todos com tema dark. **PENDENTE:** `simple_home.dart` (visual antigo azul) precisa redesign cuidadoso. Commit base: `9039540` |
+| 3.5 | Redesign do timer | ✅ Concluído | Timer completo em dark: background #2D2D2D, cores adaptadas (laranja, verde, vermelho), display com fundo elevado, botões com tema dark consistente. Arquivo: `rest_timer.dart` |
+| 3.6 | Redesign de componentes reutilizáveis | ✅ Concluído | Widgets principais convertidos para AppTheme: dropdowns, cards de workout, modals de exercício. Uso consistente de `AppTheme.backgroundCard`, `AppTheme.primaryOrange`, etc. |
+| 3.7 | Redesign da navegação e AppBar | ✅ PARCIAL | Navegação adaptada ao tema dark. **PENDENTE:** AppBar azul na tela "3-day Program" precisa fix para usar `AppTheme.backgroundPrimary` |
+| 3.8 | Redesign de telas principais | ✅ Concluído | `programs_screen.dart` adaptada ao tema dark: cards #2D2D2D, badges com destaque laranja, indicadores de dia com tema dark. Commit: `feat: redesign tela de programas com tema dark (Fase 3.8)` |
+| 3.9 | Ajuste de ícones e ilustrações | ✅ Concluído | Ícones atualizados para branco/laranja conforme contexto. Uso de `color: AppTheme.primaryOrange` e `color: AppTheme.textPrimary` consistente |
+| 3.10 | **BLOQUEIO ATUAL** | ❌ Pendente | **PROBLEMA:** Commits fc49d22 e e1d0f60 (tentativas de fix na Home) quebraram o app. Reset feito para 9039540 (versão estável). `simple_home.dart` precisa redesign sem quebrar funcionalidades. APK estável: `app-v5.10-stable-20260216-2234.apk` |
 
 **Critério de conclusão:** App inteiro em dark mode, visual premium coerente, sem nenhuma tela no tema claro antigo.
+
+**⚠️ ATENÇÃO:**
+- **Versão estável atual:** commit `9039540` - "feat: Fase 3 - Conversão completa para dark mode com AppTheme"
+- **Arquivo problemático:** `lib/screens/simple_home.dart` — ainda com visual antigo (azul), precisa redesign cuidadoso
+- **AppBar azul:** Tela "3-day Program" precisa fix no AppBar
+- **NÃO fazer:** `flutter clean` sem testar build completo antes — pode introduzir regressões
 
 #### Paleta de Cores Definida
 
@@ -282,9 +289,10 @@ Flutter-Mobile-Version/
 - Warnings de deprecated APIs (withOpacity, etc) - não bloqueantes
 
 ### 🔮 Roadmap
-- **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA)
-- **Fase 3:** 🔄 Redesign Visual Dark Mode (EM ANDAMENTO - 3.1 concluído)
-- **Fase 4:** iOS
+- **Fase 1:** ✅ Arrumar a Casa (CONCLUÍDA - 16/02/2026)
+- **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA - 16/02/2026)
+- **Fase 3:** 🔄 Redesign Visual Dark Mode (EM ANDAMENTO - 90% completo, pendente: simple_home.dart + AppBar fix)
+- **Fase 4:** 🔒 iOS (bloqueado até Fase 3 completa)
 - Xcode não configurado (iOS bloqueado até Fase 4)
 
 ---
@@ -298,5 +306,7 @@ Flutter-Mobile-Version/
 | 16/02/2026 | Planejamento | Auditoria completa + plano de melhoria | Retomar desenvolvimento ativo |
 | 16/02/2026 | Planejamento | CLAUDE.md e PROJECT_PLAN.md criados | Preparar para Claude Code |
 | 16/02/2026 | Fase 1 ✅ | Limpeza completa do projeto | Segurança (google-services.json removido), Git limpo, Flutter 3.41.1, dependências atualizadas, print() removidos, build funcional |
-| 16/02/2026 | Fase 2 ✅ | Correções SuperSet completas | Timer corrigido (só no final), campo de comentários adicionado, dados anteriores carregados automaticamente, som + vibração no timer. 5 commits: fix timer interno, feat comentários, feat dados anteriores, feat som timer, fix timer final |
-| 16/02/2026 | Fase 3 🔄 | Iniciado redesign dark mode (3.1) | Sistema de tema dark centralizado criado com paleta preto + laranja (#1A1A1A + #FF6B00). Todas cores, tipografia e componentes definidos em `lib/config/theme.dart`. Commit: feat tema centralizado |
+| 16/02/2026 | Fase 2 ✅ | Correções SuperSet completas | Timer corrigido (só no final), campo de comentários adicionado, dados anteriores carregados automaticamente, som + vibração no timer. 5 commits |
+| 16/02/2026 | Fase 3 🔄 | Redesign dark mode 90% completo | Login, Dashboard (com widgets), Workout screens, Timer, Programs, Widgets convertidos. Sistema AppTheme centralizado (#1A1A1A + #FF6B00). Commit base estável: `9039540` |
+| 16/02/2026 | Fase 3 🔄 | Reset para commit 9039540 | Tentativas de fix na Home (commits fc49d22, e1d0f60) quebraram funcionalidades. Revertido para versão estável. APK gerado: `app-v5.10-stable-20260216-2234.apk` |
+| 16/02/2026 | Fase 3 🔄 | Documentação atualizada | CLAUDE.md e PROJECT_PLAN.md refletem estado real: 90% dark mode completo, `simple_home.dart` pendente, AppBar azul precisa fix |

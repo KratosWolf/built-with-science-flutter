@@ -68,21 +68,30 @@ Só prossiga quando TODOS os itens estiverem ✅.
 > Detalhamento completo em PROJECT_PLAN.md
 > ⚠️ ESTE É UM PROJETO EXISTENTE EM MELHORIA, NÃO UM PROJETO NOVO.
 
-### FASE 1 — Arrumar a Casa ⬅️ FASE ATUAL
+### FASE 1 — Arrumar a Casa ✅ CONCLUÍDA (16/02/2026)
 **Objetivo:** Resolver segurança, limpar Git, atualizar dependências.
-- [ ] 1.1 Remover google-services.json do Git + .gitignore
-- [ ] 1.2 Commit das alterações pendentes (14 arquivos)
-- [ ] 1.3 Criar branch develop a partir da main limpa
-- [ ] 1.4 Atualizar dependências Flutter
-- [ ] 1.5 Remover print() de produção
-- [ ] 1.6 Limpar arquivos backup e APKs antigos
-- [ ] 1.7 Verificar build funcional
+- ✅ Git limpo, sem credenciais expostas
+- ✅ Flutter 3.41.1, dependências atualizadas
+- ✅ Build funcional (55.5MB)
 
-**NÃO inclui:** Mudanças de funcionalidade, redesign, iOS.
+### FASE 2 — Correções SuperSet ✅ CONCLUÍDA (16/02/2026)
+**Objetivo:** Corrigir bugs do SuperSet (timer, comentários, dados anteriores, som)
+- ✅ Timer só no final do SuperSet
+- ✅ Campo de comentários adicionado
+- ✅ Dados anteriores carregados automaticamente
+- ✅ Som + vibração no timer
 
-### FASE 2 — Correções SuperSet | 🔒 Bloqueada
-### FASE 3 — Redesign Visual (Dark Mode) | 🔒 Bloqueada
-### FASE 4 — iOS | 🔒 Bloqueada
+### FASE 3 — Redesign Visual (Dark Mode) ⬅️ FASE ATUAL (🔄 em andamento)
+**Objetivo:** Converter app para tema dark premium (preto + laranja)
+- ✅ 3.1-3.3: Theme centralizado, Login, Dashboard
+- ✅ 3.4-3.5: Workout screens, Timer (PARCIAL - Home pendente)
+- ✅ 3.6: Widgets convertidos para AppTheme
+- ✅ 3.8: Programs screen
+- ✅ 3.9: Ícones atualizados
+- ❌ PENDENTE: simple_home.dart (visual antigo)
+- ❌ PENDENTE: AppBar azul na tela "3-day Program"
+
+### FASE 4 — iOS | 🔒 Bloqueada até Fase 3 completa
 
 ---
 
@@ -144,6 +153,8 @@ Flutter-Mobile-Version/
 | 16/02/2026 | Dark mode only (sem light) | Preferência do Tiago, referência visual premium |
 | 16/02/2026 | Paleta: preto + laranja | Referência: app Coach Sandow, estilo fitness premium |
 | 16/02/2026 | SuperSet sem timer interno | Conceito correto: sem descanso entre A1↔A2, só após completar rodada |
+| 16/02/2026 | Reset para commit 9039540 | Tentativas de fix na Home (commits fc49d22, e1d0f60) quebraram o app — revertido para versão estável dark mode |
+| 16/02/2026 | simple_home.dart pendente | Redesign da Home precisa ser feito com cuidado — testar antes de commit |
 
 ---
 
