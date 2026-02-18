@@ -10,7 +10,7 @@
 - **Nome do Projeto:** Built With Science
 - **Descrição:** App de workout tracking baseado nos programas do Built With Science (Jeremy Ethier). Permite acompanhar treinos com SuperSets, registrar peso/repetições/dificuldade, ver progressão e manter consistência.
 - **Tipo:** mobile-app
-- **Tech Stack Principal:** Flutter 3.24.5 + Dart 3.5.4 + Supabase + SQLite local
+- **Tech Stack Principal:** Flutter 3.41.1 + Dart 3.11.0 + Supabase + SQLite local
 - **Repositório:** https://github.com/KratosWolf/built-with-science-flutter
 - **Dono do Projeto:** Tiago (empreendedor, perfil estratégico, não-técnico)
 
