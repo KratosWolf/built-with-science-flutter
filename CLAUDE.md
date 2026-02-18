@@ -61,6 +61,13 @@ Só prossiga quando TODOS os itens estiverem ✅.
 - Branches: `main` (produção) → `develop` (desenvolvimento) → `feature/nome`
 - NUNCA faça push direto na `main` após a Fase 1.
 
+### Regra 6: Atomicidade de Tasks
+- Cada task deve caber em uma sessão do Claude Code (~50% do contexto).
+- Se uma task envolve mais de 5-7 arquivos ou precisa de mais de 10 trocas de mensagem, é grande demais.
+- Tasks grandes devem ser quebradas em subtasks (ex: 2.3a, 2.3b, 2.3c) ANTES de começar a codar.
+- Cada subtask deve ter seus próprios critérios de done e poder ser commitada independentemente.
+- Na dúvida: se ao começar você pensa "isso vai ser longo", PARE e quebre.
+
 ---
 
 ## 📋 FASES DO PROJETO (resumo)
@@ -99,6 +106,9 @@ Só prossiga quando TODOS os itens estiverem ✅.
 
 ```
 Flutter-Mobile-Version/
+├── .claude/
+│   ├── settings.json      ← Configurações do Claude Code (hooks, etc.)
+│   └── skills/            ← Skills customizadas (14 configuradas)
 ├── CLAUDE.md              ← Este arquivo (lido automaticamente)
 ├── PROJECT_PLAN.md        ← Plano detalhado com fases
 ├── README.md              ← Documentação pública
@@ -188,6 +198,40 @@ Componentes:
 
 ---
 
+## 📦 Skills Disponíveis
+As skills em `.claude/skills/` são carregadas automaticamente quando relevantes.
+Para ver todas: listar a pasta `.claude/skills/`.
+
+### Skills Configuradas neste Projeto
+| Skill | Função | Quando usar |
+|-------|--------|-------------|
+| **session-workflow** | Workflow de sessão no Claude Code | Ao iniciar nova sessão, trocar de tarefa, quando contexto ficar grande, ou planejar antes de codar |
+| **code-cleanup** | Limpeza sistemática de código | Depois de auditoria, antes de nova fase, quando acumulou débito técnico |
+| **code-review** | Padrões de código e checklist de code review | Antes de merge, ao finalizar fase, quando pedir review de qualidade |
+| **git-workflow** | Regras e convenções de Git | Ao fazer commits, criar branches, push, merge, ou configurar Git em projeto novo |
+| **database-migration** | Processo seguro para alterações de schema no banco | Ao renomear colunas, adicionar/remover campos, alterar tabelas, migrar dados |
+| **secret-scan** | Verificação de secrets e credenciais no código | SEMPRE antes de git add/commit, ao criar/editar configs ou arquivos com API keys |
+| **project-audit** | Auditoria completa de projeto existente | Ao retomar projeto antigo, antes de planejar melhorias, quando não sabe estado atual |
+| **dependency-update** | Processo seguro para atualizar dependências | Depois de auditoria, antes de nova fase, quando há vulnerabilidade, periodicamente |
+| **supabase-setup** | Convenções de Supabase, criação de tabelas, RLS | Ao criar tabelas, alterar schema, configurar auth, escrever policies RLS |
+| **troubleshooting** | Diagnóstico e resolução de problemas comuns | Quando build quebrar, funcionalidade parar, dados sumirem, ou erro inesperado |
+| **project-setup** | Setup inicial de projeto novo | Ao criar projeto do zero (não aplicável a este projeto existente) |
+| **pre-launch** | Checklist pré-lançamento | Antes de deploy para produção (Fase 4+) |
+| **mcp-setup** | Configuração de MCP servers | Ao adicionar novos MCP servers ao Claude Code |
+| **handoff-sync** | Sincronização de conhecimento entre sessões | Ao transferir contexto, atualizar Knowledge Base, ou documentar decisões |
+
+---
+
+## 🪝 Hooks Configurados
+> Hooks em `.claude/settings.json` — executam automaticamente.
+> Se não há hooks configurados, manter esta seção vazia como referência.
+
+| Evento | O que faz |
+|--------|-----------|
+| (nenhum configurado ainda) | — |
+
+---
+
 ## 🆘 QUANDO ALGO DER ERRADO
 
 1. **NÃO** tente resolver silenciosamente refazendo tudo.
@@ -208,9 +252,10 @@ Componentes:
 
 ## Workflow por Sessão
 1. Ler `PROJECT_PLAN.md` → identificar próxima tarefa
-2. **Plan Mode** (Shift+Tab 2x) → planejar antes de codar
-3. Implementar a tarefa
-4. Testar (`flutter analyze` + teste manual)
-5. Commit → push para develop
-6. Atualizar status no `PROJECT_PLAN.md`
-7. Se contexto ficar grande → `/clear` e retomar
+2. **Avaliar tamanho:** cabe em ~50% do contexto? Se não, quebrar (Regra 6)
+3. **Plan Mode** (Shift+Tab 2x) → planejar antes de codar
+4. Implementar a tarefa
+5. Testar (`flutter analyze` + teste manual)
+6. Commit → push para develop
+7. Atualizar status no `PROJECT_PLAN.md`
+8. Se contexto ficar grande → `/clear` e retomar
