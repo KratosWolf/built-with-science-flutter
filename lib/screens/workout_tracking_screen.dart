@@ -441,7 +441,11 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     } else {
       _completedSets[exerciseId]!.add(correctedSetData);
     }
-    
+
+    // Atualizar UI para refletir os novos dados nos widgets filhos
+    // (SupersetTrackingWidget e ExerciseTrackingWidget dependem de _completedSets)
+    setState(() {});
+
     // Salvar no cache local com mais detalhes - sempre em português
     final cacheKey = 'last_workout_${widget.programId}_${widget.dayId}_$exerciseId';
     final setStrings = _completedSets[exerciseId]!

@@ -52,9 +52,10 @@ class BackgroundTimerService {
   /// Som + Vibração ao completar timer
   static Future<void> _onTimerComplete() async {
     try {
-      // 1. Tocar som de notificação
+      // 1. Tocar som de alarme (toca MESMO com celular no mudo/vibrar)
+      // AndroidSounds.alarm usa o canal de alarme, assim como o despertador
       await FlutterRingtonePlayer().play(
-        android: AndroidSounds.notification,
+        android: AndroidSounds.alarm,
         ios: IosSounds.glass,
         looping: false,
         volume: 1.0,
