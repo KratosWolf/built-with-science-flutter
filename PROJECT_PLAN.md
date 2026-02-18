@@ -143,7 +143,11 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 | 3.7 | Redesign da navegação e AppBar | ✅ PARCIAL | Navegação adaptada ao tema dark. **PENDENTE:** AppBar azul na tela "3-day Program" precisa fix para usar `AppTheme.backgroundPrimary` |
 | 3.8 | Redesign de telas principais | ✅ Concluído | `programs_screen.dart` adaptada ao tema dark: cards #2D2D2D, badges com destaque laranja, indicadores de dia com tema dark. Commit: `feat: redesign tela de programas com tema dark (Fase 3.8)` |
 | 3.9 | Ajuste de ícones e ilustrações | ✅ Concluído | Ícones atualizados para branco/laranja conforme contexto. Uso de `color: AppTheme.primaryOrange` e `color: AppTheme.textPrimary` consistente |
-| 3.10 | **BLOQUEIO ATUAL** | ❌ Pendente | **PROBLEMA:** Commits fc49d22 e e1d0f60 (tentativas de fix na Home) quebraram o app. Reset feito para 9039540 (versão estável). `simple_home.dart` precisa redesign sem quebrar funcionalidades. APK estável: `app-v5.10-stable-20260216-2234.apk` |
+| 3.10 | simple_home.dart redesign | ✅ Concluído | Já estava convertido — descoberto na análise de 18/02 |
+| 3.11 | Bug: SuperSet não atualizava UI após salvar set | ✅ Concluído | Causa: missing setState() em _saveSetData. Fix: setState após atualizar _completedSets. Commit 36ef0cd |
+| 3.12 | Alerta sonoro funcionar com celular no mudo | ✅ Concluído | Trocado canal notification→alarm. Commit 36ef0cd |
+| 3.13 | AppBar azul no program_detail_screen.dart | ⬜ Pendente | Última pendência visual |
+| 3.14 | Limpar azuis hardcoded (6 arquivos) | ⬜ Pendente | Polish antes de merge |
 
 **Critério de conclusão:** App inteiro em dark mode, visual premium coerente, sem nenhuma tela no tema claro antigo.
 
@@ -310,3 +314,6 @@ Flutter-Mobile-Version/
 | 16/02/2026 | Fase 3 🔄 | Redesign dark mode 90% completo | Login, Dashboard (com widgets), Workout screens, Timer, Programs, Widgets convertidos. Sistema AppTheme centralizado (#1A1A1A + #FF6B00). Commit base estável: `9039540` |
 | 16/02/2026 | Fase 3 🔄 | Reset para commit 9039540 | Tentativas de fix na Home (commits fc49d22, e1d0f60) quebraram funcionalidades. Revertido para versão estável. APK gerado: `app-v5.10-stable-20260216-2234.apk` |
 | 16/02/2026 | Fase 3 🔄 | Documentação atualizada | CLAUDE.md e PROJECT_PLAN.md refletem estado real: 90% dark mode completo, `simple_home.dart` pendente, AppBar azul precisa fix |
+| 18/02/2026 | Fase 3 🔄 | Bug SuperSet: UI não atualizava após save | Descoberto missing setState() em _saveSetData. Fix aplicado — dados agora aparecem imediatamente. Commit: 36ef0cd |
+| 18/02/2026 | Fase 3 🔄 | Som do timer no mudo | Canal notification→alarm — agora toca mesmo com celular no mudo/vibrar. Commit: 36ef0cd |
+| 18/02/2026 | Fase 3 🔄 | simple_home.dart verificado | Análise revelou que conversão dark mode já estava completa — task 3.10 não era necessária |

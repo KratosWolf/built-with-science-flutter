@@ -165,6 +165,9 @@ Flutter-Mobile-Version/
 | 16/02/2026 | SuperSet sem timer interno | Conceito correto: sem descanso entre A1↔A2, só após completar rodada |
 | 16/02/2026 | Reset para commit 9039540 | Tentativas de fix na Home (commits fc49d22, e1d0f60) quebraram o app — revertido para versão estável dark mode |
 | 16/02/2026 | simple_home.dart pendente | Redesign da Home precisa ser feito com cuidado — testar antes de commit |
+| 18/02/2026 | Bug SuperSet: missing setState() | UI não atualizava após save — dados estavam corretos no cache mas widget não reconstruía |
+| 18/02/2026 | Som no mudo: canal alarm | AndroidSounds.alarm toca mesmo no silencioso (igual despertador) |
+| 18/02/2026 | simple_home.dart já convertido | Análise revelou que conversão dark mode já tinha sido feita — task 3.10 não era necessária |
 
 ---
 
