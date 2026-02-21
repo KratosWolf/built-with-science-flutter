@@ -146,7 +146,7 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         _difficulties['A']![set.setNumber] = set.difficulty ?? 'Perfeito';
       }
     }
-    
+
     // Carregar dados do exercício B
     for (final set in widget.completedSetsB) {
       if (set.setNumber <= 3) {
@@ -154,6 +154,18 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         _repsControllers['B']![set.setNumber]!.text = set.reps?.toString() ?? '';
         _difficulties['B']![set.setNumber] = set.difficulty ?? 'Perfeito';
       }
+    }
+  }
+
+  @override
+  void didUpdateWidget(SupersetTrackingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Recarregar dados dos controllers quando completedSets mudam
+    if (oldWidget.completedSetsA != widget.completedSetsA ||
+        oldWidget.completedSetsB != widget.completedSetsB) {
+      _loadCompletedData();
+      debugPrint('🔄 SuperSet: dados recarregados após mudança de props');
     }
   }
 
