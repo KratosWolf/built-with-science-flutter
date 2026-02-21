@@ -95,6 +95,77 @@ class MockData {
     
     // Exercício adicional
     Exercise(id: 51, name: "Seated Flat Cable Press", sets: 3, repsTarget: "8-10"),
+
+    // ======================================
+    // EXERCÍCIOS DOS PROGRAMAS 4-DAY E 5-DAY
+    // ======================================
+
+    // 4-DAY PROGRAM
+    // Upper 1
+    Exercise(id: 52, name: "Dumbbell Fly", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/WRn2hqy0gXU"),
+    Exercise(id: 53, name: "Flat Dumbbell Press", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/g14dhC5KYBM"),
+    Exercise(id: 54, name: "Lat Pulldown", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "6-12", youtubeUrl: "https://youtu.be/AvYZZhEl7Xk"),
+    Exercise(id: 55, name: "SUPERSET A", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/3D56VDVkQnM", isSuperset: true, supersetPairId: 1),
+    Exercise(id: 56, name: "Seated Cable Row (mid/upper back)", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "10-12", youtubeUrl: "https://youtu.be/Q-5V5T55giY"),
+    Exercise(id: 57, name: "Seated Dumbbell Shoulder Press", day: "Upper 1", program: "4-day", sets: 3, repsTarget: "6-8", youtubeUrl: "https://youtu.be/DPXG3BJvl8A"),
+    Exercise(id: 58, name: "Standing Face Pulls", day: "Upper 1", program: "4-day", sets: 2, repsTarget: "10", youtubeUrl: "https://youtu.be/02g7XtSRXug"),
+
+    // Lower 1 (Quad Focus)
+    Exercise(id: 59, name: "Barbell Back Squat", day: "Lower 1 (Quad Focus)", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/AWo-q7P-HZ0"),
+    Exercise(id: 60, name: "Standing Weighted Calf Raise", day: "Lower 1 (Quad Focus)", program: "4-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/q2Eigaa9dKU"),
+    Exercise(id: 61, name: "Walking Lunges (quad focus)", day: "Lower 1 (Quad Focus)", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/JB20RuTOaFc"),
+
+    // Upper 2
+    Exercise(id: 62, name: "Cable Lateral Raise", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "15-20", youtubeUrl: "https://youtu.be/1muit9qEctY"),
+    Exercise(id: 63, name: "Flat Dumbbell Press", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/g14dhC5KYBM"),
+    Exercise(id: 64, name: "Lat Focused Cable Row", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "10-12", youtubeUrl: "https://youtu.be/ZaEnZ47cDTk"),
+    Exercise(id: 65, name: "Low Incline Dumbbell Press", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/kpzUeELReEA"),
+    Exercise(id: 66, name: "Rear Delt Cable Row", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "12-15", youtubeUrl: "https://youtu.be/k9G7BykDD4o"),
+    Exercise(id: 67, name: "SUPERSET A", day: "Upper 2", program: "4-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/OrGL-ymYREg", isSuperset: true, supersetPairId: 3),
+    Exercise(id: 68, name: "Standing Face Pulls", day: "Upper 2", program: "4-day", sets: 2, repsTarget: "10", youtubeUrl: "https://youtu.be/02g7XtSRXug"),
+
+    // Lower 2 (Glute Focus)
+    Exercise(id: 69, name: "Barbell Hip Thrust", day: "Lower 2 (Glute Focus)", program: "4-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/_vBMijiZoxE"),
+
+    // 5-DAY PROGRAM
+    // Upper
+    Exercise(id: 70, name: "Barbell Bench Press", day: "Upper", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/pCGVSBk0bIQ"),
+    Exercise(id: 71, name: "Barbell Row (lat focus)", day: "Upper", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/tS5lKXxtNvE"),
+    Exercise(id: 72, name: "Dumbbell Lateral Raise", day: "Upper", program: "5-day", sets: 3, repsTarget: "15-20", youtubeUrl: "https://youtu.be/zcO3sgAeLA0"),
+    Exercise(id: 73, name: "Seated Cable Row (mid/upper back)", day: "Upper", program: "5-day", sets: 3, repsTarget: "10-12", youtubeUrl: "https://youtu.be/Q-5V5T55giY"),
+    Exercise(id: 74, name: "Seated Dumbbell Shoulder Press", day: "Upper", program: "5-day", sets: 3, repsTarget: "6-8", youtubeUrl: "https://youtu.be/DPXG3BJvl8A"),
+    Exercise(id: 75, name: "Standing Face Pulls", day: "Upper", program: "5-day", sets: 3, repsTarget: "10", youtubeUrl: "https://youtu.be/02g7XtSRXug"),
+    Exercise(id: 76, name: "Standing High To Low Cable Fly", day: "Upper", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/JfZjng7jAKs"),
+
+    // Lower 1 (Quad Focus)
+    Exercise(id: 77, name: "SUPERSET A", day: "Lower 1 (Quad Focus)", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/Xu4DxwKWzl4", isSuperset: true, supersetPairId: 2),
+    Exercise(id: 78, name: "Side Plank", day: "Lower 1 (Quad Focus)", program: "5-day", sets: 2, repsTarget: "30s", youtubeUrl: "https://youtu.be/o4LGPtKjbhU"),
+    Exercise(id: 79, name: "Single Leg Weighted Calf Raise", day: "Lower 1 (Quad Focus)", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/cRKA_Qdut7I"),
+    Exercise(id: 80, name: "Smith Machine Squat", day: "Lower 1 (Quad Focus)", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/zSVi51Jp3eI"),
+    Exercise(id: 81, name: "Weighted Step-Ups*", day: "Lower 1 (Quad Focus)", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/Cjc3AgmdtlA"),
+
+    // Push
+    Exercise(id: 82, name: "Cable Pushdowns*", day: "Push", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/MlfCS_7ZLXA"),
+    Exercise(id: 83, name: "Dumbbell Fly", day: "Push", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/WRn2hqy0gXU"),
+    Exercise(id: 84, name: "Dumbbell Lateral Raise", day: "Push", program: "5-day", sets: 3, repsTarget: "15-20", youtubeUrl: "https://youtu.be/zcO3sgAeLA0"),
+    Exercise(id: 85, name: "Flat Dumbbell Press", day: "Push", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/g14dhC5KYBM"),
+    Exercise(id: 86, name: "Incline DB Overhead Extensions", day: "Push", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/3d86xMhHROA"),
+    Exercise(id: 87, name: "Low Incline Dumbbell Press", day: "Push", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/kpzUeELReEA"),
+
+    // Pull
+    Exercise(id: 88, name: "Hammer Curls", day: "Pull", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/OrGL-ymYREg"),
+    Exercise(id: 89, name: "Incline Dumbbell Curls", day: "Pull", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/3D56VDVkQnM"),
+    Exercise(id: 90, name: "Kneeling Lat Pulldown", day: "Pull", program: "5-day", sets: 3, repsTarget: "6-12", youtubeUrl: "https://youtu.be/4LxKeTqlpZA"),
+    Exercise(id: 91, name: "Lat Focused Cable Row", day: "Pull", program: "5-day", sets: 3, repsTarget: "10-12", youtubeUrl: "https://youtu.be/ZaEnZ47cDTk"),
+    Exercise(id: 92, name: "Rear Delt Cable Row", day: "Pull", program: "5-day", sets: 3, repsTarget: "12-15", youtubeUrl: "https://youtu.be/k9G7BykDD4o"),
+    Exercise(id: 93, name: "Standing Face Pulls", day: "Pull", program: "5-day", sets: 2, repsTarget: "10", youtubeUrl: "https://youtu.be/02g7XtSRXug"),
+
+    // Lower 2 (Glute Focus)
+    Exercise(id: 94, name: "Barbell Deadlift", day: "Lower 2 (Glute Focus)", program: "5-day", sets: 3, repsTarget: "6-8", youtubeUrl: "https://youtu.be/JL1tJTEmxfw"),
+    Exercise(id: 95, name: "Lying Leg Curls", day: "Lower 2 (Glute Focus)", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/aYy3alWRDmk"),
+    Exercise(id: 96, name: "SUPERSET A", day: "Lower 2 (Glute Focus)", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/CA0ALPgTkxw", isSuperset: true, supersetPairId: 4),
+    Exercise(id: 97, name: "Single-Leg Leg Press", day: "Lower 2 (Glute Focus)", program: "5-day", sets: 3, repsTarget: "8-10", youtubeUrl: "https://youtu.be/hdioTTf8qdw"),
+    Exercise(id: 98, name: "Smith Machine Hip Thrust", day: "Lower 2 (Glute Focus)", program: "5-day", sets: 3, repsTarget: "10-15", youtubeUrl: "https://youtu.be/srYETmyq3_c"),
   ];
 
   // Variações COMPLETAS com URLs reais do Built with Science
@@ -241,6 +312,197 @@ class MockData {
     ExerciseVariation(id: 89, exerciseId: 50, variationIndex: 1, variationName: "Seated Dumbbell Curls", youtubeUrl: "https://youtu.be/qUAzPq4B2aw", isPrimary: true),
     ExerciseVariation(id: 90, exerciseId: 50, variationIndex: 2, variationName: "Standing Cable Curl", youtubeUrl: "https://youtu.be/8Bb-ak2lB8E"),
     ExerciseVariation(id: 91, exerciseId: 50, variationIndex: 3, variationName: "Dumbbell Spider Curls", youtubeUrl: "https://youtu.be/hDDcQkCxHjE"),
+
+    // ======================================
+    // VARIAÇÕES DOS PROGRAMAS 4-DAY E 5-DAY
+    // ======================================
+
+    // Dumbbell Fly (id: 52)
+    ExerciseVariation(id: 103, exerciseId: 52, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/WRn2hqy0gXU", isPrimary: true),
+
+    // Flat Dumbbell Press (id: 53)
+    ExerciseVariation(id: 104, exerciseId: 53, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/g14dhC5KYBM", isPrimary: true),
+
+    // Lat Pulldown (id: 54)
+    ExerciseVariation(id: 105, exerciseId: 54, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/AvYZZhEl7Xk", isPrimary: true),
+
+    // SUPERSET A (id: 55)
+    ExerciseVariation(id: 106, exerciseId: 55, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/3D56VDVkQnM", isPrimary: true),
+    ExerciseVariation(id: 107, exerciseId: 55, variationIndex: 2, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/zcO3sgAeLA0"),
+
+    // Seated Cable Row (mid/upper back) (id: 56)
+    ExerciseVariation(id: 108, exerciseId: 56, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/Q-5V5T55giY", isPrimary: true),
+
+    // Seated Dumbbell Shoulder Press (id: 57)
+    ExerciseVariation(id: 109, exerciseId: 57, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/DPXG3BJvl8A", isPrimary: true),
+
+    // Standing Face Pulls (id: 58)
+    ExerciseVariation(id: 110, exerciseId: 58, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/02g7XtSRXug", isPrimary: true),
+
+    // Barbell Back Squat (id: 59)
+    ExerciseVariation(id: 111, exerciseId: 59, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/AWo-q7P-HZ0", isPrimary: true),
+
+    // Standing Weighted Calf Raise (id: 60)
+    ExerciseVariation(id: 112, exerciseId: 60, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/q2Eigaa9dKU", isPrimary: true),
+
+    // Walking Lunges (quad focus) (id: 61)
+    ExerciseVariation(id: 113, exerciseId: 61, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/JB20RuTOaFc", isPrimary: true),
+
+    // Cable Lateral Raise (id: 62)
+    ExerciseVariation(id: 114, exerciseId: 62, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/1muit9qEctY", isPrimary: true),
+    ExerciseVariation(id: 115, exerciseId: 62, variationIndex: 2, variationName: "https://youtu.be/rnV3y1P7894", youtubeUrl: "https://youtu.be/rnV3y1P7894"),
+    ExerciseVariation(id: 116, exerciseId: 62, variationIndex: 3, variationName: "https://youtu.be/WRn2hqy0gXU", youtubeUrl: "https://youtu.be/WRn2hqy0gXU"),
+    ExerciseVariation(id: 117, exerciseId: 62, variationIndex: 4, variationName: "https://youtu.be/dI7LVElfMOg", youtubeUrl: "https://youtu.be/dI7LVElfMOg"),
+
+    // Flat Dumbbell Press (id: 63)
+    ExerciseVariation(id: 118, exerciseId: 63, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/g14dhC5KYBM", isPrimary: true),
+    ExerciseVariation(id: 119, exerciseId: 63, variationIndex: 2, variationName: "https://youtu.be/kpzUeELReEA", youtubeUrl: "https://youtu.be/kpzUeELReEA"),
+    ExerciseVariation(id: 120, exerciseId: 63, variationIndex: 3, variationName: "https://youtu.be/abc1fisYB3w", youtubeUrl: "https://youtu.be/abc1fisYB3w"),
+    ExerciseVariation(id: 121, exerciseId: 63, variationIndex: 4, variationName: "https://youtu.be/R53nThQcdZo", youtubeUrl: "https://youtu.be/R53nThQcdZo"),
+
+    // Lat Focused Cable Row (id: 64)
+    ExerciseVariation(id: 122, exerciseId: 64, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/ZaEnZ47cDTk", isPrimary: true),
+    ExerciseVariation(id: 123, exerciseId: 64, variationIndex: 2, variationName: "https://youtu.be/LdahU9kB-u0", youtubeUrl: "https://youtu.be/LdahU9kB-u0"),
+    ExerciseVariation(id: 124, exerciseId: 64, variationIndex: 3, variationName: "https://youtu.be/JfZjng7jAKs", youtubeUrl: "https://youtu.be/JfZjng7jAKs"),
+    ExerciseVariation(id: 125, exerciseId: 64, variationIndex: 4, variationName: "https://youtu.be/iv3Uldr7LJc", youtubeUrl: "https://youtu.be/iv3Uldr7LJc"),
+
+    // Low Incline Dumbbell Press (id: 65)
+    ExerciseVariation(id: 126, exerciseId: 65, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/kpzUeELReEA", isPrimary: true),
+    ExerciseVariation(id: 127, exerciseId: 65, variationIndex: 2, variationName: "https://youtu.be/sO8lFa9CidE", youtubeUrl: "https://youtu.be/sO8lFa9CidE"),
+    ExerciseVariation(id: 128, exerciseId: 65, variationIndex: 3, variationName: "https://youtu.be/3Z3C44SXSQE", youtubeUrl: "https://youtu.be/3Z3C44SXSQE"),
+    ExerciseVariation(id: 129, exerciseId: 65, variationIndex: 4, variationName: "https://youtu.be/hPpNTAEDnxM", youtubeUrl: "https://youtu.be/hPpNTAEDnxM"),
+    ExerciseVariation(id: 130, exerciseId: 65, variationIndex: 5, variationName: "https://youtu.be/N-kUwH1uf9c", youtubeUrl: "https://youtu.be/N-kUwH1uf9c"),
+
+    // Rear Delt Cable Row (id: 66)
+    ExerciseVariation(id: 131, exerciseId: 66, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/k9G7BykDD4o", isPrimary: true),
+    ExerciseVariation(id: 132, exerciseId: 66, variationIndex: 2, variationName: "https://youtu.be/6qV1WZ_z0u0", youtubeUrl: "https://youtu.be/6qV1WZ_z0u0"),
+    ExerciseVariation(id: 133, exerciseId: 66, variationIndex: 3, variationName: "https://youtu.be/LdahU9kB-u0", youtubeUrl: "https://youtu.be/LdahU9kB-u0"),
+    ExerciseVariation(id: 134, exerciseId: 66, variationIndex: 4, variationName: "https://youtu.be/fyFVaCP9J-8", youtubeUrl: "https://youtu.be/fyFVaCP9J-8"),
+
+    // SUPERSET A (id: 67)
+    ExerciseVariation(id: 135, exerciseId: 67, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/OrGL-ymYREg", isPrimary: true),
+    ExerciseVariation(id: 136, exerciseId: 67, variationIndex: 2, variationName: "https://youtu.be/S2CNDlAY8kY", youtubeUrl: "https://youtu.be/S2CNDlAY8kY"),
+    ExerciseVariation(id: 137, exerciseId: 67, variationIndex: 3, variationName: "https://youtu.be/-ClfZ00zo8c", youtubeUrl: "https://youtu.be/-ClfZ00zo8c"),
+    ExerciseVariation(id: 138, exerciseId: 67, variationIndex: 4, variationName: "https://youtu.be/0vEzBCydrU0", youtubeUrl: "https://youtu.be/0vEzBCydrU0"),
+    ExerciseVariation(id: 139, exerciseId: 67, variationIndex: 5, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/3d86xMhHROA"),
+
+    // Standing Face Pulls (id: 68)
+    ExerciseVariation(id: 140, exerciseId: 68, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/02g7XtSRXug", isPrimary: true),
+    ExerciseVariation(id: 141, exerciseId: 68, variationIndex: 2, variationName: "https://youtu.be/XgwPiPY4vCI", youtubeUrl: "https://youtu.be/XgwPiPY4vCI"),
+    ExerciseVariation(id: 142, exerciseId: 68, variationIndex: 3, variationName: "https://youtu.be/Fua2QlXnn6Y", youtubeUrl: "https://youtu.be/Fua2QlXnn6Y"),
+    ExerciseVariation(id: 143, exerciseId: 68, variationIndex: 4, variationName: "https://youtu.be/kNvy2_9Ji2w", youtubeUrl: "https://youtu.be/kNvy2_9Ji2w"),
+    ExerciseVariation(id: 144, exerciseId: 68, variationIndex: 5, variationName: "https://youtu.be/FTCmwlfZ29A", youtubeUrl: "https://youtu.be/FTCmwlfZ29A"),
+
+    // Barbell Hip Thrust (id: 69)
+    ExerciseVariation(id: 145, exerciseId: 69, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/_vBMijiZoxE", isPrimary: true),
+    ExerciseVariation(id: 146, exerciseId: 69, variationIndex: 2, variationName: "https://youtu.be/kpzUeELReEA", youtubeUrl: "https://youtu.be/kpzUeELReEA"),
+    ExerciseVariation(id: 147, exerciseId: 69, variationIndex: 3, variationName: "https://youtu.be/abc1fisYB3w", youtubeUrl: "https://youtu.be/abc1fisYB3w"),
+    ExerciseVariation(id: 148, exerciseId: 69, variationIndex: 4, variationName: "https://youtu.be/R53nThQcdZo", youtubeUrl: "https://youtu.be/R53nThQcdZo"),
+
+    // Barbell Bench Press (id: 70)
+    ExerciseVariation(id: 149, exerciseId: 70, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/pCGVSBk0bIQ", isPrimary: true),
+
+    // Barbell Row (lat focus) (id: 71)
+    ExerciseVariation(id: 150, exerciseId: 71, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/tS5lKXxtNvE", isPrimary: true),
+
+    // Dumbbell Lateral Raise (id: 72)
+    ExerciseVariation(id: 151, exerciseId: 72, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/zcO3sgAeLA0", isPrimary: true),
+
+    // Seated Cable Row (mid/upper back) (id: 73)
+    ExerciseVariation(id: 152, exerciseId: 73, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/Q-5V5T55giY", isPrimary: true),
+
+    // Seated Dumbbell Shoulder Press (id: 74)
+    ExerciseVariation(id: 153, exerciseId: 74, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/DPXG3BJvl8A", isPrimary: true),
+
+    // Standing Face Pulls (id: 75)
+    ExerciseVariation(id: 154, exerciseId: 75, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/02g7XtSRXug", isPrimary: true),
+
+    // Standing High To Low Cable Fly (id: 76)
+    ExerciseVariation(id: 155, exerciseId: 76, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/JfZjng7jAKs", isPrimary: true),
+
+    // SUPERSET A (id: 77)
+    ExerciseVariation(id: 156, exerciseId: 77, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/Xu4DxwKWzl4", isPrimary: true),
+    ExerciseVariation(id: 157, exerciseId: 77, variationIndex: 2, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/nIalczfM8es"),
+
+    // Side Plank (id: 78)
+    ExerciseVariation(id: 158, exerciseId: 78, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/o4LGPtKjbhU", isPrimary: true),
+
+    // Single Leg Weighted Calf Raise (id: 79)
+    ExerciseVariation(id: 159, exerciseId: 79, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/cRKA_Qdut7I", isPrimary: true),
+
+    // Smith Machine Squat (id: 80)
+    ExerciseVariation(id: 160, exerciseId: 80, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/zSVi51Jp3eI", isPrimary: true),
+
+    // Weighted Step-Ups* (id: 81)
+    ExerciseVariation(id: 161, exerciseId: 81, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/Cjc3AgmdtlA", isPrimary: true),
+
+    // Cable Pushdowns* (id: 82)
+    ExerciseVariation(id: 162, exerciseId: 82, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/MlfCS_7ZLXA", isPrimary: true),
+
+    // Dumbbell Fly (id: 83)
+    ExerciseVariation(id: 163, exerciseId: 83, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/WRn2hqy0gXU", isPrimary: true),
+
+    // Dumbbell Lateral Raise (id: 84)
+    ExerciseVariation(id: 164, exerciseId: 84, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/zcO3sgAeLA0", isPrimary: true),
+
+    // Flat Dumbbell Press (id: 85)
+    ExerciseVariation(id: 165, exerciseId: 85, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/g14dhC5KYBM", isPrimary: true),
+
+    // Incline DB Overhead Extensions (id: 86)
+    ExerciseVariation(id: 166, exerciseId: 86, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/3d86xMhHROA", isPrimary: true),
+
+    // Low Incline Dumbbell Press (id: 87)
+    ExerciseVariation(id: 167, exerciseId: 87, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/kpzUeELReEA", isPrimary: true),
+
+    // Hammer Curls (id: 88)
+    ExerciseVariation(id: 168, exerciseId: 88, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/OrGL-ymYREg", isPrimary: true),
+
+    // Incline Dumbbell Curls (id: 89)
+    ExerciseVariation(id: 169, exerciseId: 89, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/3D56VDVkQnM", isPrimary: true),
+
+    // Kneeling Lat Pulldown (id: 90)
+    ExerciseVariation(id: 170, exerciseId: 90, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/4LxKeTqlpZA", isPrimary: true),
+
+    // Lat Focused Cable Row (id: 91)
+    ExerciseVariation(id: 171, exerciseId: 91, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/ZaEnZ47cDTk", isPrimary: true),
+
+    // Rear Delt Cable Row (id: 92)
+    ExerciseVariation(id: 172, exerciseId: 92, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/k9G7BykDD4o", isPrimary: true),
+
+    // Standing Face Pulls (id: 93)
+    ExerciseVariation(id: 173, exerciseId: 93, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/02g7XtSRXug", isPrimary: true),
+
+    // Barbell Deadlift (id: 94)
+    ExerciseVariation(id: 174, exerciseId: 94, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/JL1tJTEmxfw", isPrimary: true),
+    ExerciseVariation(id: 175, exerciseId: 94, variationIndex: 2, variationName: "https://youtu.be/sO8lFa9CidE", youtubeUrl: "https://youtu.be/sO8lFa9CidE"),
+    ExerciseVariation(id: 176, exerciseId: 94, variationIndex: 3, variationName: "https://youtu.be/3Z3C44SXSQE", youtubeUrl: "https://youtu.be/3Z3C44SXSQE"),
+    ExerciseVariation(id: 177, exerciseId: 94, variationIndex: 4, variationName: "https://youtu.be/hPpNTAEDnxM", youtubeUrl: "https://youtu.be/hPpNTAEDnxM"),
+    ExerciseVariation(id: 178, exerciseId: 94, variationIndex: 5, variationName: "https://youtu.be/N-kUwH1uf9c", youtubeUrl: "https://youtu.be/N-kUwH1uf9c"),
+
+    // Lying Leg Curls (id: 95)
+    ExerciseVariation(id: 179, exerciseId: 95, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/aYy3alWRDmk", isPrimary: true),
+    ExerciseVariation(id: 180, exerciseId: 95, variationIndex: 2, variationName: "https://youtu.be/6qV1WZ_z0u0", youtubeUrl: "https://youtu.be/6qV1WZ_z0u0"),
+    ExerciseVariation(id: 181, exerciseId: 95, variationIndex: 3, variationName: "https://youtu.be/LdahU9kB-u0", youtubeUrl: "https://youtu.be/LdahU9kB-u0"),
+    ExerciseVariation(id: 182, exerciseId: 95, variationIndex: 4, variationName: "https://youtu.be/fyFVaCP9J-8", youtubeUrl: "https://youtu.be/fyFVaCP9J-8"),
+
+    // SUPERSET A (id: 96)
+    ExerciseVariation(id: 183, exerciseId: 96, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/CA0ALPgTkxw", isPrimary: true),
+    ExerciseVariation(id: 184, exerciseId: 96, variationIndex: 2, variationName: "https://youtu.be/rnV3y1P7894", youtubeUrl: "https://youtu.be/rnV3y1P7894"),
+    ExerciseVariation(id: 185, exerciseId: 96, variationIndex: 3, variationName: "https://youtu.be/WRn2hqy0gXU", youtubeUrl: "https://youtu.be/WRn2hqy0gXU"),
+    ExerciseVariation(id: 186, exerciseId: 96, variationIndex: 4, variationName: "https://youtu.be/dI7LVElfMOg", youtubeUrl: "https://youtu.be/dI7LVElfMOg"),
+    ExerciseVariation(id: 187, exerciseId: 96, variationIndex: 5, variationName: "https://youtu.be/3D56VDVkQnM", youtubeUrl: "https://youtu.be/3D56VDVkQnM"),
+
+    // Single-Leg Leg Press (id: 97)
+    ExerciseVariation(id: 188, exerciseId: 97, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/hdioTTf8qdw", isPrimary: true),
+    ExerciseVariation(id: 189, exerciseId: 97, variationIndex: 2, variationName: "https://youtu.be/LdahU9kB-u0", youtubeUrl: "https://youtu.be/LdahU9kB-u0"),
+    ExerciseVariation(id: 190, exerciseId: 97, variationIndex: 3, variationName: "https://youtu.be/JfZjng7jAKs", youtubeUrl: "https://youtu.be/JfZjng7jAKs"),
+    ExerciseVariation(id: 191, exerciseId: 97, variationIndex: 4, variationName: "https://youtu.be/pSOseCLdzIY", youtubeUrl: "https://youtu.be/pSOseCLdzIY"),
+
+    // Smith Machine Hip Thrust (id: 98)
+    ExerciseVariation(id: 192, exerciseId: 98, variationIndex: 1, variationName: "See Tutorial Video", youtubeUrl: "https://youtu.be/srYETmyq3_c", isPrimary: true),
+    ExerciseVariation(id: 193, exerciseId: 98, variationIndex: 2, variationName: "https://youtu.be/kpzUeELReEA", youtubeUrl: "https://youtu.be/kpzUeELReEA"),
+    ExerciseVariation(id: 194, exerciseId: 98, variationIndex: 3, variationName: "https://youtu.be/abc1fisYB3w", youtubeUrl: "https://youtu.be/abc1fisYB3w"),
+    ExerciseVariation(id: 195, exerciseId: 98, variationIndex: 4, variationName: "https://youtu.be/R53nThQcdZo", youtubeUrl: "https://youtu.be/R53nThQcdZo"),
   ];
 
   // Mock user para desenvolvimento

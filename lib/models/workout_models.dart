@@ -69,12 +69,24 @@ class Exercise {
   final String name;
   final int sets;
   final String repsTarget;
+  final String? day;
+  final String? program;
+  final String? youtubeUrl;
+  final bool isSuperset;
+  final int? supersetPairId;
+  final String? supersetOrder;
 
   Exercise({
     required this.id,
     required this.name,
     this.sets = 3,
     this.repsTarget = "8-12",
+    this.day,
+    this.program,
+    this.youtubeUrl,
+    this.isSuperset = false,
+    this.supersetPairId,
+    this.supersetOrder,
   });
 
   factory Exercise.fromJson(Map<String, dynamic> json) {
@@ -83,6 +95,12 @@ class Exercise {
       name: json['name'] as String,
       sets: json['sets'] as int? ?? 3,
       repsTarget: json['reps_target'] as String? ?? "8-12",
+      day: json['day'] as String?,
+      program: json['program'] as String?,
+      youtubeUrl: json['youtube_url'] as String?,
+      isSuperset: json['is_superset'] as bool? ?? false,
+      supersetPairId: json['superset_pair_id'] as int?,
+      supersetOrder: json['superset_order'] as String?,
     );
   }
 
@@ -92,6 +110,12 @@ class Exercise {
       'name': name,
       'sets': sets,
       'reps_target': repsTarget,
+      'day': day,
+      'program': program,
+      'youtube_url': youtubeUrl,
+      'is_superset': isSuperset,
+      'superset_pair_id': supersetPairId,
+      'superset_order': supersetOrder,
     };
   }
 }
