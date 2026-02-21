@@ -149,7 +149,14 @@ class MockData {
     ExerciseVariation(id: 30, exerciseId: 27, variationIndex: 3, variationName: "Lying Incline Lateral Raise", youtubeUrl: "https://youtu.be/upEqeI0F73M"),
     ExerciseVariation(id: 31, exerciseId: 27, variationIndex: 4, variationName: "Lean In Lateral Raise", youtubeUrl: "https://youtu.be/2q4kjTDg-vs"),
     ExerciseVariation(id: 32, exerciseId: 27, variationIndex: 5, variationName: "Wide Grip BB Upright Row (last resort)", youtubeUrl: "https://youtu.be/6BTMVh9AnCw"),
-    
+
+    // CABLE LATERAL RAISE (id: 28) - 5 variações
+    ExerciseVariation(id: 98, exerciseId: 28, variationIndex: 1, variationName: "Cable Lateral Raise", youtubeUrl: "https://youtu.be/1muit9qEctY", isPrimary: true),
+    ExerciseVariation(id: 99, exerciseId: 28, variationIndex: 2, variationName: "Dumbbell Lateral Raise", youtubeUrl: "https://youtu.be/zcO3sgAeLA0"),
+    ExerciseVariation(id: 100, exerciseId: 28, variationIndex: 3, variationName: "Lying Incline Lateral Raise", youtubeUrl: "https://youtu.be/upEqeI0F73M"),
+    ExerciseVariation(id: 101, exerciseId: 28, variationIndex: 4, variationName: "Lean In Lateral Raise", youtubeUrl: "https://youtu.be/2q4kjTDg-vs"),
+    ExerciseVariation(id: 102, exerciseId: 28, variationIndex: 5, variationName: "Wide Grip BB Upright Row (last resort)", youtubeUrl: "https://youtu.be/6BTMVh9AnCw"),
+
     // SINGLE LEG WEIGHTED CALF RAISE (id: 32) - 4 variações
     ExerciseVariation(id: 33, exerciseId: 32, variationIndex: 1, variationName: "Single Leg Weighted Calf Raise", youtubeUrl: "https://youtu.be/cRKA_Qdut7I", isPrimary: true),
     ExerciseVariation(id: 34, exerciseId: 32, variationIndex: 2, variationName: "Toes-Elevated Smith Machine Calf Raise", youtubeUrl: "https://youtu.be/_ChZv2iluM8"),
