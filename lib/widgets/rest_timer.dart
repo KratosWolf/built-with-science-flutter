@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import '../config/theme.dart';
 
 class RestTimer extends StatefulWidget {
@@ -210,7 +211,7 @@ class _RestTimerState extends State<RestTimer>
       isRunning = false;
       timeLeft = 0;
     });
-    
+
     // Strong haptic feedback for completion
     if (widget.enableVibration) {
       HapticFeedback.lightImpact();
@@ -219,7 +220,29 @@ class _RestTimerState extends State<RestTimer>
         HapticFeedback.lightImpact();
       });
     }
-    
+
+    // Play alarm sound (works even when phone is in silent mode)
+    if (widget.enableSound) {
+      try {
+        FlutterRingtonePlayer().play(
+          android: AndroidSounds.alarm,
+          ios: IosSounds.alarm,
+          looping: false,
+          volume: 0.8,
+          asAlarm: true,
+        );
+
+        // Stop sound after 2 seconds
+        Future.delayed(const Duration(seconds: 2), () {
+          FlutterRingtonePlayer().stop();
+        });
+
+        debugPrint('🔔 Som do timer tocado (canal alarm)');
+      } catch (e) {
+        debugPrint('⚠️ Erro ao tocar som do timer: $e');
+      }
+    }
+
     _pulseAnimationController.stop();
     widget.onComplete();
   }
