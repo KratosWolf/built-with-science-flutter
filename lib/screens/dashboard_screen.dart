@@ -118,21 +118,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
       setState(() => _isLoadingWeeklyGoal = false);
 
-      // Buscar dados de workout_sets para o calendar
-      final workoutSetsData = await SupabaseService.instance.client
-          .from('workout_sets')
+      // Buscar dados de workout_sessions FINALIZADAS para o calendar
+      final workoutSessionsData = await SupabaseService.instance.client
+          .from('workout_sessions')
           .select()
           .eq('user_id', SupabaseService.instance.currentUser!.id)
+          .eq('status', 'done')  // Apenas treinos concluídos
           .order('created_at', ascending: true);
 
       // Processar dados para o calendar
       List<WorkoutDay> days = [];
       Map<String, int> workoutsByDate = {};
 
-      for (var set in workoutSetsData) {
-        final createdAt = set['created_at'] as String;
+      for (var session in workoutSessionsData) {
+        final createdAt = session['created_at'] as String;
         final date = DateTime.parse(createdAt);
         final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        // Cada sessão finalizada = 1 treino completo
         workoutsByDate[dateKey] = (workoutsByDate[dateKey] ?? 0) + 1;
       }
 
