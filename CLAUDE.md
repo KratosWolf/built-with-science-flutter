@@ -88,17 +88,20 @@ Só prossiga quando TODOS os itens estiverem ✅.
 - ✅ Dados anteriores carregados automaticamente
 - ✅ Som + vibração no timer
 
-### FASE 3 — Redesign Visual (Dark Mode) ⬅️ FASE ATUAL (🔄 em andamento)
+### FASE 3 — Redesign Visual (Dark Mode) ✅ CONCLUÍDA (22/02/2026)
 **Objetivo:** Converter app para tema dark premium (preto + laranja)
 - ✅ 3.1-3.3: Theme centralizado, Login, Dashboard
-- ✅ 3.4-3.5: Workout screens, Timer (PARCIAL - Home pendente)
+- ✅ 3.4-3.5: Workout screens, Timer
 - ✅ 3.6: Widgets convertidos para AppTheme
 - ✅ 3.8: Programs screen
 - ✅ 3.9: Ícones atualizados
-- ❌ PENDENTE: simple_home.dart (visual antigo)
-- ❌ PENDENTE: AppBar azul na tela "3-day Program"
+- ✅ 3.10: simple_home.dart (já estava convertido)
+- ✅ 3.11-3.12: Bugs corrigidos (UI update, som no mudo)
+- ✅ 3.13: AppBar azul corrigido
+- ✅ 3.14a-d: Onboarding, Backup, Program Selection, Statistics
+- ✅ APK v6.0 gerado (53MB)
 
-### FASE 4 — iOS | 🔒 Bloqueada até Fase 3 completa
+### FASE 4 — iOS | 🔒 Bloqueada — decidido focar em Android por agora
 
 ---
 
@@ -168,6 +171,10 @@ Flutter-Mobile-Version/
 | 18/02/2026 | Bug SuperSet: missing setState() | UI não atualizava após save — dados estavam corretos no cache mas widget não reconstruía |
 | 18/02/2026 | Som no mudo: canal alarm | AndroidSounds.alarm toca mesmo no silencioso (igual despertador) |
 | 18/02/2026 | simple_home.dart já convertido | Análise revelou que conversão dark mode já tinha sido feita — task 3.10 não era necessária |
+| 22/02/2026 | Variações 4-day/5-day completas | 267 variações (IDs 103-369) adicionadas ao mock_data.dart, SUPERSETs resolvidos |
+| 22/02/2026 | Fase 3 dark mode completa | Todas as telas convertidas — APK v6.0 |
+| 22/02/2026 | iOS adiado — foco Android | Quando mudar para iPhone, configurar Xcode + TestFlight (1-2 sessões) |
+| 22/02/2026 | Programas femininos BWS | Esposa usa iOS — programas femininos 3/4/5 dias a adicionar futuramente |
 
 ---
 
