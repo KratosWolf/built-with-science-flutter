@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/backup_service.dart';
+import '../config/theme.dart';
 
 class BackupScreen extends StatefulWidget {
   const BackupScreen({super.key});
@@ -113,18 +114,19 @@ class _BackupScreenState extends State<BackupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.backgroundCard,
         title: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 28),
+            const Icon(Icons.check_circle, color: AppTheme.success, size: 28),
             const SizedBox(width: 12),
-            Text(title),
+            Text(title, style: const TextStyle(color: AppTheme.textPrimary)),
           ],
         ),
-        content: Text(message),
+        content: Text(message, style: const TextStyle(color: AppTheme.textPrimary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: const Text('OK', style: TextStyle(color: AppTheme.primaryOrange)),
           ),
         ],
       ),
@@ -135,8 +137,9 @@ class _BackupScreenState extends State<BackupScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        backgroundColor: AppTheme.backgroundCard,
+        title: Text(title, style: const TextStyle(color: AppTheme.textPrimary)),
+        content: Text(message, style: const TextStyle(color: AppTheme.textPrimary)),
         actions: [
           if (showImportButton)
             TextButton(
@@ -144,11 +147,14 @@ class _BackupScreenState extends State<BackupScreen> {
                 Navigator.of(context).pop();
                 _performImport();
               },
-              child: const Text('Confirmar Import'),
+              child: const Text('Confirmar Import', style: TextStyle(color: AppTheme.primaryOrange)),
             ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(showImportButton ? 'Cancelar' : 'OK'),
+            child: Text(
+              showImportButton ? 'Cancelar' : 'OK',
+              style: TextStyle(color: showImportButton ? AppTheme.textSecondary : AppTheme.primaryOrange),
+            ),
           ),
         ],
       ),
@@ -160,8 +166,8 @@ class _BackupScreenState extends State<BackupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Backup & Restauração'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundPrimary,
+        foregroundColor: AppTheme.textPrimary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -173,15 +179,11 @@ class _BackupScreenState extends State<BackupScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-                  ],
-                ),
+                color: AppTheme.backgroundCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  color: AppTheme.primaryOrange.withOpacity(0.3),
+                  width: 1.5,
                 ),
               ),
               child: Column(
@@ -189,9 +191,9 @@ class _BackupScreenState extends State<BackupScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.info_outline,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: AppTheme.primaryOrange,
                         size: 28,
                       ),
                       const SizedBox(width: 12),
@@ -199,7 +201,7 @@ class _BackupScreenState extends State<BackupScreen> {
                         'Sistema de Backup',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: AppTheme.primaryOrange,
                         ),
                       ),
                     ],
@@ -208,7 +210,7 @@ class _BackupScreenState extends State<BackupScreen> {
                   const Text(
                     'Mantenha seus dados de treino seguros! '
                     'Exporte seus dados regularmente para não perder seu progresso.',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: AppTheme.textPrimary),
                   ),
                 ],
               ),
@@ -222,9 +224,9 @@ class _BackupScreenState extends State<BackupScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: AppTheme.backgroundCard,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: AppTheme.borderColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,6 +235,7 @@ class _BackupScreenState extends State<BackupScreen> {
                       'Dados Atuais:',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -252,11 +255,11 @@ class _BackupScreenState extends State<BackupScreen> {
               height: 60,
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _exportData,
-                icon: _isLoading 
+                icon: _isLoading
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.textPrimary),
                       )
                     : const Icon(Icons.backup, size: 28),
                 label: Text(
@@ -267,8 +270,8 @@ class _BackupScreenState extends State<BackupScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.primaryOrange,
+                  foregroundColor: AppTheme.textPrimary,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -293,11 +296,12 @@ class _BackupScreenState extends State<BackupScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.backgroundElevated,
+                  foregroundColor: AppTheme.textPrimary,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: AppTheme.primaryOrange, width: 1.5),
                   ),
                 ),
               ),
@@ -311,10 +315,11 @@ class _BackupScreenState extends State<BackupScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: _message!.contains('sucesso') ? Colors.green.shade50 : Colors.red.shade50,
+                  color: AppTheme.backgroundCard,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _message!.contains('sucesso') ? Colors.green : Colors.red,
+                    color: _message!.contains('sucesso') ? AppTheme.success : AppTheme.error,
+                    width: 1.5,
                   ),
                 ),
                 child: Row(
@@ -322,14 +327,14 @@ class _BackupScreenState extends State<BackupScreen> {
                   children: [
                     Icon(
                       _message!.contains('sucesso') ? Icons.check_circle : Icons.error,
-                      color: _message!.contains('sucesso') ? Colors.green : Colors.red,
+                      color: _message!.contains('sucesso') ? AppTheme.success : AppTheme.error,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         _message!,
                         style: TextStyle(
-                          color: _message!.contains('sucesso') ? Colors.green.shade700 : Colors.red.shade700,
+                          color: _message!.contains('sucesso') ? AppTheme.success : AppTheme.error,
                         ),
                       ),
                     ),
@@ -345,33 +350,36 @@ class _BackupScreenState extends State<BackupScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: AppTheme.backgroundCard,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(
+                  color: AppTheme.primaryOrange.withOpacity(0.3),
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: [
-                      Icon(Icons.help_outline, color: Colors.blue.shade700),
-                      const SizedBox(width: 8),
+                    children: const [
+                      Icon(Icons.help_outline, color: AppTheme.primaryOrange),
+                      SizedBox(width: 8),
                       Text(
                         'Dicas:',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
+                          color: AppTheme.primaryOrange,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     '• Faça backup regularmente\n'
                     '• Guarde os arquivos em local seguro\n'
                     '• Use para transferir dados entre celulares\n'
                     '• O arquivo contém todos os seus treinos',
-                    style: TextStyle(color: Colors.blue.shade700),
+                    style: TextStyle(color: AppTheme.textPrimary),
                   ),
                 ],
               ),
@@ -388,8 +396,8 @@ class _BackupScreenState extends State<BackupScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: AppTheme.textSecondary)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
         ],
       ),
     );

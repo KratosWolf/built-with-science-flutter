@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'program_selection_screen.dart';
+import '../config/theme.dart';
 
 /// Onboarding Screen - Welcome and introduction to the app
 class OnboardingScreen extends StatefulWidget {
@@ -123,36 +124,36 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       title: 'Welcome to\nBuilt With Science',
       description: 'Science-based workout programs designed for maximum muscle growth and strength development.',
       image: Icons.fitness_center,
-      color: Colors.blue,
-      backgroundColor: Colors.blue.shade50,
+      color: AppTheme.primaryOrange,
+      backgroundColor: AppTheme.backgroundCard,
     ),
     OnboardingData(
       title: 'Smart Progression\nSystem',
       description: 'Our AI-powered system automatically suggests weight and rep progressions based on your performance.',
       image: Icons.trending_up,
-      color: Colors.green,
-      backgroundColor: Colors.green.shade50,
+      color: AppTheme.primaryOrange,
+      backgroundColor: AppTheme.backgroundCard,
     ),
     OnboardingData(
       title: 'Track Every Set\n& Rep',
       description: 'Log your workouts with precision. Track weight, reps, difficulty, and rest times for optimal results.',
       image: Icons.analytics,
-      color: Colors.orange,
-      backgroundColor: Colors.orange.shade50,
+      color: AppTheme.primaryOrange,
+      backgroundColor: AppTheme.backgroundCard,
     ),
     OnboardingData(
       title: 'Video Guidance\n& Form Tips',
       description: 'Access exercise tutorials and form guidance to ensure you\'re performing every movement correctly.',
       image: Icons.play_circle_outline,
-      color: Colors.purple,
-      backgroundColor: Colors.purple.shade50,
+      color: AppTheme.primaryOrange,
+      backgroundColor: AppTheme.backgroundCard,
     ),
     OnboardingData(
       title: 'Ready to Build\nYour Best Physique?',
       description: 'Choose a program that fits your experience level and start your transformation journey today.',
       image: Icons.rocket_launch,
-      color: Colors.red,
-      backgroundColor: Colors.red.shade50,
+      color: AppTheme.primaryOrange,
+      backgroundColor: AppTheme.backgroundCard,
     ),
   ];
 
@@ -165,8 +166,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              _onboardingData[_currentPage].backgroundColor,
-              Colors.white,
+              AppTheme.backgroundCard,
+              AppTheme.backgroundPrimary,
             ],
           ),
         ),
@@ -208,7 +209,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         decoration: BoxDecoration(
                           color: index <= _currentPage
                             ? _onboardingData[_currentPage].color
-                            : Colors.grey.shade300,
+                            : AppTheme.backgroundElevated,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -270,19 +271,19 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     style: const TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: AppTheme.textPrimary,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  
+
                                   const SizedBox(height: 24),
-                                  
+
                                   // Description
                                   Text(
                                     data.description,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18,
-                                      color: Colors.grey.shade700,
+                                      color: AppTheme.textSecondary,
                                       height: 1.5,
                                     ),
                                     textAlign: TextAlign.center,
@@ -356,7 +357,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _onboardingData[_currentPage].color,
-                                foregroundColor: Colors.white,
+                                foregroundColor: AppTheme.textPrimary,
                                 padding: const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
