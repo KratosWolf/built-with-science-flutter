@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/workout_models.dart';
 import '../services/supabase_service.dart';
+import '../config/theme.dart';
 
 /// Statistics Screen - Track progress and workout analytics  
 class StatisticsScreen extends StatefulWidget {
@@ -105,7 +106,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppTheme.backgroundPrimary,
       appBar: AppBar(
         title: const Text(
           'Your Progress',
@@ -114,8 +115,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundPrimary,
+        foregroundColor: AppTheme.textPrimary,
         elevation: 0,
         actions: [
           IconButton(
@@ -135,13 +136,13 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(color: AppTheme.primaryOrange),
             SizedBox(height: 16),
             Text(
               'Loading your progress...',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppTheme.textSecondary,
               ),
             ),
           ],
@@ -154,18 +155,18 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.shade400,
+              color: AppTheme.error,
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Failed to load statistics',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.red.shade600,
+                color: AppTheme.error,
               ),
             ),
             const SizedBox(height: 24),
@@ -174,8 +175,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+                backgroundColor: AppTheme.primaryOrange,
+                foregroundColor: AppTheme.textPrimary,
               ),
             ),
           ],
@@ -227,31 +228,57 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
   Widget _buildHeaderStats() {
     final stats = [
-      StatCard(
+      const StatCard(
         title: 'Total Workouts',
-        value: _totalWorkouts.toString(),
+        value: '0',
         icon: Icons.fitness_center,
-        color: Colors.blue,
+        color: AppTheme.primaryOrange,
       ),
-      StatCard(
+      const StatCard(
         title: 'Total Sets',
-        value: _totalSets.toString(),
+        value: '0',
         icon: Icons.repeat,
-        color: Colors.green,
+        color: AppTheme.success,
       ),
-      StatCard(
+      const StatCard(
         title: 'Total Volume',
-        value: '${(_totalVolumeKg / 1000).toStringAsFixed(1)}t',
+        value: '0.0t',
         icon: Icons.trending_up,
-        color: Colors.orange,
+        color: AppTheme.warning,
       ),
-      StatCard(
+      const StatCard(
         title: 'Current Streak',
-        value: '$_currentStreak days',
+        value: '0 days',
         icon: Icons.local_fire_department,
-        color: Colors.red,
+        color: AppTheme.error,
       ),
     ];
+
+    // Update values dynamically
+    stats[0] = StatCard(
+      title: 'Total Workouts',
+      value: _totalWorkouts.toString(),
+      icon: Icons.fitness_center,
+      color: AppTheme.primaryOrange,
+    );
+    stats[1] = StatCard(
+      title: 'Total Sets',
+      value: _totalSets.toString(),
+      icon: Icons.repeat,
+      color: AppTheme.success,
+    );
+    stats[2] = StatCard(
+      title: 'Total Volume',
+      value: '${(_totalVolumeKg / 1000).toStringAsFixed(1)}t',
+      icon: Icons.trending_up,
+      color: AppTheme.warning,
+    );
+    stats[3] = StatCard(
+      title: 'Current Streak',
+      value: '$_currentStreak days',
+      icon: Icons.local_fire_department,
+      color: AppTheme.error,
+    );
 
     return GridView.builder(
       shrinkWrap: true,
@@ -273,6 +300,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               scale: value,
               child: Card(
                 elevation: 4,
+                color: AppTheme.backgroundCard,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -283,8 +311,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        stat.color.withOpacity(0.1),
-                        Colors.white,
+                        stat.color.withValues(alpha: 0.15),
+                        AppTheme.backgroundCard,
                       ],
                     ),
                   ),
@@ -295,7 +323,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: stat.color.withOpacity(0.2),
+                          color: stat.color.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -310,15 +338,15 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         stat.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: AppTheme.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -337,57 +365,61 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
             Icon(
               Icons.emoji_events,
-              color: Colors.amber.shade600,
+              color: AppTheme.warning,
               size: 24,
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               'Recent Personal Records',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         if (_recentPRs.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: AppTheme.backgroundCard,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.shade200),
+              border: Border.all(
+                color: AppTheme.primaryOrange.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
-            child: Column(
+            child: const Column(
               children: [
                 Icon(
                   Icons.emoji_events_outlined,
                   size: 48,
-                  color: Colors.blue.shade400,
+                  color: AppTheme.primaryOrange,
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Text(
                   'No PRs yet',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.blue.shade700,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Text(
                   'Keep training to set your first personal record!',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.blue.shade600,
+                    color: AppTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -409,6 +441,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       opacity: value,
                       child: Card(
                         elevation: 2,
+                        color: AppTheme.backgroundCard,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -416,12 +449,12 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.amber.shade100,
+                              color: AppTheme.warning.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.emoji_events,
-                              color: Colors.amber.shade600,
+                              color: AppTheme.warning,
                               size: 20,
                             ),
                           ),
@@ -429,31 +462,32 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                             pr.exerciseName,
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
                             ),
                           ),
                           subtitle: Text(
                             '${pr.weightKg}kg × ${pr.reps} reps',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
+                            style: const TextStyle(
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
+                              const Text(
                                 'NEW PR!',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.amber.shade600,
+                                  color: AppTheme.warning,
                                 ),
                               ),
                               Text(
                                 _formatDate(pr.achievedAt),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade500,
+                                  color: AppTheme.textSecondary,
                                 ),
                               ),
                             ],
@@ -478,34 +512,36 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           children: [
             Icon(
               Icons.show_chart,
-              color: Colors.purple.shade600,
+              color: AppTheme.primaryOrange,
               size: 24,
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8),
+            Text(
               'Exercise Progress',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
               ),
             ),
           ],
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         ..._exerciseProgress.entries.map((entry) {
           final exerciseName = entry.key;
           final progressPercent = entry.value.clamp(0.0, 1.0);
-          
+
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             child: Card(
               elevation: 1,
+              color: AppTheme.backgroundCard,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -519,6 +555,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -527,9 +564,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         Expanded(
                           child: LinearProgressIndicator(
                             value: progressPercent,
-                            backgroundColor: Colors.grey.shade300,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.purple.shade400,
+                            backgroundColor: AppTheme.backgroundElevated,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppTheme.primaryOrange,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -537,10 +574,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                         const SizedBox(width: 12),
                         Text(
                           '+${(progressPercent * 100).round()}%',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Colors.purple.shade600,
+                            color: AppTheme.primaryOrange,
                           ),
                         ),
                       ],
@@ -563,28 +600,28 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       'Science-based training delivers results! 🧪',
       'Keep pushing your limits! 🚀',
     ];
-    
+
     final randomMessage = messages[DateTime.now().millisecond % messages.length];
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.blue.shade400,
-            Colors.blue.shade600,
+            AppTheme.primaryOrange,
+            AppTheme.primaryOrangeHover,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.auto_awesome,
-            color: Colors.white,
+            color: AppTheme.textPrimary,
             size: 32,
           ),
           const SizedBox(height: 12),
@@ -593,7 +630,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -601,7 +638,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             randomMessage,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.9),
+              color: AppTheme.textPrimary.withValues(alpha: 0.9),
             ),
             textAlign: TextAlign.center,
           ),

@@ -5,6 +5,7 @@ import '../models/workout_models.dart';
 import '../services/supabase_service.dart';
 import 'main_navigation.dart';
 import 'dashboard_screen.dart';
+import '../config/theme.dart';
 
 /// Program Selection Screen - Choose a workout program
 class ProgramSelectionScreen extends StatefulWidget {
@@ -141,7 +142,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erro ao salvar programa: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.error,
           ),
         );
       }
@@ -149,16 +150,8 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
   }
 
   Color _getProgramColor(int daysPerWeek) {
-    switch (daysPerWeek) {
-      case 3:
-        return Colors.green;
-      case 4:
-        return Colors.blue;
-      case 5:
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
+    // Usando primaryOrange para todos os programas (consistência dark theme)
+    return AppTheme.primaryOrange;
   }
 
   IconData _getProgramIcon(int daysPerWeek) {
@@ -219,14 +212,14 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade50,
-              Colors.white,
-              Colors.grey.shade50,
+              AppTheme.backgroundCard,
+              AppTheme.backgroundPrimary,
+              AppTheme.backgroundPrimary,
             ],
           ),
         ),
@@ -243,17 +236,17 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade100,
+                            color: AppTheme.primaryOrange.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.fitness_center,
-                            color: Colors.blue.shade600,
+                            color: AppTheme.primaryOrange,
                             size: 32,
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Expanded(
+                        const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -262,14 +255,14 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade800,
+                                  color: AppTheme.textPrimary,
                                 ),
                               ),
                               Text(
                                 'Choose Your Program',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.grey.shade600,
+                                  color: AppTheme.textSecondary,
                                 ),
                               ),
                             ],
@@ -285,9 +278,9 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                               ),
                             );
                           },
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.insights,
-                            color: Colors.blue.shade600,
+                            color: AppTheme.primaryOrange,
                             size: 28,
                           ),
                           tooltip: 'Dashboard de Consistência',
@@ -300,23 +293,26 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: AppTheme.backgroundCard,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.blue.shade200),
+                        border: Border.all(
+                          color: AppTheme.primaryOrange.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
                           Icon(
                             Icons.lightbulb_outline,
-                            color: Colors.blue.shade600,
+                            color: AppTheme.primaryOrange,
                             size: 20,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               'Select a science-based program that fits your experience level and schedule.',
                               style: TextStyle(
-                                color: Colors.blue.shade700,
+                                color: AppTheme.textPrimary,
                                 fontSize: 14,
                               ),
                             ),
@@ -345,13 +341,13 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(color: AppTheme.primaryOrange),
             SizedBox(height: 16),
             Text(
               'Loading programs...',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppTheme.textSecondary,
               ),
             ),
           ],
@@ -364,27 +360,27 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red.shade400,
+              color: AppTheme.error,
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Failed to load programs',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.red.shade600,
+                color: AppTheme.error,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: AppTheme.textSecondary,
               ),
             ),
             const SizedBox(height: 24),
@@ -393,8 +389,8 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
               icon: const Icon(Icons.refresh),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+                backgroundColor: AppTheme.primaryOrange,
+                foregroundColor: AppTheme.textPrimary,
               ),
             ),
           ],
@@ -410,7 +406,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
             Icon(
               Icons.info_outline,
               size: 64,
-              color: Colors.grey,
+              color: AppTheme.textSecondary,
             ),
             SizedBox(height: 16),
             Text(
@@ -418,7 +414,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey,
+                color: AppTheme.textSecondary,
               ),
             ),
           ],
@@ -464,7 +460,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
         child: Material(
           elevation: isSelected ? 8 : 4,
           borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
+          color: AppTheme.backgroundCard,
           child: InkWell(
             onTap: () => _selectProgram(program),
             borderRadius: BorderRadius.circular(20),
@@ -473,8 +469,8 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? color : Colors.transparent,
-                  width: 3,
+                  color: isSelected ? color : AppTheme.borderColor,
+                  width: isSelected ? 3 : 1,
                 ),
               ),
               child: Padding(
@@ -488,7 +484,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: color.withOpacity(0.1),
+                            color: color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Icon(
@@ -507,7 +503,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: AppTheme.textPrimary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
@@ -521,7 +517,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: color.withOpacity(0.2),
+                                      color: color.withValues(alpha: 0.3),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -537,9 +533,9 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                                   Flexible(
                                     child: Text(
                                       '${program.daysPerWeek} days/week',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 14,
-                                        color: Colors.grey.shade600,
+                                        color: AppTheme.textSecondary,
                                         fontWeight: FontWeight.w500,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -559,7 +555,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                             ),
                             child: const Icon(
                               Icons.check,
-                              color: Colors.white,
+                              color: AppTheme.textPrimary,
                               size: 20,
                             ),
                           ),
@@ -570,11 +566,21 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                     
                     // Description
                     if (program.description != null) ...[
-                      Text(
-                        program.description!,
+                      const Text(
+                        '',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade700,
+                          color: AppTheme.textSecondary,
+                          height: 1.4,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 3,
+                      ),
+                      Text(
+                        program.description!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
                           height: 1.4,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -582,7 +588,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                       ),
                       const SizedBox(height: 16),
                     ],
-                    
+
                     // Features
                     Wrap(
                       spacing: 8,
@@ -594,7 +600,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: AppTheme.backgroundElevated,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
@@ -608,9 +614,9 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                               const SizedBox(width: 4),
                               Text(
                                 feature,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade700,
+                                  color: AppTheme.textPrimary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -639,7 +645,7 @@ class _ProgramSelectionScreenState extends State<ProgramSelectionScreen>
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: color,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppTheme.textPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
