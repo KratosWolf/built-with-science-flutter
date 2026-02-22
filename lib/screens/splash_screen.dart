@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/theme.dart';
 import 'onboarding_screen.dart';
 import 'program_selection_screen.dart';
 
@@ -115,9 +116,9 @@ class _SplashScreenState extends State<SplashScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade600,
-              Colors.blue.shade800,
-              Colors.blue.shade900,
+              AppTheme.backgroundPrimary,
+              AppTheme.backgroundCard,
+              AppTheme.backgroundElevated,
             ],
           ),
         ),
@@ -137,11 +138,11 @@ class _SplashScreenState extends State<SplashScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppTheme.backgroundCard,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withOpacity(0.4),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
@@ -150,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: const Icon(
                           Icons.fitness_center,
                           size: 60,
-                          color: Colors.blue,
+                          color: AppTheme.primaryOrange,
                         ),
                       ),
                       

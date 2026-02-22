@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/workout_models.dart';
+import '../config/theme.dart';
 // import "supabase_service.dart";
 import 'workout_tracking_screen.dart';
 
@@ -140,8 +141,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.program.name),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundPrimary,
+        foregroundColor: AppTheme.textPrimary,
       ),
       body: SafeArea(
         child: Padding(
@@ -174,7 +175,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(Icons.calendar_today, size: 16, color: Colors.blue),
+                          Icon(Icons.calendar_today, size: 16, color: AppTheme.primaryOrange),
                           const SizedBox(width: 4),
                           Text('${widget.program.daysPerWeek} days per week'),
                         ],
@@ -249,9 +250,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   : null,
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: isRecommended 
+                    backgroundColor: isRecommended
                       ? Theme.of(context).colorScheme.secondary
-                      : Colors.blue,
+                      : AppTheme.backgroundElevated,
                     child: Text(
                       '${day.dayIndex}',
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

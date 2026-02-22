@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/supabase_service.dart';
 import '../models/user_stats.dart';
+import '../config/theme.dart';
 import '../widgets/dashboard/volume_chart.dart';
 import '../widgets/dashboard/comparison_card.dart';
 import '../widgets/dashboard/personal_records_card.dart';
@@ -552,7 +553,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             '💪',
                             'Total treinos',
                             '${_stats?.totalWorkouts ?? _monthTotal}',
-                            const Color(0xFF3B82F6), // Info blue
+                            AppTheme.info,
                             context,
                           ),
                         ),
