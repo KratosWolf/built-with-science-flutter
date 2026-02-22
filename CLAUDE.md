@@ -101,7 +101,13 @@ Só prossiga quando TODOS os itens estiverem ✅.
 - ✅ 3.14a-d: Onboarding, Backup, Program Selection, Statistics
 - ✅ APK v6.0 gerado (53MB)
 
-### FASE 4 — iOS | 🔒 Bloqueada — decidido focar em Android por agora
+### FASE 4 — Backup Automático ⬅️ FASE ATUAL
+**Objetivo:** Backup automático na nuvem + restore ao reinstalar
+- [ ] 4.1 Auto-backup ao concluir treino
+- [ ] 4.2 Auto-restore ao instalar/reinstalar
+- [ ] 4.3 Indicador de sync
+
+### FASE 5 — iOS | 🔒 Bloqueada — decidido focar em Android por agora
 
 ---
 
@@ -175,6 +181,7 @@ Flutter-Mobile-Version/
 | 22/02/2026 | Fase 3 dark mode completa | Todas as telas convertidas — APK v6.0 |
 | 22/02/2026 | iOS adiado — foco Android | Quando mudar para iPhone, configurar Xcode + TestFlight (1-2 sessões) |
 | 22/02/2026 | Programas femininos BWS | Esposa usa iOS — programas femininos 3/4/5 dias a adicionar futuramente |
+| 22/02/2026 | Backup automático como Fase 4 | Dados ficam só no SQLite local — risco de perda. Auto-backup resolve antes de migrar para iOS |
 
 ---
 

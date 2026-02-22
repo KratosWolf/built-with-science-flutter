@@ -205,21 +205,36 @@ Estilo: Dark mode premium, fitness-oriented. Referência: app Coach Sandow.AI.
 
 ---
 
-### FASE 4 — iOS
+### FASE 4 — Backup Automático ⬅️ FASE ATUAL
+**Objetivo:** Garantir que os dados de treino nunca se percam. Backup automático na nuvem (Supabase) e restore ao reinstalar.
+**Status:** ⬜ Pendente
+**Prazo estimado:** 2-3 sessões de Claude Code
+
+| # | Tarefa | Status | Notas |
+|---|--------|--------|-------|
+| 4.1 | Auto-backup ao concluir treino | ⬜ Pendente | Ao finalizar um treino, salvar automaticamente no Supabase. Silencioso, sem interrupção do usuário. Done: treino salvo na nuvem ao completar, sem erros, sem delay perceptível |
+| 4.2 | Auto-restore ao instalar/reinstalar | ⬜ Pendente | Na primeira abertura do app (ou quando não há dados locais), perguntar se quer restaurar da nuvem. Done: dados restaurados corretamente, treinos anteriores aparecem no dashboard |
+| 4.3 | Indicador de sync no app | ⬜ Pendente | Mostrar no dashboard ou settings se o backup está em dia ou pendente. Done: ícone/texto visível indicando status do backup, atualiza após cada sync |
+
+**Critério de conclusão:** Treinos salvam automaticamente na nuvem, dados recuperáveis após reinstalação, indicador visual de status do backup.
+
+---
+
+### FASE 5 — iOS
 **Objetivo:** Preparar e publicar o app para iOS (iPhone/iPad).
-**Status:** 🔒 Bloqueada — só inicia após Fase 3 completa.
+**Status:** 🔒 Bloqueada — decidido focar em Android por agora.
 **Prazo estimado:** A definir
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
-| 4.1 | Configurar ambiente Xcode completo | 🔒 | Instalação completa do Xcode + CocoaPods |
-| 4.2 | Configurar Google Sign-In para iOS | 🔒 | iOS client ID, Info.plist, URL schemes |
-| 4.3 | Configurar Supabase para iOS | 🔒 | Deep links, URL schemes |
-| 4.4 | Ajustar UI para iOS guidelines | 🔒 | Cupertino adaptations, safe areas, notch |
-| 4.5 | Testar em simulador iOS | 🔒 | Todas as funcionalidades |
-| 4.6 | Testar em dispositivo real | 🔒 | TestFlight |
-| 4.7 | Preparar para App Store | 🔒 | Screenshots, descrição, review guidelines |
-| 4.8 | Submeter para Apple | 🔒 | — |
+| 5.1 | Configurar ambiente Xcode completo | 🔒 | Instalação completa do Xcode + CocoaPods |
+| 5.2 | Configurar Google Sign-In para iOS | 🔒 | iOS client ID, Info.plist, URL schemes |
+| 5.3 | Configurar Supabase para iOS | 🔒 | Deep links, URL schemes |
+| 5.4 | Ajustar UI para iOS guidelines | 🔒 | Cupertino adaptations, safe areas, notch |
+| 5.5 | Testar em simulador iOS | 🔒 | Todas as funcionalidades |
+| 5.6 | Testar em dispositivo real | 🔒 | TestFlight |
+| 5.7 | Preparar para App Store | 🔒 | Screenshots, descrição, review guidelines |
+| 5.8 | Submeter para Apple | 🔒 | — |
 
 **Critério de conclusão:** App publicado na App Store e funcionando em iPhones.
 
@@ -300,8 +315,9 @@ Flutter-Mobile-Version/
 - **Fase 1:** ✅ Arrumar a Casa (CONCLUÍDA - 16/02/2026)
 - **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA - 16/02/2026)
 - **Fase 3:** ✅ Redesign Visual Dark Mode (CONCLUÍDA - 22/02/2026)
-- **Fase 4:** 🔓 iOS (desbloqueada — pronta para iniciar)
-- Xcode não configurado (iOS bloqueado até Fase 4)
+- **Fase 4:** ⬜ Backup Automático (PRÓXIMA)
+- **Fase 5:** 🔒 iOS (bloqueada — decidido focar em Android por agora)
+- Xcode não configurado (iOS bloqueado até Fase 5)
 
 ---
 
