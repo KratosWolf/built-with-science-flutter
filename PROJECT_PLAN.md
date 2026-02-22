@@ -127,10 +127,11 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 
 ---
 
-### FASE 3 — Redesign Visual (Dark Mode)
+### FASE 3 — Redesign Visual (Dark Mode) ✅ CONCLUÍDA
 **Objetivo:** Transformar o visual do app para tema dark premium com laranja como cor de destaque.
-**Status:** 🔄 Em andamento — iniciada em 16/02/2026 | Versão estável: commit 9039540
-**Prazo estimado:** 3-5 sessões de Claude Code
+**Status:** ✅ Concluída — 22/02/2026
+**Data de conclusão:** 22/02/2026
+**APK Final:** releases/app-v6.0-dark-mode-complete-20260222.apk (53MB)
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
@@ -146,8 +147,11 @@ Isso já funciona nos exercícios normais (não-SuperSet). O código de carregam
 | 3.10 | simple_home.dart redesign | ✅ Concluído | Já estava convertido — descoberto na análise de 18/02 |
 | 3.11 | Bug: SuperSet não atualizava UI após salvar set | ✅ Concluído | Causa: missing setState() em _saveSetData. Fix: setState após atualizar _completedSets. Commit 36ef0cd |
 | 3.12 | Alerta sonoro funcionar com celular no mudo | ✅ Concluído | Trocado canal notification→alarm. Commit 36ef0cd |
-| 3.13 | AppBar azul no program_detail_screen.dart | ⬜ Pendente | Última pendência visual |
-| 3.14 | Limpar azuis hardcoded (6 arquivos) | ⬜ Pendente | Polish antes de merge |
+| 3.13 | AppBar azul no program_detail_screen.dart | ✅ Concluído | AppBar convertido para tema dark |
+| 3.14a | Converter onboarding_screen.dart para dark mode | ✅ Concluído | Todas as páginas unificadas com tema laranja. Commit: `feat: converter onboarding e backup screens para dark mode (Fase 3.14a-b)` |
+| 3.14b | Converter backup_screen.dart para dark mode | ✅ Concluído | Info boxes, dialogs e help text convertidos para tema dark |
+| 3.14c | Converter program_selection_screen.dart para dark mode | ✅ Concluído | Programas unificados com tema laranja, gradientes e cards dark. Commit: `feat: converter program selection e statistics para dark mode (Fase 3.14c-d)` |
+| 3.14d | Converter statistics_screen.dart para dark mode | ✅ Concluído | Stat cards, progress bars e motivational section em dark mode |
 
 **Critério de conclusão:** App inteiro em dark mode, visual premium coerente, sem nenhuma tela no tema claro antigo.
 
@@ -295,8 +299,8 @@ Flutter-Mobile-Version/
 ### 🔮 Roadmap
 - **Fase 1:** ✅ Arrumar a Casa (CONCLUÍDA - 16/02/2026)
 - **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA - 16/02/2026)
-- **Fase 3:** 🔄 Redesign Visual Dark Mode (EM ANDAMENTO - 90% completo, pendente: simple_home.dart + AppBar fix)
-- **Fase 4:** 🔒 iOS (bloqueado até Fase 3 completa)
+- **Fase 3:** ✅ Redesign Visual Dark Mode (CONCLUÍDA - 22/02/2026)
+- **Fase 4:** 🔓 iOS (desbloqueada — pronta para iniciar)
 - Xcode não configurado (iOS bloqueado até Fase 4)
 
 ---
@@ -317,3 +321,4 @@ Flutter-Mobile-Version/
 | 18/02/2026 | Fase 3 🔄 | Bug SuperSet: UI não atualizava após save | Descoberto missing setState() em _saveSetData. Fix aplicado — dados agora aparecem imediatamente. Commit: 36ef0cd |
 | 18/02/2026 | Fase 3 🔄 | Som do timer no mudo | Canal notification→alarm — agora toca mesmo com celular no mudo/vibrar. Commit: 36ef0cd |
 | 18/02/2026 | Fase 3 🔄 | simple_home.dart verificado | Análise revelou que conversão dark mode já estava completa — task 3.10 não era necessária |
+| 22/02/2026 | Fase 3 ✅ | Redesign dark mode completo | Todas as telas convertidas para tema dark premium (preto #1A1A1A + laranja #FF6B00). 4 telas finais: onboarding, backup, program_selection, statistics. APK v6.0 gerado (53MB) |
