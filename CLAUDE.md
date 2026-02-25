@@ -101,13 +101,17 @@ Só prossiga quando TODOS os itens estiverem ✅.
 - ✅ 3.14a-d: Onboarding, Backup, Program Selection, Statistics
 - ✅ APK v6.0 gerado (53MB)
 
-### FASE 4 — Backup Automático ⬅️ FASE ATUAL
+### FASE 4 — Backup Automático ✅ CONCLUÍDA (24/02/2026)
 **Objetivo:** Backup automático na nuvem + restore ao reinstalar
-- [ ] 4.1 Auto-backup ao concluir treino
-- [ ] 4.2 Auto-restore ao instalar/reinstalar
-- [ ] 4.3 Indicador de sync
+- ✅ 4.1 Auto-backup ao concluir treino (sync robusto com pending queue)
+- ✅ 4.2 Auto-restore ao instalar/reinstalar (restore silencioso no login)
+- ✅ 4.3 Indicador de sync (ícone visual no dashboard)
+- ✅ APK v7.0 gerado (53MB)
 
-### FASE 5 — iOS | 🔒 Bloqueada — decidido focar em Android por agora
+### FASE 5 — iOS ⬅️ FASE ATUAL
+**Status:** Aguardando validação da Fase 4 em treino real (25/02/2026)
+- Configurar Xcode + TestFlight (1-2 sessões estimadas)
+- Adicionar programas femininos BWS 3/4/5 dias (esposa usa iOS)
 
 ---
 
@@ -182,6 +186,10 @@ Flutter-Mobile-Version/
 | 22/02/2026 | iOS adiado — foco Android | Quando mudar para iPhone, configurar Xcode + TestFlight (1-2 sessões) |
 | 22/02/2026 | Programas femininos BWS | Esposa usa iOS — programas femininos 3/4/5 dias a adicionar futuramente |
 | 22/02/2026 | Backup automático como Fase 4 | Dados ficam só no SQLite local — risco de perda. Auto-backup resolve antes de migrar para iOS |
+| 24/02/2026 | Bug crítico: saveWorkoutSession() enviava campos errados | Tabela workout_sessions tinha 0 registros — campos day_id, duration_seconds, completed_at não existem no schema real |
+| 24/02/2026 | Coluna status adicionada em workout_sessions | Dashboard filtra por status='done' para contar treinos |
+| 24/02/2026 | SyncService criado (lib/services/sync_service.dart) | Pending queue + retry + restore automático no login |
+| 24/02/2026 | Supabase RLS corrigido: 16→2 alertas críticos | RLS habilitado em todas as tabelas de dados do usuário, tabelas órfãs dropadas |
 
 ---
 

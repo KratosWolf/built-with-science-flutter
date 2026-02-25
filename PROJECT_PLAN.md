@@ -205,25 +205,29 @@ Estilo: Dark mode premium, fitness-oriented. Referência: app Coach Sandow.AI.
 
 ---
 
-### FASE 4 — Backup Automático ⬅️ FASE ATUAL
+### FASE 4 — Backup Automático ✅ CONCLUÍDA
 **Objetivo:** Garantir que os dados de treino nunca se percam. Backup automático na nuvem (Supabase) e restore ao reinstalar.
-**Status:** ⬜ Pendente
+**Status:** ✅ Concluída
 **Prazo estimado:** 2-3 sessões de Claude Code
+**Data de conclusão:** 24/02/2026
+**APK Final:** releases/app-v7.0-fase4-backup-automatico-20260224.apk (53MB)
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
-| 4.1 | Auto-backup ao concluir treino | ⬜ Pendente | Ao finalizar um treino, salvar automaticamente no Supabase. Silencioso, sem interrupção do usuário. Done: treino salvo na nuvem ao completar, sem erros, sem delay perceptível |
-| 4.2 | Auto-restore ao instalar/reinstalar | ⬜ Pendente | Na primeira abertura do app (ou quando não há dados locais), perguntar se quer restaurar da nuvem. Done: dados restaurados corretamente, treinos anteriores aparecem no dashboard |
-| 4.3 | Indicador de sync no app | ⬜ Pendente | Mostrar no dashboard ou settings se o backup está em dia ou pendente. Done: ícone/texto visível indicando status do backup, atualiza após cada sync |
+| 4.1 | Auto-backup ao concluir treino | ✅ Concluído | SyncService criado com pending queue robusta. Sets salvam automaticamente no Supabase ao completar exercício, com retry em caso de falha. Timeout de 10s, se falhar vai para fila pendente. Commit: `feat: sync robusto com pending queue (Fase 4.1)` (e3ad1f0) |
+| 4.2 | Auto-restore ao instalar/reinstalar | ✅ Concluído | Restore silencioso ao fazer login. Query geral busca todos workout_sets do usuário, compara timestamps (cache vs cloud), restaura o mais recente. Zero popups, acontece em background. Commit: `feat: auto-restore silencioso ao fazer login (Fase 4.2)` (0bb3b40) |
+| 4.3 | Indicador de sync no app | ✅ Concluído | Ícone discreto no dashboard AppBar. 3 estados: cloud_done (cinza - sync OK), cloud_upload (laranja - sincronizando), cloud_off (amarelo - pendente). Atualiza automaticamente após sync. Commit: `feat: indicador visual de sync no dashboard (Fase 4.3)` (092cb69) |
 
-**Critério de conclusão:** Treinos salvam automaticamente na nuvem, dados recuperáveis após reinstalação, indicador visual de status do backup.
+**Critério de conclusão:** ✅ Treinos salvam automaticamente na nuvem com retry robusto, dados restaurados silenciosamente ao fazer login, indicador visual de status do backup discreto no dashboard. Bug crítico de dashboard corrigido (workout_sessions schema). RLS Supabase corrigido (16→2 alertas críticos).
 
 ---
 
-### FASE 5 — iOS
+### FASE 5 — iOS ⬅️ FASE ATUAL
 **Objetivo:** Preparar e publicar o app para iOS (iPhone/iPad).
-**Status:** 🔒 Bloqueada — decidido focar em Android por agora.
-**Prazo estimado:** A definir
+**Status:** Aguardando validação da Fase 4 em treino real (25/02/2026)
+**Prazo estimado:** 1-2 sessões (configuração Xcode + TestFlight)
+
+**Nota:** Próximo passo a decidir após validação da Fase 4 em treino real. Quando mudar para iPhone, configurar ambiente iOS (Xcode + CocoaPods + TestFlight). Adicionar programas femininos BWS 3/4/5 dias (esposa usa iOS).
 
 | # | Tarefa | Status | Notas |
 |---|--------|--------|-------|
@@ -315,8 +319,8 @@ Flutter-Mobile-Version/
 - **Fase 1:** ✅ Arrumar a Casa (CONCLUÍDA - 16/02/2026)
 - **Fase 2:** ✅ Correções SuperSet (CONCLUÍDA - 16/02/2026)
 - **Fase 3:** ✅ Redesign Visual Dark Mode (CONCLUÍDA - 22/02/2026)
-- **Fase 4:** ⬜ Backup Automático (PRÓXIMA)
-- **Fase 5:** 🔒 iOS (bloqueada — decidido focar em Android por agora)
+- **Fase 4:** ✅ Backup Automático (CONCLUÍDA - 24/02/2026)
+- **Fase 5:** ⬅️ iOS (aguardando validação Fase 4)
 - Xcode não configurado (iOS bloqueado até Fase 5)
 
 ---
@@ -338,3 +342,4 @@ Flutter-Mobile-Version/
 | 18/02/2026 | Fase 3 🔄 | Som do timer no mudo | Canal notification→alarm — agora toca mesmo com celular no mudo/vibrar. Commit: 36ef0cd |
 | 18/02/2026 | Fase 3 🔄 | simple_home.dart verificado | Análise revelou que conversão dark mode já estava completa — task 3.10 não era necessária |
 | 22/02/2026 | Fase 3 ✅ | Redesign dark mode completo | Todas as telas convertidas para tema dark premium (preto #1A1A1A + laranja #FF6B00). 4 telas finais: onboarding, backup, program_selection, statistics. APK v6.0 gerado (53MB) |
+| 24/02/2026 | Fase 4 ✅ | Backup automático completo | SyncService, pending queue, auto-restore, indicador visual. Bug crítico dashboard corrigido. RLS Supabase corrigido. APK v7.0 |
