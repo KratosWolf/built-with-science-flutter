@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/supabase_service.dart';
+import '../services/sync_service.dart';
 import '../screens/login_screen.dart';
 import '../screens/main_navigation.dart';
 import '../config/theme.dart';
@@ -40,6 +41,22 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } catch (e) {
         debugPrint('⚠️ Supabase não inicializado - continuando em modo offline');
         isLoggedIn = false;
+      }
+
+      // Restore silencioso em background se usuário está logado
+      if (isLoggedIn) {
+        // Não bloqueia UI — acontece em background
+        SyncService.instance.restoreFromCloud().then((result) {
+          if (result['restored']! > 0) {
+            debugPrint('✅ Restore: ${result['restored']} exercícios restaurados');
+          }
+          if (result['skipped']! > 0) {
+            debugPrint('ℹ️ Restore: ${result['skipped']} exercícios mantidos (cache mais recente)');
+          }
+        }).catchError((error) {
+          debugPrint('⚠️ Restore silencioso falhou: $error');
+          // Não bloqueia app — apenas log
+        });
       }
 
       setState(() {
