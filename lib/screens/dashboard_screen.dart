@@ -18,6 +18,12 @@ enum TimePeriod {
   allTime,
 }
 
+enum SyncStatus {
+  synced,   // Sem pendências → cloud_done (cinza)
+  syncing,  // Sincronizando → cloud_upload (laranja)
+  pending,  // Com pendências → cloud_off (amarelo warning)
+}
+
 extension TimePeriodExtension on TimePeriod {
   String get label {
     switch (this) {
@@ -72,6 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoadingPRs = false;
   Map<String, dynamic> _weeklyProgress = {};
   bool _isLoadingWeeklyGoal = false;
+  SyncStatus _syncStatus = SyncStatus.synced; // Estado inicial: sem pendências
 
   @override
   void initState() {
@@ -170,6 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       debugPrint('   - Volume: ${stats.formattedVolume}');
 
       // Sync silencioso em background ao abrir dashboard (não bloqueia UI)
+      setState(() => _syncStatus = SyncStatus.syncing);
       SyncService.instance.syncPendingQueue().then((result) {
         if (result['synced']! > 0) {
           debugPrint('✅ Startup sync: ${result['synced']} sets recuperados');
@@ -177,8 +185,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (result['failed']! > 0) {
           debugPrint('⏳ Startup sync: ${result['failed']} sets ainda pendentes');
         }
+        // Atualizar ícone após sync
+        _checkSyncStatus();
       }).catchError((error) {
         debugPrint('❌ Erro no startup sync: $error');
+        // Atualizar ícone mesmo com erro
+        _checkSyncStatus();
       });
 
     } catch (e) {
@@ -293,6 +305,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
         checkDate = checkDate.subtract(Duration(days: 1));
       } else {
         break;
+      }
+    }
+  }
+
+  /// Verifica status do sync (pendências na fila)
+  Future<void> _checkSyncStatus() async {
+    try {
+      final stats = await SyncService.instance.getQueueStats();
+      final pendingCount = stats['total'] as int;
+
+      if (mounted) {
+        setState(() {
+          _syncStatus = pendingCount > 0 ? SyncStatus.pending : SyncStatus.synced;
+        });
+
+        debugPrint('🔄 Sync status: ${pendingCount > 0 ? 'PENDING ($pendingCount)' : 'SYNCED'}');
+      }
+    } catch (error) {
+      debugPrint('❌ Erro ao verificar sync status: $error');
+      // Em caso de erro, assumir synced (otimista)
+      if (mounted) {
+        setState(() => _syncStatus = SyncStatus.synced);
       }
     }
   }
@@ -517,6 +551,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  /// Ícone de sync na AppBar (discreto, 3 estados)
+  Widget _buildSyncIcon() {
+    IconData icon;
+    Color color;
+    String tooltip;
+
+    switch (_syncStatus) {
+      case SyncStatus.syncing:
+        icon = Icons.cloud_upload_outlined;
+        color = AppTheme.primaryOrange;
+        tooltip = 'Sincronizando...';
+        break;
+      case SyncStatus.pending:
+        icon = Icons.cloud_off_outlined;
+        color = AppTheme.warning; // #F59E0B
+        tooltip = 'Backup pendente';
+        break;
+      case SyncStatus.synced:
+        icon = Icons.cloud_done_outlined;
+        color = AppTheme.textSecondary;
+        tooltip = 'Backup em dia';
+        break;
+    }
+
+    return Tooltip(
+      message: tooltip,
+      child: Icon(icon, color: color, size: 20),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -536,6 +600,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: theme.colorScheme.surface,
         foregroundColor: theme.colorScheme.onSurface,
         elevation: 0,
+        actions: [
+          // Ícone de sync (discreto no canto direito)
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: _buildSyncIcon(),
+          ),
+        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
