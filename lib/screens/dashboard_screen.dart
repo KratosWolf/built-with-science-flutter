@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../services/supabase_service.dart';
+import '../services/sync_service.dart';
 import '../models/user_stats.dart';
 import '../config/theme.dart';
 import '../widgets/dashboard/volume_chart.dart';
@@ -167,6 +168,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
       debugPrint('   - Streak: ${stats.currentStreak} dias');
       debugPrint('   - Total workouts: ${stats.totalWorkouts}');
       debugPrint('   - Volume: ${stats.formattedVolume}');
+
+      // Sync silencioso em background ao abrir dashboard (não bloqueia UI)
+      SyncService.instance.syncPendingQueue().then((result) {
+        if (result['synced']! > 0) {
+          debugPrint('✅ Startup sync: ${result['synced']} sets recuperados');
+        }
+        if (result['failed']! > 0) {
+          debugPrint('⏳ Startup sync: ${result['failed']} sets ainda pendentes');
+        }
+      }).catchError((error) {
+        debugPrint('❌ Erro no startup sync: $error');
+      });
 
     } catch (e) {
       debugPrint('❌ Erro ao carregar dados do Supabase: $e');

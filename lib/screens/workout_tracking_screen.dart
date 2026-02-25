@@ -7,6 +7,7 @@ import '../widgets/exercise_tracking_widget.dart';
 import '../widgets/superset_tracking_widget.dart';
 import '../widgets/rest_timer_widget.dart';
 import '../services/supabase_service.dart';
+import '../services/sync_service.dart';
 import '../services/background_timer_service.dart';
 import '../config/theme.dart';
 
@@ -455,22 +456,35 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     await prefs.setStringList(cacheKey, setStrings);
     debugPrint('✅ Cache local salvo com ${setStrings.length} sets para exercício $exerciseId');
     
-    // Tentar salvar na nuvem se logado (sem bloquear se falhar)
+    // Tentar salvar na nuvem se logado (com pending queue para retry)
     if (SupabaseService.instance.isLoggedIn) {
       try {
         final cloudSaved = await SupabaseService.instance.saveWorkoutSet(
-          correctedSetData, 
-          widget.programId, 
+          correctedSetData,
+          widget.programId,
           widget.dayId
-        ).timeout(const Duration(seconds: 5));
-        
+        ).timeout(const Duration(seconds: 10));
+
         if (cloudSaved) {
-          debugPrint('☁️ Dados também salvos na nuvem');
+          debugPrint('☁️ Dados salvos na nuvem');
         } else {
-          debugPrint('⚠️ Falha ao salvar na nuvem, mantidos localmente');
+          // Falhou → adicionar à fila para retry posterior
+          await SyncService.instance.addToPendingQueue(
+            setData: correctedSetData,
+            programId: widget.programId,
+            dayId: widget.dayId,
+          );
+          debugPrint('⏳ Set adicionado à fila de sync pendente');
         }
       } catch (error) {
-        debugPrint('❌ Timeout/erro cloud sync: $error - dados mantidos localmente');
+        // Timeout/erro → adicionar à fila para retry posterior
+        await SyncService.instance.addToPendingQueue(
+          setData: correctedSetData,
+          programId: widget.programId,
+          dayId: widget.dayId,
+        );
+        debugPrint('❌ Timeout/erro cloud sync: $error');
+        debugPrint('⏳ Set adicionado à fila de sync pendente');
       }
     } else {
       debugPrint('📱 Modo offline - dados salvos apenas localmente');
@@ -600,6 +614,20 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
         debugPrint('☁️ Sessão de treino salva na nuvem');
       } catch (error) {
         debugPrint('⚠️ Erro ao salvar sessão na nuvem: $error - dados mantidos localmente');
+      }
+
+      // Tentar sincronizar fila pendente ao finalizar treino
+      debugPrint('🔄 Verificando fila de sync pendente...');
+      try {
+        final result = await SyncService.instance.syncPendingQueue();
+        if (result['synced']! > 0) {
+          debugPrint('✅ Sync ao finalizar: ${result['synced']} sets sincronizados');
+        }
+        if (result['failed']! > 0) {
+          debugPrint('⏳ Sync ao finalizar: ${result['failed']} sets ainda pendentes');
+        }
+      } catch (error) {
+        debugPrint('❌ Erro ao sincronizar fila pendente: $error');
       }
     } else {
       debugPrint('📱 Modo offline - sessão salva apenas localmente');
