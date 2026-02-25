@@ -211,17 +211,41 @@ class SupabaseService {
         return false;
       }
 
+      // Map dayId to readable workout type
+      String workoutType;
+      switch (dayId) {
+        case 1:
+          workoutType = 'Full Body A';
+          break;
+        case 2:
+          workoutType = 'Full Body B';
+          break;
+        case 3:
+          workoutType = 'Full Body C';
+          break;
+        case 4:
+          workoutType = 'Full Body D';
+          break;
+        case 5:
+          workoutType = 'Full Body E';
+          break;
+        default:
+          workoutType = 'Day $dayId';
+      }
+
+      final now = DateTime.now();
       final data = {
         'user_id': currentUser!.id,
+        'workout_date': now.toIso8601String().split('T')[0], // YYYY-MM-DD format
+        'workout_type': workoutType,
         'program_id': programId,
-        'day_id': dayId,
-        'duration_seconds': durationSeconds,
-        'completed_at': DateTime.now().toIso8601String(),
+        'duration_minutes': (durationSeconds / 60).round(),
+        'status': 'done',
       };
 
       await client.from('workout_sessions').insert(data);
       debugPrint('✅ Workout session saved to cloud');
-      debugPrint('   📊 Program: $programId, Day: $dayId, Duration: ${durationSeconds}s');
+      debugPrint('   📊 Type: $workoutType, Program: $programId, Duration: ${data['duration_minutes']}min');
       return true;
     } catch (e) {
       debugPrint('❌ Error saving workout session: $e');
