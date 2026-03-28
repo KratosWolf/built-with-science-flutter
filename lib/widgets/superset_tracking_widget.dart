@@ -273,49 +273,19 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
         } else {
           // Superset completo - chegamos ao final da sequência (B3)
           debugPrint('🎉 SuperSet completo! Chegamos no final da sequência');
-          debugPrint('📊 Status final - currentSetNumber: $_currentSetNumber, isExerciseA: $_isExerciseA');
           debugPrint('📋 ExerciseA: ${widget.exerciseA.name}');
           debugPrint('📋 ExerciseB: ${widget.exerciseB.name}');
 
-          _showCompletionMessage();
-
-          // REMOVIDO: callback duplicado estava causando bug
-          // O callback será chamado apenas pelo botão manual na SnackBar
+          // Chamar callback automaticamente para finalizar/avançar
+          // Usando addPostFrameCallback para evitar conflito com setState em curso
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            widget.onSupersetCompleted?.call();
+          });
         }
       }
     });
   }
 
-  void _showCompletionMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Text('🎉 Superset completo!'),
-            const Spacer(),
-            TextButton(
-              onPressed: () {
-                debugPrint('🔥 Botão manual pressionado - forçando próximo SuperSet');
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                widget.onSupersetCompleted?.call();
-              },
-              child: const Text(
-                'PRÓXIMO SUPERSET',
-                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: AppTheme.success,
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        ),
-      ),
-    );
-  }
-  
   Future<void> _openYouTubeVideo(bool isA) async {
     try {
       final variation = isA ? _selectedVariationA : _selectedVariationB;
@@ -1158,49 +1128,59 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       debugPrint('🔄 Variação B restaurada: ${_selectedVariationB?.variationName}');
     }
 
-    // 3. Dados do exercício A - preencher todos os campos com dados do último treino
-    if (_lastWorkoutDataA != null && _lastWorkoutDataA!['lastSet3'] != null) {
-      final lastSet3 = _lastWorkoutDataA!['lastSet3'];
-      debugPrint('🔄 Dados A encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
+    // 3. Dados do exercício A - preencher TODOS os sets com dados do último treino
+    _prefillExerciseSets('A', _lastWorkoutDataA);
 
-      // Preencher peso, reps e dificuldade do set 1 com dados do último treino
-      if (lastSet3['weight'] != null) {
-        _weightControllers['A']![1]?.text = lastSet3['weight'].toString();
-      }
-      if (lastSet3['reps'] != null) {
-        _repsControllers['A']![1]?.text = lastSet3['reps'].toString();
-      }
-      if (lastSet3['difficulty'] != null) {
-        _difficulties['A']![1] = lastSet3['difficulty'].toString();
-      }
-      // Preencher campo de comentários
-      if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
-        _notesControllers['A']![1]?.text = lastSet3['notes'].toString();
-      }
-    }
-
-    // 4. Dados do exercício B - preencher todos os campos com dados do último treino
-    if (_lastWorkoutDataB != null && _lastWorkoutDataB!['lastSet3'] != null) {
-      final lastSet3 = _lastWorkoutDataB!['lastSet3'];
-      debugPrint('🔄 Dados B encontrados - Peso: ${lastSet3['weight']}, Reps: ${lastSet3['reps']}, Dificuldade: ${lastSet3['difficulty']}, Notas: ${lastSet3['notes']}');
-
-      // Preencher peso, reps e dificuldade do set 1 com dados do último treino
-      if (lastSet3['weight'] != null) {
-        _weightControllers['B']![1]?.text = lastSet3['weight'].toString();
-      }
-      if (lastSet3['reps'] != null) {
-        _repsControllers['B']![1]?.text = lastSet3['reps'].toString();
-      }
-      if (lastSet3['difficulty'] != null) {
-        _difficulties['B']![1] = lastSet3['difficulty'].toString();
-      }
-      // Preencher campo de comentários
-      if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
-        _notesControllers['B']![1]?.text = lastSet3['notes'].toString();
-      }
-    }
+    // 4. Dados do exercício B - preencher TODOS os sets com dados do último treino
+    _prefillExerciseSets('B', _lastWorkoutDataB);
 
     setState(() {}); // Atualizar UI
+  }
+
+  void _prefillExerciseSets(String prefix, Map<String, dynamic>? cacheData) {
+    if (cacheData == null) return;
+
+    // Tentar novo formato (sets individuais)
+    final setsMap = cacheData['sets'] as Map<String, dynamic>?;
+    if (setsMap != null) {
+      for (int i = 1; i <= 3; i++) {
+        final setData = setsMap['set$i'] as Map<String, dynamic>?;
+        if (setData != null) {
+          if (setData['weight'] != null) {
+            _weightControllers[prefix]![i]?.text = setData['weight'].toString();
+          }
+          if (setData['reps'] != null) {
+            _repsControllers[prefix]![i]?.text = setData['reps'].toString();
+          }
+          if (setData['difficulty'] != null) {
+            _difficulties[prefix]![i] = setData['difficulty'].toString();
+          }
+          if (setData['notes'] != null && setData['notes'].toString().isNotEmpty) {
+            _notesControllers[prefix]![i]?.text = setData['notes'].toString();
+          }
+        }
+      }
+      debugPrint('🔄 Dados $prefix preenchidos (${setsMap.length} sets do cache)');
+      return;
+    }
+
+    // Fallback: formato antigo (lastSet3) — preencher apenas set 1
+    final lastSet3 = cacheData['lastSet3'] as Map<String, dynamic>?;
+    if (lastSet3 != null) {
+      if (lastSet3['weight'] != null) {
+        _weightControllers[prefix]![1]?.text = lastSet3['weight'].toString();
+      }
+      if (lastSet3['reps'] != null) {
+        _repsControllers[prefix]![1]?.text = lastSet3['reps'].toString();
+      }
+      if (lastSet3['difficulty'] != null) {
+        _difficulties[prefix]![1] = lastSet3['difficulty'].toString();
+      }
+      if (lastSet3['notes'] != null && lastSet3['notes'].toString().isNotEmpty) {
+        _notesControllers[prefix]![1]?.text = lastSet3['notes'].toString();
+      }
+      debugPrint('🔄 Dados $prefix preenchidos (fallback lastSet3 → set 1)');
+    }
   }
 
   Future<void> _saveToCache(WorkoutSet lastSet, bool isExerciseA) async {
@@ -1211,10 +1191,26 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
       final prefix = isExerciseA ? 'A' : 'B';
       final cacheKey = 'lastWorkout_${exercise.id}';
 
-      // Dados do último set (set 3) para usar no próximo treino
+      // Dados de TODOS os sets para usar no próximo treino
+      final setsData = <String, dynamic>{};
+      for (int i = 1; i <= 3; i++) {
+        final weight = double.tryParse(_weightControllers[prefix]![i]?.text ?? '');
+        final reps = int.tryParse(_repsControllers[prefix]![i]?.text ?? '');
+        if (weight != null || reps != null) {
+          setsData['set$i'] = {
+            'weight': weight,
+            'reps': reps,
+            'difficulty': _difficulties[prefix]![i] ?? 'Perfeito',
+            'notes': _notesControllers[prefix]![i]?.text ?? '',
+          };
+        }
+      }
+
       final cacheData = {
         'exerciseId': exercise.id,
         'exerciseName': exercise.name,
+        'sets': setsData,
+        // Manter lastSet3 para compatibilidade
         'lastSet3': {
           'weight': lastSet.weightKg,
           'reps': lastSet.reps,
