@@ -107,17 +107,6 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     return _getExerciseName(_isExerciseA);
   }
 
-  // Método auxiliar para obter label do set atual (A1 ou A2)
-  String _getCurrentSetLabel(bool isA) {
-    // No padrão A1-A2-A1-A2-A1-A2:
-    // exerciseA sempre é A1, exerciseB sempre é A2
-    if (isA) {
-      return 'A1'; // Exercício A sempre é A1
-    } else {
-      return 'A2'; // Exercício B sempre é A2
-    }
-  }
-
   void _initializeControllers() {
     for (int i = 1; i <= 3; i++) {
       // Para exercício A
@@ -373,8 +362,6 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final currentExercise = _isExerciseA ? widget.exerciseA : widget.exerciseB;
-    final otherExercise = _isExerciseA ? widget.exerciseB : widget.exerciseA;
     final prefix = _isExerciseA ? 'A' : 'B';
 
     return SingleChildScrollView(
@@ -1229,35 +1216,4 @@ class _SupersetTrackingWidgetState extends State<SupersetTrackingWidget> {
     }
   }
 
-  Color _getDifficultyColor(String? difficulty) {
-    switch (difficulty) {
-      case 'Perfeito':
-        return AppTheme.success;
-      case 'Fácil':
-      case 'Muito Fácil':
-        return AppTheme.info;
-      case 'Difícil':
-      case 'Muito Difícil':
-        return AppTheme.error;
-      case 'Falhei':
-        return AppTheme.error;
-      default:
-        return AppTheme.textSecondary;
-    }
-  }
-
-  String _getDifficultyEmoji(String? difficulty) {
-    switch (difficulty) {
-      case 'Perfeito':
-        return '😊';
-      case 'Fácil':
-        return '😌';
-      case 'Difícil':
-        return '😤';
-      case 'Muito Difícil':
-        return '🔥';
-      default:
-        return '🤔';
-    }
-  }
 }

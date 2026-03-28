@@ -34,7 +34,6 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
   List<Exercise> _exercises = [];
   int _currentExerciseIndex = 0;
   bool _isLoading = true;
-  bool _isWorkoutComplete = false;
   DateTime? _workoutStartTime;
   Map<int, List<WorkoutSet>> _completedSets = {};
   bool _showRestTimer = false;
@@ -349,42 +348,6 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           _completedSets[exercise.id] = cachedSets;
         }
       }
-    }
-  }
-
-  Future<void> _loadAndMergeCloudData() async {
-    try {
-      debugPrint('☁️ Carregando dados da nuvem para mesclar...');
-      
-      final cloudData = await SupabaseService.instance.loadLastWorkoutData(
-        widget.programId, 
-        widget.dayId
-      );
-      
-      if (cloudData.isNotEmpty) {
-        debugPrint('📊 Dados da nuvem encontrados: ${cloudData.length} exercícios');
-        
-        // Mesclar dados da nuvem com dados locais
-        // Prioridade: dados mais recentes (local vs nuvem)
-        for (final entry in cloudData.entries) {
-          final exerciseId = entry.key;
-          final cloudSets = entry.value;
-          
-          // Se não temos dados locais, usar os da nuvem
-          if (!_completedSets.containsKey(exerciseId)) {
-            _completedSets[exerciseId] = cloudSets;
-            debugPrint('📥 Usando dados da nuvem para exercício $exerciseId');
-          } else {
-            // TODO: Implementar merge inteligente baseado em timestamps
-            // Por enquanto, manter dados locais se existirem
-            debugPrint('🔄 Mantendo dados locais para exercício $exerciseId');
-          }
-        }
-      } else {
-        debugPrint('📭 Nenhum dado na nuvem encontrado');
-      }
-    } catch (error) {
-      debugPrint('❌ Erro ao carregar dados da nuvem: $error');
     }
   }
 
@@ -770,18 +733,16 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       debugPrint('📱 Modo offline - sessão salva apenas localmente');
     }
 
-    setState(() {
-      _isWorkoutComplete = true;
-    });
-    
     // Vibração de sucesso
     HapticFeedback.heavyImpact();
-    
+
     // Notificar completion callback
     widget.onWorkoutCompleted?.call();
-    
-    // Mostrar dialog de conclusão
-    _showCompletionDialog(duration);
+
+    // Voltar para o dashboard (confirmação já foi feita no summary)
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _showExerciseSelector() {
@@ -992,77 +953,6 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       }
     }
     return null;
-  }
-
-  void _showCompletionDialog(Duration duration) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.backgroundCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-          side: BorderSide(color: AppTheme.borderColor, width: 1),
-        ),
-        title: Row(
-          children: [
-            const Icon(Icons.celebration, color: AppTheme.primaryOrange, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Treino Completo!',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '🎉 Parabéns! Você completou o treino ${widget.dayName}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '⏱️ Duração: ${duration.inMinutes}m ${duration.inSeconds % 60}s',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            Text(
-              '💪 Exercícios: ${_exercises.length}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-            Text(
-              '📊 Sets completados: ${_completedSets.values.fold(0, (sum, sets) => sum + sets.length)}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Fechar dialog
-              Navigator.of(context).pop(); // Voltar para lista
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryOrange,
-              foregroundColor: AppTheme.textPrimary,
-            ),
-            child: const Text('Finalizar'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
