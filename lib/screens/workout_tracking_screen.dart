@@ -526,7 +526,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
             debugPrint('🎯 Novo índice: $_currentExerciseIndex - ${_exercises[_currentExerciseIndex].name}');
           } else if (_currentExerciseIndex == 6) {
             debugPrint('🏁 SuperSet B completo - finalizando treino');
-            _completeWorkout(); // Fim do treino após Superset B
+            _showWorkoutSummary(); // Fim do treino após Superset B
             return;
           } else if (_currentExerciseIndex == 5 || _currentExerciseIndex == 7) {
             // Se estiver em exercício não principal do superset, voltar ao principal
@@ -542,7 +542,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           if (_currentExerciseIndex == 3) {
             _currentExerciseIndex = 5; // Pular para exercício 6 (após Superset A)
           } else if (_currentExerciseIndex == 6) {
-            _completeWorkout(); // Fim do treino
+            _showWorkoutSummary(); // Fim do treino
             return;
           } else if (_currentExerciseIndex == 4 || _currentExerciseIndex == 7) {
             // Voltar para início do superset respectivo
@@ -555,7 +555,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
           if (_currentExerciseIndex == 1) {
             _currentExerciseIndex = 3; // Pular para exercício 4 (após Superset A)
           } else if (_currentExerciseIndex == 6) {
-            _completeWorkout(); // Fim do treino
+            _showWorkoutSummary(); // Fim do treino
             return;
           } else if (_currentExerciseIndex == 2 || _currentExerciseIndex == 7) {
             // Voltar para início do superset respectivo
@@ -568,7 +568,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       });
       HapticFeedback.selectionClick();
     } else {
-      _completeWorkout();
+      _showWorkoutSummary();
     }
   }
 
@@ -593,6 +593,143 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
       });
       HapticFeedback.selectionClick();
     }
+  }
+
+  /// Mostra resumo do treino antes de finalizar
+  void _showWorkoutSummary() {
+    final duration = DateTime.now().difference(_workoutStartTime!);
+
+    // Construir lista de exercícios únicos com sets completados
+    final exerciseSummary = <Map<String, dynamic>>[];
+    final seenIds = <int>{};
+
+    for (final exercise in _exercises) {
+      if (seenIds.contains(exercise.id)) continue;
+      seenIds.add(exercise.id);
+
+      final sets = _completedSets[exercise.id] ?? [];
+      exerciseSummary.add({
+        'name': exercise.name,
+        'setsCompleted': sets.length,
+        'setsTarget': exercise.sets,
+        'hasData': sets.isNotEmpty,
+      });
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppTheme.backgroundCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLarge)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20, right: 20, top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle, color: AppTheme.success, size: 48),
+              const SizedBox(height: 12),
+              const Text(
+                'Treino Concluído!',
+                style: TextStyle(
+                  color: AppTheme.textPrimary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${duration.inMinutes}m ${duration.inSeconds % 60}s',
+                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              // Lista de exercícios
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: exerciseSummary.length,
+                  separatorBuilder: (_, __) => const Divider(color: AppTheme.borderColor, height: 1),
+                  itemBuilder: (_, i) {
+                    final ex = exerciseSummary[i];
+                    final hasData = ex['hasData'] as bool;
+                    return ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        hasData ? Icons.check_circle : Icons.warning_amber_rounded,
+                        color: hasData ? AppTheme.success : AppTheme.warning,
+                        size: 20,
+                      ),
+                      title: Text(
+                        ex['name'] as String,
+                        style: TextStyle(
+                          color: hasData ? AppTheme.textPrimary : AppTheme.warning,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Text(
+                        '${ex['setsCompleted']}/${ex['setsTarget']} sets',
+                        style: TextStyle(
+                          color: hasData ? AppTheme.textSecondary : AppTheme.warning,
+                          fontSize: 13,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Botão principal — Finalizar
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    _completeWorkout();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryOrange,
+                    foregroundColor: AppTheme.textPrimary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                  child: const Text(
+                    'Finalizar Treino',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Botão secundário — Continuar
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.textSecondary,
+                    side: const BorderSide(color: AppTheme.borderColor),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    ),
+                  ),
+                  child: const Text('Continuar Treinando'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _completeWorkout() async {
@@ -964,7 +1101,13 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
     final supersetPair = _getSupersetPair(_currentExerciseIndex);
 
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _showExitConfirmation();
+      },
+      child: Scaffold(
       backgroundColor: AppTheme.backgroundPrimary,
       appBar: AppBar(
         title: GestureDetector(
@@ -1104,7 +1247,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
 
                             // SuperSet B completo (índice 6/7) -> finalizar treino
                             if (_currentExerciseIndex == 6 || _currentExerciseIndex == 7) {
-                              _completeWorkout();
+                              _showWorkoutSummary();
                               return;
                             }
 
@@ -1156,7 +1299,7 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: _currentExerciseIndex == _exercises.length - 1
-                              ? _completeWorkout
+                              ? _showWorkoutSummary
                               : _nextExercise,
                           icon: Icon(_currentExerciseIndex == _exercises.length - 1
                               ? Icons.check_circle
@@ -1185,6 +1328,49 @@ class _WorkoutTrackingScreenState extends State<WorkoutTrackingScreen>
             RestTimerWidget(
               onTimerComplete: _onRestTimerComplete,
             ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  void _showExitConfirmation() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppTheme.backgroundCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          side: const BorderSide(color: AppTheme.borderColor, width: 1),
+        ),
+        title: const Text(
+          'Sair do treino?',
+          style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'O seu progresso não salvo será perdido.',
+          style: TextStyle(color: AppTheme.textSecondary),
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // Fechar dialog
+              Navigator.of(context).pop(); // Sair do treino
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.error,
+              side: const BorderSide(color: AppTheme.error),
+            ),
+            child: const Text('Sair'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryOrange,
+              foregroundColor: AppTheme.textPrimary,
+            ),
+            child: const Text('Continuar'),
+          ),
         ],
       ),
     );
