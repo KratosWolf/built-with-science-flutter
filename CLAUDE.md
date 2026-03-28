@@ -190,6 +190,9 @@ Flutter-Mobile-Version/
 | 24/02/2026 | Coluna status adicionada em workout_sessions | Dashboard filtra por status='done' para contar treinos |
 | 24/02/2026 | SyncService criado (lib/services/sync_service.dart) | Pending queue + retry + restore automático no login |
 | 24/02/2026 | Supabase RLS corrigido: 16→2 alertas críticos | RLS habilitado em todas as tabelas de dados do usuário, tabelas órfãs dropadas |
+| 28/03/2026 | Bugs SuperSet corrigidos | Séries 2/3 agora pré-preenchidas (cache salva 3 sets), finalizar treino via callback automático — commit fd78388 |
+| 28/03/2026 | UX: resumo ao finalizar + confirmação ao sair | Bottom sheet com lista de exercícios antes de finalizar, PopScope intercepta botão voltar — commit 0b059f2 |
+| 28/03/2026 | Supabase heartbeat configurado | Edge Function + pg_cron a cada 5 dias — projeto nunca pausa no free tier |
 
 ---
 

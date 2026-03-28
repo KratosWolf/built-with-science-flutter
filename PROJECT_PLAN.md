@@ -222,6 +222,20 @@ Estilo: Dark mode premium, fitness-oriented. Referência: app Coach Sandow.AI.
 
 ---
 
+### Correções e melhorias pós-validação (28/03/2026)
+
+| # | Tarefa | Status | Commit |
+|---|--------|--------|--------|
+| - | Fix SuperSet: séries 2/3 em branco | ✅ | fd78388 |
+| - | Fix SuperSet: finalizar treino não encerrava | ✅ | fd78388 |
+| - | UX: tela de resumo ao finalizar treino | ✅ | 0b059f2 |
+| - | UX: confirmação ao pressionar voltar | ✅ | 0b059f2 |
+| - | Code review + dupla confirmação corrigida | ✅ | 021aa76 |
+| - | Supabase heartbeat (nunca pausa) | ✅ | via MCP |
+| - | APK v7.3 gerado | ✅ | — |
+
+---
+
 ### FASE 5 — iOS ⬅️ FASE ATUAL
 **Objetivo:** Preparar e publicar o app para iOS (iPhone/iPad).
 **Status:** Aguardando validação da Fase 4 em treino real (25/02/2026)
@@ -343,3 +357,4 @@ Flutter-Mobile-Version/
 | 18/02/2026 | Fase 3 🔄 | simple_home.dart verificado | Análise revelou que conversão dark mode já estava completa — task 3.10 não era necessária |
 | 22/02/2026 | Fase 3 ✅ | Redesign dark mode completo | Todas as telas convertidas para tema dark premium (preto #1A1A1A + laranja #FF6B00). 4 telas finais: onboarding, backup, program_selection, statistics. APK v6.0 gerado (53MB) |
 | 24/02/2026 | Fase 4 ✅ | Backup automático completo | SyncService, pending queue, auto-restore, indicador visual. Bug crítico dashboard corrigido. RLS Supabase corrigido. APK v7.0 |
+| 28/03/2026 | Pós-validação | Fixes SuperSet + UX + code review | Séries 2/3 pré-preenchidas, finalizar treino corrigido, resumo ao finalizar, confirmação ao sair, código morto removido, heartbeat Supabase. APK v7.3 |
