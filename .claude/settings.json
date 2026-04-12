@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qE 'git[[:space:]]+commit' && echo '🔒 secret-scan: verifique secrets antes deste commit (invoque a skill secret-scan se ainda não o fez)' || true"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/tiagofernandes/Desktop/VIBE/Built-With-Science-Projects/Flutter-Mobile-Version && echo \"📁 Projeto: Built With Science (Flutter) | 🌿 Branch: $(git branch --show-current 2>/dev/null || echo 'n/a') | 📅 $(date +%Y-%m-%d)\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📝 Atualizar Notion: https://www.notion.so/3404e70d1ef681dfa3ecd8d68dd87c31'"
+          }
+        ]
+      }
+    ]
+  }
+}
