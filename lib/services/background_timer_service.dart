@@ -56,9 +56,10 @@ class BackgroundTimerService {
       // AndroidSounds.alarm usa o canal de alarme, assim como o despertador
       await FlutterRingtonePlayer().play(
         android: AndroidSounds.alarm,
-        ios: IosSounds.glass,
+        ios: IosSounds.alarm,
         looping: false,
         volume: 1.0,
+        asAlarm: true,
       );
       debugPrint('🔔 Som tocado - Descanso completo!');
 
