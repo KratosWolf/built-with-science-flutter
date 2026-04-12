@@ -256,7 +256,9 @@ Para ver todas: listar a pasta `.claude/skills/`.
 
 | Evento | O que faz |
 |--------|-----------|
-| (nenhum configurado ainda) | — |
+| PreToolUse (Bash → git commit) | Lembrete de rodar secret-scan antes do commit |
+| SessionStart | Mostra projeto, branch atual e data |
+| SessionEnd | Lembrete de atualizar Notion Hub de Projetos |
 
 ---
 
